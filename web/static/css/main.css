@@ -1,2 +1,8 @@
 body {
   margin: 0; }
+
+  #mainPhoto div {
+    position: relative;
+    float: left;
+    width: 20px;
+    height: 20px; }

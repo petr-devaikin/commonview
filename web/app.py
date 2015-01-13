@@ -4,6 +4,7 @@ from flask.ext.scss import Scss
 #from .env_settings import load_env
 import json
 import peewee
+import random
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -18,7 +19,16 @@ Scss(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    palette = []
+    for i in range(20):
+        for j in range(15):
+            palette.append({
+                'x': i,
+                'y': j,
+                'color': 'rgb(%d,%d,%d)' % (random.randrange(255), random.randrange(255), random.randrange(255))
+            })
+
+    return render_template('index.html', palette=palette)
 
 
 if __name__ == '__main__':

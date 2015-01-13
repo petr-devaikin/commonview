@@ -18,5 +18,10 @@
         </script>
     </head>
     <body>
+        <div id="mainPhoto">
+            {% for p in palette %}
+                <div style="background: {{ p['color'] }}"></div>
+            {% endfor %}
+        </div>
     </body>
 </html>
