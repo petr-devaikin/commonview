@@ -5,6 +5,7 @@ from flask.ext.scss import Scss
 import json
 import peewee
 import random
+from PIL import Image
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -19,16 +20,24 @@ Scss(app)
 
 @app.route('/')
 def index():
+    width = 80
+    height = 60
+
+    img = Image.open('web/static/img/basil.jpeg')
+    small_img = img.resize((width, height), Image.ANTIALIAS)
+
     palette = []
-    for i in range(20):
-        for j in range(15):
+    for i in range(width):
+        for j in range(height):
+            pixel = small_img.getpixel((i, j))
+            print pixel
             palette.append({
                 'x': i,
                 'y': j,
-                'color': 'rgb(%d,%d,%d)' % (random.randrange(255), random.randrange(255), random.randrange(255))
+                'color': 'rgb(%d,%d,%d)' % pixel
             })
 
-    return render_template('index.html', palette=palette)
+    return render_template('index.html', palette=json.dumps(palette))
 
 
 if __name__ == '__main__':

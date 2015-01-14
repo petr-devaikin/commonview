@@ -4,24 +4,25 @@
         <title>City Mosaic</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
 
-        <script src="{{ url_for('static', filename='js/require.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/libs/require.js') }}"></script>
         <script>
             requirejs.config({
                 baseUrl: "{{ url_for('static', filename='js') }}",
-                //urlArgs: "bust=" + (new Date()).getTime(),
+                urlArgs: "bust=" + (new Date()).getTime(),
                 paths: {
                     'libs/d3': "libs/d3.min",
                 }
                 //    jquery: 'jquery-2.1.1.min'
                 //},
             });
+
+            require(['main'], function(main) {
+                main({{ palette | safe }});
+            })
         </script>
     </head>
     <body>
         <div id="mainPhoto">
-            {% for p in palette %}
-                <div style="background: {{ p['color'] }}"></div>
-            {% endfor %}
         </div>
     </body>
 </html>

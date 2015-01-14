@@ -2,11 +2,22 @@ body {
     margin: 0;
 }
 
+$miniPhotoSize: 10px;
+
 #mainPhoto {
-    div {
-        position: relative;
-        float: left;
-        width: 20px;
-        height: 20px;
+    position: absolute;
+
+    .miniPhoto {
+        position: absolute;
+        width: $miniPhotoSize;
+        height: $miniPhotoSize;
+
+        @for $i from 1 through 100 {
+            &[column="#{$i}"] { left: $miniPhotoSize * $i; }
+        }
+
+        @for $i from 1 through 100 {
+            &[row="#{$i}"] { top: $miniPhotoSize * $i; }
+        }
     }
 }
