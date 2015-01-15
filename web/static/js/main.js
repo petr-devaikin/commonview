@@ -6,6 +6,14 @@ define(['libs/d3'], function(d3) {
                 .classed('miniPhoto', true)
                 .attr('row', function(d) { return d.y; })
                 .attr('column', function(d) { return d.x; })
-                .style('background', function(d) { return d.color; });
+                .style('background-image', function(d) {
+                    if (d.image != null)
+                        return 'url(' + d.image.url + ')';
+                    else
+                        return '';
+                })
+                .style('background-color', function(d) {
+                    return 'rgb(' + d.color[0] + ',' + d.color[1] + ',' + d.color[2] + ')';
+                });
     }
 });

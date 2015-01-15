@@ -1,1 +1,6 @@
 DEBUG = False
+
+INSTA_ID = ''
+INSTA_SECRET = ''
+
+MAX_ITERATIONS = 20

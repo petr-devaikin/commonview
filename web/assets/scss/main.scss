@@ -2,7 +2,7 @@ body {
     margin: 0;
 }
 
-$miniPhotoSize: 10px;
+$miniPhotoSize: 40px;
 
 #mainPhoto {
     position: absolute;
@@ -11,6 +11,8 @@ $miniPhotoSize: 10px;
         position: absolute;
         width: $miniPhotoSize;
         height: $miniPhotoSize;
+        background-size: $miniPhotoSize $miniPhotoSize;
+        background-repeat: no-repeat;
 
         @for $i from 1 through 100 {
             &[column="#{$i}"] { left: $miniPhotoSize * $i; }
