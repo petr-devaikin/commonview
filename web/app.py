@@ -27,10 +27,10 @@ def get_web_image_color(url):
 
 @app.route('/')
 def index():
-    width = 40
-    height = 30
+    width = 50
+    height = 50
 
-    img = Image.open('web/static/img/basil.jpeg')
+    img = Image.open('web/static/img/putin.jpg')
     small_img = img.resize((width, height), Image.ANTIALIAS)
 
     palette = []
@@ -73,7 +73,7 @@ def index():
         global_diff = sum([p['image']['diff'] for p in palette]) / len(palette)
         print 'Currently found: %d' % currently_found
         print 'Global diff: %d' % global_diff
-        
+
         params['with_next_url'] = next_
 
     return render_template('index.html', palette=json.dumps(palette))
