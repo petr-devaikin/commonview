@@ -8,7 +8,7 @@ define(['libs/d3'], function(d3) {
                 .attr('column', function(d) { return d.x; })
                 .style('background-image', function(d) {
                     if (d.image != null)
-                        return 'url(' + d.image.url + ')';
+                        return 'url(' + d.url + ')';
                     else
                         return '';
                 })

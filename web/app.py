@@ -5,6 +5,8 @@ from .db.engine import init_db, get_db
 import json
 import peewee
 
+from .db.models import *
+
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('web.default_settings')
@@ -17,7 +19,10 @@ init_db(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html', palette=json.dumps(palette))
+    picture = Picture.get()
+    fragments = [f.to_hash() for f in picture.fragments]
+
+    return render_template('index.html', palette=json.dumps(fragments))
 
 
 if __name__ == '__main__':

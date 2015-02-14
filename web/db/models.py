@@ -20,3 +20,11 @@ class Fragment(Model):
     insta_img = CharField(null=True)
     insta_url = CharField(null=True)
     insta_user = CharField(null=True)
+
+    def to_hash(self):
+        return {
+            'x': self.column,
+            'y': self.row,
+            'color': (self.r, self.g, self.b),
+            'url': self.insta_url,
+        }
