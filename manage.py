@@ -3,6 +3,9 @@ from web.app import app
 from web.logger import get_logger
 from web.db import scripts
 
+from web.db.models import *
+from picprocessor import *
+
 manager = Manager(app)
 
 @manager.command
@@ -33,8 +36,6 @@ def loadimg():
     """
     from os import listdir
     from os.path import join
-    from web.db.models import *
-    from picprocessor import *
 
     folder = 'img/'
     for f in listdir(folder):
@@ -46,17 +47,20 @@ def loadimg():
 
         ids_to_delete = [f.id for f in picture.fragments]
         Fragment.delete().where(Fragment.id << ids_to_delete).execute()
-        palette = get_palette(path, 40)
-        #fill_palette(palette, app.conf)
+        palette = get_palette(path, 10)
 
-        for p in palette:
-            print p
-            r = p['color'][0]
-            g = p['color'][1]
-            b = p['color'][2]
-            fragment = Fragment.create(picture=picture, row=p['y'], column=p['x'], r=r, g=g, b=b)
-            if p['image']:
-                fragment.insta_url = p['image'].get_thumbnail_url()
+        save_palette_to_db(picture, palette)
+
+
+@manager.command
+def updateimg():
+    """
+    Update images
+    """
+    picture = Picture.get()
+    palette = load_palette_from_db(picture)
+    fill_palette(palette, app.config, 'london')
+    save_palette_to_db(picture, palette)
 
 
 if __name__ == "__main__":

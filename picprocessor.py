@@ -1,4 +1,7 @@
 from PIL import Image
+from instagram import client
+import urllib2, cStringIO
+from web.db.models import *
 
 
 def get_palette(path, small_width):
@@ -19,9 +22,35 @@ def get_palette(path, small_width):
                 'diff': 255
             })
 
-    print small_width
-    print small_height
     return palette
+
+
+def load_palette_from_db(picture):
+    palette = []
+    for f in picture.fragments:
+        palette.append({
+            'x': f.column,
+            'y': f.row,
+            'color': (f.r, f.g, f.b),
+            'image': None,
+            'diff': 255
+        })
+
+    return palette
+
+
+def save_palette_to_db(picture, palette):
+    for p in palette:
+        r = p['color'][0]
+        g = p['color'][1]
+        b = p['color'][2]
+        fragment = Fragment.create(picture=picture, row=p['y'], column=p['x'], r=r, g=g, b=b)
+        if p['image']:
+            fragment.insta_id = p['image'].id
+            fragment.insta_img = p['image'].get_thumbnail_url()
+            fragment.insta_url = p['image'].url
+            fragment.insta_user = p['image'].user
+            fragment.save()
 
 
 def get_web_image_color(url):
@@ -40,12 +69,12 @@ def media_to_img_meta(m):
     }
 
 
-def fill_palette(palette, config):
+def fill_palette(palette, config, tag):
     insta = client.InstagramAPI(client_id=config['INSTA_ID'], client_secret=config['INSTA_SECRET'])
 
     params = {
         'count': 50,
-        'tag_name': 'moscow',
+        'tag_name': tag,
     }
 
     threshold = 15

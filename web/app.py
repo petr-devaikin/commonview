@@ -4,10 +4,6 @@ from .db.engine import init_db, get_db
 #from .env_settings import load_env
 import json
 import peewee
-import random
-from PIL import Image
-import urllib2, cStringIO
-from instagram import client
 
 
 app = Flask(__name__, instance_relative_config=True)
