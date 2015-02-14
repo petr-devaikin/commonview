@@ -46,15 +46,19 @@ def save_palette_to_db(picture, palette):
         b = p['color'][2]
         fragment = Fragment.create(picture=picture, row=p['y'], column=p['x'], r=r, g=g, b=b)
         if p['image']:
-            fragment.insta_id = p['image'].id
-            fragment.insta_img = p['image'].get_thumbnail_url()
-            fragment.insta_url = p['image'].url
-            fragment.insta_user = p['image'].user
+            fragment.insta_id = p['image']['media'].id
+            fragment.insta_img = p['image']['media'].get_thumbnail_url()
+            fragment.insta_url = p['image']['media'].link
+            fragment.insta_user = p['image']['media'].user.username
             fragment.save()
 
 
 def get_web_image_color(url):
-    f = cStringIO.StringIO(urllib2.urlopen(url).read())
+    try:
+        f = cStringIO.StringIO(urllib2.urlopen(url).read())
+    except urllib2.HTTPError:
+        return None
+
     img = Image.open(f)
     colour_tuple = [None, None, None]
     for channel in range(3):
@@ -62,9 +66,10 @@ def get_web_image_color(url):
         colour_tuple[channel] = sum(pixels) / len(pixels)
     return colour_tuple
 
-def media_to_img_meta(m):
+
+def add_color_to_media(m):
     return {
-        'url': m.get_thumbnail_url(),
+        'media': m,
         'color': get_web_image_color(m.get_thumbnail_url()) 
     }
 
@@ -77,7 +82,7 @@ def fill_palette(palette, config, tag):
         'tag_name': tag,
     }
 
-    threshold = 15
+    threshold = 50
 
     counter = 0
     global_diff = 255
@@ -87,7 +92,8 @@ def fill_palette(palette, config, tag):
         media, next_ = insta.tag_recent_media(**params)
 
         currently_found = 0
-        free_media = [media_to_img_meta(m) for m in media]
+        free_media = [add_color_to_media(m) for m in media]
+        free_media = [m for m in free_media if m['color']]
         i = 0
         print len(free_media)
         while i < len(free_media):
