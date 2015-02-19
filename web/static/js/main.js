@@ -11,9 +11,6 @@ define(['libs/d3'], function(d3) {
                         return 'url(' + d.img + ')';
                     else
                         return '';
-                })
-                .style('background-color', function(d) {
-                    return 'rgb(' + d.color[0] + ',' + d.color[1] + ',' + d.color[2] + ')';
                 });
     }
 });

@@ -35,7 +35,6 @@ class Fragment(Model):
         return {
             'x': self.column,
             'y': self.row,
-            'color': (self.r, self.g, self.b),
             'img': self.insta_img,
             'url': self.insta_url,
         }
