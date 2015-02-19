@@ -57,7 +57,7 @@ def updateimg():
     """
     Update images
     """
-    pictures = [p for p in Picture.select().where(Picture.updated==None)]
+    pictures = [p for p in Picture.select()]#.where(Picture.updated==None)]
     for picture in pictures:
         picture = Picture.get()
         palette = Palette(picture)

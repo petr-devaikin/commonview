@@ -21,7 +21,7 @@ class PixelGroup:
 
 
 class Palette:
-    PIX_PER_IMAGE = 3
+    PIX_PER_IMAGE = 4
     
     def __init__(self, picture):
         self.picture = picture

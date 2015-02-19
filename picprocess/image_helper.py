@@ -10,8 +10,8 @@ class ImageHelper:
             return None
 
         img = Image.open(f)
-        colour_tuple = [None, None, None]
-        return img.resize((size, size), Image.ANTIALIAS)
+        img.thumbnail((size, size))
+        return img
 
 
     @staticmethod
