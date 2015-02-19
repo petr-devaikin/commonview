@@ -21,7 +21,7 @@ class PixelGroup:
 
 
 class Palette:
-    PIX_PER_IMAGE = 2
+    PIX_PER_IMAGE = 3
     
     def __init__(self, picture):
         self.picture = picture
@@ -68,8 +68,8 @@ class Palette:
             Fragment.create(picture=self.picture, row=f.y, column=f.x,
                 insta_id=insta_id, insta_img=insta_img, insta_url=insta_url, insta_user=insta_user)
 
-        picture.updated = datetime.date.today()
-        picture.save()
+        self.picture.updated = datetime.date.today()
+        self.picture.save()
 
 
     def fill(self, config, tag):
@@ -84,8 +84,9 @@ class Palette:
 
         counter = 0
         global_diff = 255
+        diff_delta = 255
 
-        while global_diff > threshold and counter < config['MAX_ITERATIONS']:
+        while diff_delta > threshold and counter < config['MAX_ITERATIONS']:
             counter += 1
             media, next_ = insta.tag_recent_media(**params)
 
@@ -110,7 +111,9 @@ class Palette:
                         currently_found += 1
                         break
 
-            global_diff = sum([f.diff for f in self.palette]) / float(len(self.palette))
+            new_global_diff = sum([f.diff for f in self.palette]) / float(len(self.palette))
+            diff_delta = global_diff - new_global_diff
+            global_diff = new_global_diff
 
             print 'Currently found: %d' % currently_found
             print 'Global diff: ' + str(global_diff)
