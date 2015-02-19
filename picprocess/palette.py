@@ -3,6 +3,8 @@ from web.db.models import *
 from instagram import client
 from .image_helper import ImageHelper
 import datetime
+import threading
+import Queue
 
 class PixelGroup:
     def __init__(self, x, y, size):
@@ -21,6 +23,54 @@ class PixelGroup:
         self.pixels[3 * (dY * self.size + dX)] = color[0]
         self.pixels[3 * (dY * self.size + dX) + 1] = color[1]
         self.pixels[3 * (dY * self.size + dX) + 2] = color[2]
+
+
+class Downloader(threading.Thread):
+    def __init__(self, queue, count, tag, insta_id, insta_secret, group_size):
+        super(Downloader, self).__init__()
+        self.queue = queue
+        self.count = count
+        self.tag = tag
+        self.insta = client.InstagramAPI(client_id=insta_id, client_secret=insta_secret)
+        self.group_size = group_size
+
+        self._start_download = threading.Event()
+        self._downloaded = threading.Event()
+        self._stop = threading.Event()
+
+
+    def stop(self):
+        self._stop.set()
+
+    def stopped(self):
+        return self._stop.isSet()
+
+    def start_download(self):
+        self._start_download.set()
+        if not self.stopped():
+            self._downloaded.wait()
+            self._downloaded.clear()
+
+
+    def run(self):   
+        params = {
+            'count': self.count,
+            'tag_name': self.tag,
+        }
+
+        while not self.stopped():
+            while self.queue.qsize() < 100 and not self.stopped():
+                media, next_ = self.insta.tag_recent_media(**params)
+                print("%d downloaded" % len(media))
+                for m in media:
+                    self.queue.put(ImageHelper.add_color_to_media(m, self.group_size))
+                print("%d resized" % len(media))
+                self._downloaded.set()
+                params['with_next_url'] = next_
+
+            self._start_download.wait()
+            self._start_download.clear()
+
 
 
 class Palette:
@@ -72,12 +122,11 @@ class Palette:
 
 
     def fill(self, config, tag):
-        insta = client.InstagramAPI(client_id=config['INSTA_ID'], client_secret=config['INSTA_SECRET'])
+        q = Queue.Queue()
 
-        params = {
-            'count': config['INSTA_REQUEST_PHOTO_COUNT'],
-            'tag_name': tag,
-        }
+        downloader = Downloader(q, config['INSTA_REQUEST_PHOTO_COUNT'], tag,
+            config['INSTA_ID'], config['INSTA_SECRET'], self.PIX_PER_IMAGE)
+        downloader.start()
 
         threshold = config['MATCH_THRESHOLD']
 
@@ -85,19 +134,19 @@ class Palette:
         global_diff = 255
         diff_delta = 255
 
-        while diff_delta > threshold and counter < config['MAX_ITERATIONS']:
-            print 'Start step'
+        while global_diff > threshold and counter < config['MAX_ITERATIONS']:
+            try:
+                m = q.get_nowait()
+            except Queue.Empty:
+                print 'Wait for media'
+                downloader.start_download()
+                continue
 
             counter += 1
-            media, next_ = insta.tag_recent_media(**params)
-
-            print 'Insta done'
 
             currently_found = 0
-            free_media = [ImageHelper.add_color_to_media(m, self.PIX_PER_IMAGE) for m in media]
+            free_media = [m]
             i = 0
-
-            print 'Resized'
 
             while i < len(free_media):
                 first_fixed = True
@@ -123,4 +172,6 @@ class Palette:
             print 'Currently found: %d' % currently_found
             print 'Global diff: ' + str(global_diff)
 
-            params['with_next_url'] = next_
+        downloader.stop()
+        downloader.start_download()
+
