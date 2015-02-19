@@ -2,6 +2,7 @@ from .pixels import Pixels
 from web.db.models import *
 from instagram import client
 from .image_helper import ImageHelper
+import datetime
 
 class PixelGroup:
     def __init__(self, x, y):
@@ -12,13 +13,11 @@ class PixelGroup:
         self.diff = 255
 
     def calc_diff(self, media, size):
-        max_diff = 0
+        summa = 0
         for p in self.pixels:
             media_colors = media['small_pic'].getpixel((p['dX'], p['dY']))
-            diff = max([abs(a - b) for a, b in zip(p['color'], media_colors)])
-            if diff > max_diff:
-                max_diff = diff
-        return max_diff
+            summa += max([abs(a - b) for a, b in zip(p['color'], media_colors)])
+        return float(summa) / len(self.pixels)
 
 
 class Palette:
@@ -68,6 +67,9 @@ class Palette:
 
             Fragment.create(picture=self.picture, row=f.y, column=f.x,
                 insta_id=insta_id, insta_img=insta_img, insta_url=insta_url, insta_user=insta_user)
+
+        picture.updated = datetime.date.today()
+        picture.save()
 
 
     def fill(self, config, tag):
