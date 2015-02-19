@@ -25,7 +25,7 @@ class PixelGroup:
 
 
 class Palette:
-    PIX_PER_IMAGE = 4
+    PIX_PER_IMAGE = 3
     
     def __init__(self, picture):
         self.picture = picture
@@ -91,12 +91,11 @@ class Palette:
             except Queue.Empty:
                 print 'Wait for media'
                 downloader.start_download()
+                counter += 1
                 continue
 
             if m == None: # if not downloaded
                 continue
-
-            counter += 1
 
             currently_found = 0
             free_media = [ImageHelper.add_color_to_media(m, self.PIX_PER_IMAGE)]
