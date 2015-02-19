@@ -6,6 +6,9 @@ from web.db import scripts
 from web.db.models import *
 from picprocessor import *
 
+from picprocess.pixels import Pixels
+from picprocess.palette import Palette
+
 manager = Manager(app)
 
 @manager.command
@@ -45,11 +48,9 @@ def loadimg():
         except Picture.DoesNotExist:
             picture = Picture.create(path=path)
 
-        ids_to_delete = [f.id for f in picture.fragments]
-        Fragment.delete().where(Fragment.id << ids_to_delete).execute()
-        palette = get_palette(path, 10)
-
-        save_palette_to_db(picture, palette)
+        pixels = Pixels()
+        pixels.get_pixels_from_img(picture, app.config['IMAGE_WIDTH'])
+        pixels.save_to_db()
 
 
 @manager.command
@@ -58,9 +59,10 @@ def updateimg():
     Update images
     """
     picture = Picture.get()
-    palette = load_palette_from_db(picture)
-    fill_palette(palette, app.config, 'london')
-    save_palette_to_db(picture, palette)
+    palette = Palette(picture)
+    palette.generate()
+    palette.fill(app.config, 'london')
+    palette.save_to_db()
 
 
 if __name__ == "__main__":
