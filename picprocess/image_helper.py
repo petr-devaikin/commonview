@@ -11,12 +11,12 @@ class ImageHelper:
 
         img = Image.open(f)
         img.thumbnail((size, size))
-        return img
+        return reduce(lambda a, b: a + b, img.getdata(), ())
 
 
     @staticmethod
     def add_color_to_media(m, size):
         return {
             'media': m,
-            'small_pic': ImageHelper.get_web_image_color(m.get_thumbnail_url(), size)
+            'colors': ImageHelper.get_web_image_color(m.get_thumbnail_url(), size)
         }
