@@ -1,10 +1,9 @@
 from .pixels import Pixels
+from .downloader import Downloader
 from web.db.models import *
-from instagram import client
-from .image_helper import ImageHelper
 import datetime
-import threading
 import Queue
+from .image_helper import ImageHelper
 
 class PixelGroup:
     def __init__(self, x, y, size):
@@ -23,54 +22,6 @@ class PixelGroup:
         self.pixels[3 * (dY * self.size + dX)] = color[0]
         self.pixels[3 * (dY * self.size + dX) + 1] = color[1]
         self.pixels[3 * (dY * self.size + dX) + 2] = color[2]
-
-
-class Downloader(threading.Thread):
-    def __init__(self, queue, count, tag, insta_id, insta_secret, group_size):
-        super(Downloader, self).__init__()
-        self.queue = queue
-        self.count = count
-        self.tag = tag
-        self.insta = client.InstagramAPI(client_id=insta_id, client_secret=insta_secret)
-        self.group_size = group_size
-
-        self._start_download = threading.Event()
-        self._downloaded = threading.Event()
-        self._stop = threading.Event()
-
-
-    def stop(self):
-        self._stop.set()
-
-    def stopped(self):
-        return self._stop.isSet()
-
-    def start_download(self):
-        self._start_download.set()
-        if not self.stopped():
-            self._downloaded.wait()
-            self._downloaded.clear()
-
-
-    def run(self):   
-        params = {
-            'count': self.count,
-            'tag_name': self.tag,
-        }
-
-        while not self.stopped():
-            while self.queue.qsize() < 100 and not self.stopped():
-                media, next_ = self.insta.tag_recent_media(**params)
-                print("%d downloaded" % len(media))
-                for m in media:
-                    self.queue.put(ImageHelper.add_color_to_media(m, self.group_size))
-                print("%d resized" % len(media))
-                self._downloaded.set()
-                params['with_next_url'] = next_
-
-            self._start_download.wait()
-            self._start_download.clear()
-
 
 
 class Palette:
@@ -142,18 +93,18 @@ class Palette:
                 downloader.start_download()
                 continue
 
+            if m == None: # if not downloaded
+                continue
+
             counter += 1
 
             currently_found = 0
-            free_media = [m]
+            free_media = [ImageHelper.add_color_to_media(m, self.PIX_PER_IMAGE)]
             i = 0
 
             while i < len(free_media):
                 first_fixed = True
                 current_media = free_media[i]
-                if current_media['colors'] == None:
-                    free_media.remove(current_media)
-                    continue
                 i += 1
                 for f in self.palette:
                     diff = f.calc_diff(current_media)
