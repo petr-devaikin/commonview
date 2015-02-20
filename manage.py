@@ -60,9 +60,10 @@ def updateimg():
     """
     pictures = [p for p in Picture.select().where(Picture.updated==None)]
     for picture in pictures:
+        print picture.id
         palette = Palette(picture)
         palette.generate()
-        #palette.fill(app.config)
+        palette.fill(app.config)
         palette.save_to_db()
 
 

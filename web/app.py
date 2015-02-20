@@ -19,7 +19,7 @@ init_db(app)
 
 @app.route('/')
 def index():
-    picture = Picture.get(Picture.id == 2)
+    picture = Picture.get(Picture.id == 1)
     fragments = [f.to_hash() for f in picture.fragments]
 
     return render_template('index.html', palette=json.dumps(fragments))
