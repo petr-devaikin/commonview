@@ -25,12 +25,12 @@ class PixelGroup:
 
 
 class Palette:
-    PIX_PER_IMAGE = 3
+    PIX_PER_IMAGE = 4
     
     def __init__(self, picture):
         self.picture = picture
         self.pixels = Pixels()
-        self.pixels.load_from_db(picture)
+        self.pixels.get_pixels_from_img(picture)
 
     def generate(self):
         palette = []
@@ -72,10 +72,12 @@ class Palette:
         self.picture.save()
 
 
-    def fill(self, config, tag):
+    def fill(self, config):
+        print datetime.date.today()
+
         q = Queue.Queue()
 
-        downloader = Downloader(q, config['INSTA_REQUEST_PHOTO_COUNT'], tag,
+        downloader = Downloader(q, config['INSTA_REQUEST_PHOTO_COUNT'], self.picture.tag,
             config['INSTA_ID'], config['INSTA_SECRET'], self.PIX_PER_IMAGE)
         downloader.start()
 
@@ -85,7 +87,7 @@ class Palette:
         global_diff = 255
         diff_delta = 255
 
-        while global_diff > threshold and counter < config['MAX_ITERATIONS']:
+        while global_diff > threshold: # and counter < config['MAX_ITERATIONS']:
             try:
                 m = q.get_nowait()
             except Queue.Empty:
@@ -124,4 +126,6 @@ class Palette:
 
         downloader.stop()
         downloader.start_download()
+
+        datetime.date.today()
 

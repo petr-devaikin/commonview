@@ -2,16 +2,16 @@ from PIL import Image
 from web.db.models import *
 
 class Pixels:
-    def get_pixels_from_img(self, picture, small_width):
+    def get_pixels_from_img(self, picture):
         self.picture = picture
 
         image = Image.open(picture.path)
         width, height = image.size
-        small_height = height * small_width / width
-        small_img = image.resize((small_width, small_height), Image.ANTIALIAS)
+        small_height = height * picture.width / width
+        small_img = image.resize((picture.width, small_height), Image.ANTIALIAS)
 
         self.pixels = []
-        for i in range(small_width):
+        for i in range(picture.width):
             for j in range(small_height):
                 pixel = small_img.getpixel((i, j))
                 self.pixels.append({

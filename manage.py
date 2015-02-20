@@ -34,7 +34,8 @@ def initdb():
 
 @manager.option('-f', '--filename', help='File name')
 @manager.option('-t', '--tag', help='Tag name')
-def loadimg(filename, tag):
+@manager.option('-w', '--width', help='Image result width')
+def loadimg(filename, tag, width):
     """
     Load new image
     """
@@ -45,11 +46,11 @@ def loadimg(filename, tag):
     try:
         picture = Picture.get(Picture.path == path)
     except Picture.DoesNotExist:
-        picture = Picture.create(path=path, tag=tag)
+        picture = Picture.create(path=path, tag=tag, width=width)
 
-    pixels = Pixels()
-    pixels.get_pixels_from_img(picture, app.config['IMAGE_WIDTH'])
-    pixels.save_to_db()
+    #pixels = Pixels()
+    #pixels.get_pixels_from_img(picture, app.config['IMAGE_WIDTH'])
+    #pixels.save_to_db()
 
 
 @manager.command
@@ -57,12 +58,11 @@ def updateimg():
     """
     Update images
     """
-    pictures = [p for p in Picture.select()]#.where(Picture.updated==None)]
+    pictures = [p for p in Picture.select().where(Picture.updated==None)]
     for picture in pictures:
-        picture = Picture.get()
         palette = Palette(picture)
         palette.generate()
-        palette.fill(app.config, 'london')
+        #palette.fill(app.config)
         palette.save_to_db()
 
 

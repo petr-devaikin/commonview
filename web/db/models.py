@@ -5,22 +5,23 @@ from .engine import get_db
 class Picture(Model):
     path = CharField()
     tag = CharField()
+    width = IntegerField()
     updated = DateTimeField(null=True)
 
     class Meta:
         database = get_db()
 
 
-class Pixel(Model):
-    picture = ForeignKeyField(Picture, related_name='pixels')
-    row = IntegerField()
-    column = IntegerField()
-    r = IntegerField()
-    g = IntegerField()
-    b = IntegerField()
+#class Pixel(Model):
+#    picture = ForeignKeyField(Picture, related_name='pixels')
+#    row = IntegerField()
+#    column = IntegerField()
+#    r = IntegerField()
+#    g = IntegerField()
+#    b = IntegerField()
 
-    class Meta:
-        database = get_db()
+#    class Meta:
+#        database = get_db()
 
 
 
