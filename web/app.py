@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
+from flask import make_response
 from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
 #from .env_settings import load_env
@@ -8,6 +9,7 @@ from instagram import client
 from .db.models import *
 from picprocess.image_helper import ImageHelper
 from picprocess.pixels import Pixels
+import base64, urllib2
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -89,6 +91,18 @@ def resize():
     url = request.args.get('url')
     colors = ImageHelper.get_image_color(request.args.get('url'), 4)
     return jsonify(colors=colors)
+
+
+@app.route('/img')
+def img():
+    #if 'access_token' not in session:
+    #    return 'error', 500
+    
+    url = request.args.get('url')
+    f = urllib2.urlopen(url).read()
+    response = make_response(f)
+    response.headers['Content-Type'] = 'image/jpeg'
+    return response
 
 
 if __name__ == '__main__':

@@ -1,7 +1,5 @@
 define(['pixel_group'], function(PixelGroup) {
-    var PIX_PER_IMAGE = 4;
-
-    return function(picture) {
+    return function(picture, groupSize) {
         this.picture = picture;
         this.groups = [];
 
@@ -12,25 +10,24 @@ define(['pixel_group'], function(PixelGroup) {
                 var x = this.picture.pixels[i].x,
                     y = this.picture.pixels[i].y,
                     color = this.picture.pixels[i].color,
-                    gX = Math.floor(x/PIX_PER_IMAGE),
-                    gY = Math.floor(y/PIX_PER_IMAGE);
+                    gX = Math.floor(x/groupSize),
+                    gY = Math.floor(y/groupSize);
 
                 var pixelGroup = this.groups.filter(function(el) {
                     return el.x == gX && el.y == gY;
                 });
                 if (pixelGroup.length == 0) {
-                    pixelGroup = new PixelGroup(gX, gY, PIX_PER_IMAGE);
+                    pixelGroup = new PixelGroup(gX, gY, groupSize);
                     this.groups.push(pixelGroup);
                 }
                 else
                     pixelGroup = pixelGroup[0];
 
-                pixelGroup.addPixel(x % PIX_PER_IMAGE, y % PIX_PER_IMAGE, color);
+                pixelGroup.addPixel(x % groupSize, y % groupSize, color);
             }
         }
 
         this.fill = function(insta_image) {
-            var currentlyFound = 0;
             var freeMedia = insta_image;
             
             for (var i = 0; i < this.groups.length; i++) {
@@ -38,25 +35,21 @@ define(['pixel_group'], function(PixelGroup) {
                     diff = g.calcDiff(freeMedia.color);
 
                 if (g.diff > diff) {
-                    currentlyFound++;
                     if (g.image !== undefined) {
                         var tmp = g.image;
                         g.image = freeMedia;
                         g.diff = diff;
                         freeMedia = tmp;
-                        console.log('((');
                     }
                     else {
                         g.image = freeMedia;
                         g.diff = diff;
-                        console.log('!!');
                         break;
                     }
                 }
             }
 
             var globalDiff = this.groups.reduce(function (a, b) { return a + b.diff; }, 0) / this.groups.length;
-            console.log('Currently found: ' + currentlyFound);
             console.log('Global diff: ' + globalDiff);
             return globalDiff;
         }
