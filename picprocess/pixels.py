@@ -3,11 +3,9 @@ from web.db.models import *
 
 class Pixels:
     def get_pixels_from_img(self, picture):
-        self.picture = picture
-
         image = Image.open(picture.path)
-        width, height = image.size
-        small_height = height * picture.width / width
+        self.width, self.height = image.size
+        small_height = self.height * picture.width / self.width
         small_img = image.resize((picture.width, small_height), Image.ANTIALIAS)
 
         self.pixels = []
@@ -20,21 +18,9 @@ class Pixels:
                     'color': pixel,
                 })
 
-    def load_from_db(self, picture):
-        self.pixels = []
-        for p in picture.pixels:
-            self.pixels.append({
-                'x': p.column,
-                'y': p.row,
-                'color': (p.r, p.g, p.b),
-            })
-
-    def save_to_db(self):
-        ids_to_delete = [f.id for f in self.picture.pixels]
-        Pixel.delete().where(Pixel.id << ids_to_delete).execute()
-
-        for p in self.pixels:
-            r = p['color'][0]
-            g = p['color'][1]
-            b = p['color'][2]
-            pixel = Pixel.create(picture=self.picture, row=p['y'], column=p['x'], r=r, g=g, b=b)
+    def to_hash(self):
+        return {
+            'width': self.width,
+            'height': self.height,
+            'pixels': self.pixels,
+        }

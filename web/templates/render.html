@@ -18,13 +18,12 @@
             });
 
             require(['render'], function(render) {
-                render('{{ access_token }}');
+                render('{{ access_token }}', {{ picture | safe }});
             })
         </script>
     </head>
     <body>
-        <canvas width=1050 height=150 id="work"></canvas>
-        <div id="instafeed">
+        <div id="mainPhoto">
         </div>
     </body>
 </html>

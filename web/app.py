@@ -7,6 +7,7 @@ import peewee
 from instagram import client
 from .db.models import *
 from picprocess.image_helper import ImageHelper
+from picprocess.pixels import Pixels
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -52,7 +53,7 @@ def insta_code():
         except User.DoesNotExist:
             user = User.create(insta_id=user_info[u'id'], insta_name=user_info[u'username'])
 
-        return redirect(url_for('index', id=1))
+        return redirect(url_for('render', id=1))
     except Exception as e:
         print e
         return 'error'
@@ -68,18 +69,26 @@ def index(id):
 
 @app.route('/render/<id>')
 def render(id):
-    #picture = Picture.get(Picture.id == id)
+    if 'access_token' not in session:
+        return redirect(url_for('login'))
+
+    picture = Picture.get(Picture.id == id)
+    pixels = Pixels()
+    pixels.get_pixels_from_img(picture)
     #fragments = [f.to_hash() for f in picture.fragments]
 
-    return render_template('render.html', access_token=session['access_token'])
+    return render_template('render.html', access_token=session['access_token'],
+        picture=json.dumps(pixels.to_hash()))
 
 
 @app.route('/resize')
 def resize():
-    # check auth!!
+    if 'access_token' not in session:
+        return 'error', 500
+    
     url = request.args.get('url')
     colors = ImageHelper.get_image_color(request.args.get('url'), 4)
-    return jsonify(colors = colors)
+    return jsonify(colors=colors)
 
 
 if __name__ == '__main__':
