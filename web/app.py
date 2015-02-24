@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, current_app, session
+from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
 from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
 #from .env_settings import load_env
@@ -6,6 +6,7 @@ import json
 import peewee
 from instagram import client
 from .db.models import *
+from picprocess.image_helper import ImageHelper
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -71,6 +72,14 @@ def render(id):
     #fragments = [f.to_hash() for f in picture.fragments]
 
     return render_template('render.html', access_token=session['access_token'])
+
+
+@app.route('/resize')
+def resize():
+    # check auth!!
+    url = request.args.get('url')
+    colors = ImageHelper.get_image_color(request.args.get('url'), 4)
+    return jsonify(colors = colors)
 
 
 if __name__ == '__main__':
