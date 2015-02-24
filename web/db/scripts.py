@@ -9,6 +9,10 @@ def drop_tables():
     if Picture.table_exists():
         Picture.drop_table()
         get_logger().info('Picture table dropped')
+        
+    if User.table_exists():
+        User.drop_table()
+        get_logger().info('User table dropped')
 
 
 def create_tables():
@@ -17,6 +21,9 @@ def create_tables():
 
     Fragment.create_table()
     get_logger().info('Fragment table created')
+
+    User.create_table()
+    get_logger().info('User table created')
 
 
 def init_data():

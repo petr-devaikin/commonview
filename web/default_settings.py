@@ -1,7 +1,11 @@
 DEBUG = False
 
+import os
+SECRET_KEY = os.urandom(24)
+  
 INSTA_ID = ''
 INSTA_SECRET = ''
+
 INSTA_REQUEST_PHOTO_COUNT = 50
 
 DATABASE_URI = 'sqlite:////tmp/commonview.db'

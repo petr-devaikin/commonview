@@ -2,6 +2,14 @@ from peewee import *
 from .engine import get_db
 
 
+class User(Model):
+    insta_id = CharField()
+    insta_name = CharField()
+
+    class Meta:
+        database = get_db()
+
+
 class Picture(Model):
     path = CharField()
     tag = CharField()
@@ -10,19 +18,6 @@ class Picture(Model):
 
     class Meta:
         database = get_db()
-
-
-#class Pixel(Model):
-#    picture = ForeignKeyField(Picture, related_name='pixels')
-#    row = IntegerField()
-#    column = IntegerField()
-#    r = IntegerField()
-#    g = IntegerField()
-#    b = IntegerField()
-
-#    class Meta:
-#        database = get_db()
-
 
 
 class Fragment(Model):

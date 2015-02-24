@@ -85,7 +85,6 @@ class Palette:
 
         counter = 0
         global_diff = 255
-        diff_delta = 255
 
         while global_diff > threshold: # and counter < config['MAX_ITERATIONS']:
             try:
@@ -118,7 +117,6 @@ class Palette:
                         break
 
             new_global_diff = sum([f.diff for f in self.palette]) / float(len(self.palette))
-            diff_delta = global_diff - new_global_diff
             global_diff = new_global_diff
 
             print 'Currently found: %d' % currently_found

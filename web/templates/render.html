@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+    <head>
+        <title>City Mosaic</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+
+        <script src="{{ url_for('static', filename='js/libs/require.js') }}"></script>
+        <script>
+            requirejs.config({
+                baseUrl: "{{ url_for('static', filename='js') }}",
+                urlArgs: "bust=" + (new Date()).getTime(),
+                paths: {
+                    'libs/d3': "libs/d3.min",
+                    'libs/instafeed': "libs/instafeed.min",
+                }
+                //    jquery: 'jquery-2.1.1.min'
+                //},
+            });
+
+            require(['render'], function(render) {
+                render('{{ access_token }}');
+            })
+        </script>
+    </head>
+    <body>
+        <div id="instafeed">
+        </div>
+    </body>
+</html>
