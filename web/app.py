@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
-from flask import make_response
+from flask import make_response, g
 from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
 import json
@@ -32,7 +32,8 @@ def get_unauthenticated_api(**kwargs):
 def before_request():
     if 'user_id' in session:
         g.authorized = True
-        g.user = User.get(id == session['user_id'])
+        # load from db if not /img or /resize
+        g.user = User.get(User.id == session['user_id'])
     else:
         g.authorized = False
         g.user = None
@@ -45,9 +46,9 @@ def login():
 
 @app.route('/logout')
 def logout():
-    if not g.authorized:
+    if g.authorized:
         del session['user_id']
-    return redirect('index')
+    return redirect(url_for('index'))
 
 
 @app.route('/insta_code')
@@ -62,34 +63,39 @@ def insta_code():
             if user.access_token != access_token: user.access_token = access_token
             user.save()
         except User.DoesNotExist:
-            user = User.create(insta_id=user_info[u'id'], insta_name=user_info[u'username'])
+            user = User.create(insta_id=user_info[u'id'],
+                               insta_name=user_info[u'username'],
+                               access_token=access_token)
 
         session['user_id'] = user.id
 
-        return redirect(url_for('render', id=1))
+        return redirect(url_for('index'))
     except Exception as e:
         print e
         return 'error'
 
 
+@app.route('/')
 @app.route('/<id>')
-def index(id=None):
-    picture = Picture.get(Picture.id == id)
-    fragments = [f.to_hash() for f in picture.fragments]
+def index(id=1):
+    #picture = Picture.get(Picture.id == id)
+    #fragments = [f.to_hash() for f in picture.fragments]
 
-    return render_template('index.html', palette=json.dumps(fragments))
+    return render_template('index.html', palette=json.dumps([]))
 
 
 @app.route('/render/<id>')
 def render(id):
     if not g.authorized: return redirect(url_for('index'))
 
+    #check picture owner
+
     picture = Picture.get(Picture.id == id)
     pixels = Pixels()
     pixels.get_pixels_from_img(picture)
     #fragments = [f.to_hash() for f in picture.fragments]
 
-    return render_template('render.html', access_token=session['access_token'],
+    return render_template('render.html', access_token=g.user.access_token,
         picture=json.dumps(pixels.to_hash()))
 
 
@@ -102,13 +108,17 @@ def upload():
     if not g.authorized: return redirect(url_for('index'))
 
     if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file', filename=filename))
-
-
+        f = request.files['pic']
+        if f and allowed_file(f.filename):
+            picture = Picture.create(user=g.user)
+            filename = picture.get_path()
+            pic = ImageHelper.resize(f)
+            pic.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            return 'ok'#redirect(url_for('render', id=filename))
+        else:
+            return 'error', 500
+    else:
+        return render_template('upload.html')
 
 
 @app.route('/resize')

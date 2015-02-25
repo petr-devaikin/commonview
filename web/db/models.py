@@ -12,11 +12,12 @@ class User(Model):
 
 
 class Picture(Model):
-    picture = ForeignKeyField(User, related_name='pictures')
-    path = CharField()
-    tag = CharField()
-    width = IntegerField()
+    user = ForeignKeyField(User, related_name='pictures')
+    tag = CharField(null=True)
     updated = DateTimeField(null=True)
+
+    def get_path(self):
+        return '%d_%d.jpg' % (self.user.id, self.id)
 
     class Meta:
         database = get_db()
