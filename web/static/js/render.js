@@ -53,7 +53,6 @@ define(['libs/d3', 'libs/instafeed', 'libs/qwest', 'palette'], function(d3, inst
                 }
                 else {
                     var image = new Image();
-                    image.crossOrigin = 'Anonymous';
                     image.onload = function(img, instaImg) {
                         return function() {
                             ctx.drawImage(img, 0, 0, THUMBNAIL_SIZE, THUMBNAIL_SIZE, 0, 0, GROUP_SIZE, GROUP_SIZE);

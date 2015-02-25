@@ -5,12 +5,14 @@ from .engine import get_db
 class User(Model):
     insta_id = CharField()
     insta_name = CharField()
+    access_token = CharField()
 
     class Meta:
         database = get_db()
 
 
 class Picture(Model):
+    picture = ForeignKeyField(User, related_name='pictures')
     path = CharField()
     tag = CharField()
     width = IntegerField()

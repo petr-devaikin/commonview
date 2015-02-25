@@ -14,3 +14,7 @@ IMAGE_WIDTH = 200
 
 MAX_ITERATIONS = 1000
 MATCH_THRESHOLD = 27
+
+
+ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif']
+UPLOAD_FOLDER = 'img/'

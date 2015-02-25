@@ -2,14 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for, current_ap
 from flask import make_response
 from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
-#from .env_settings import load_env
 import json
 import peewee
 from instagram import client
 from .db.models import *
 from picprocess.image_helper import ImageHelper
 from picprocess.pixels import Pixels
-import base64, urllib2
+import urllib2
+import os
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -28,6 +28,16 @@ def get_unauthenticated_api(**kwargs):
                                redirect_uri=url_for('insta_code', _external=True, **kwargs))
 
 
+@app.before_request
+def before_request():
+    if 'user_id' in session:
+        g.authorized = True
+        g.user = User.get(id == session['user_id'])
+    else:
+        g.authorized = False
+        g.user = None
+
+
 @app.route('/login')
 def login():
     return redirect(get_unauthenticated_api().get_authorize_url())
@@ -35,9 +45,9 @@ def login():
 
 @app.route('/logout')
 def logout():
-    if 'access_token' in session:
-        del session['access_token']
-    return redirect(get_unauthenticated_api().get_authorize_url())
+    if not g.authorized:
+        del session['user_id']
+    return redirect('index')
 
 
 @app.route('/insta_code')
@@ -45,15 +55,16 @@ def insta_code():
     code = request.args.get('code')
     try:
         access_token, user_info = get_unauthenticated_api().exchange_code_for_access_token(code)
-        session['access_token'] = access_token
 
         try:
             user = User.get(User.insta_id == user_info[u'id'])
-            if user.insta_name != user_info[u'username']:
-                user.insta_name = user_info[u'username']
-                user.save()
+            if user.insta_name != user_info[u'username']: user.insta_name = user_info[u'username']
+            if user.access_token != access_token: user.access_token = access_token
+            user.save()
         except User.DoesNotExist:
             user = User.create(insta_id=user_info[u'id'], insta_name=user_info[u'username'])
+
+        session['user_id'] = user.id
 
         return redirect(url_for('render', id=1))
     except Exception as e:
@@ -62,7 +73,7 @@ def insta_code():
 
 
 @app.route('/<id>')
-def index(id):
+def index(id=None):
     picture = Picture.get(Picture.id == id)
     fragments = [f.to_hash() for f in picture.fragments]
 
@@ -71,8 +82,7 @@ def index(id):
 
 @app.route('/render/<id>')
 def render(id):
-    if 'access_token' not in session:
-        return redirect(url_for('login'))
+    if not g.authorized: return redirect(url_for('index'))
 
     picture = Picture.get(Picture.id == id)
     pixels = Pixels()
@@ -83,10 +93,27 @@ def render(id):
         picture=json.dumps(pixels.to_hash()))
 
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in current_app.config['ALLOWED_EXTENSIONS']
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if not g.authorized: return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('uploaded_file', filename=filename))
+
+
+
+
 @app.route('/resize')
 def resize():
-    if 'access_token' not in session:
-        return 'error', 500
+    if not g.authorized: return 'error', 500
     
     url = request.args.get('url')
     colors = ImageHelper.get_image_color(request.args.get('url'), 4)
@@ -95,8 +122,7 @@ def resize():
 
 @app.route('/img')
 def img():
-    #if 'access_token' not in session:
-    #    return 'error', 500
+    if not g.authorized: return 'error', 500
     
     url = request.args.get('url')
     f = urllib2.urlopen(url).read()
