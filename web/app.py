@@ -109,20 +109,11 @@ def upload():
             picture = Picture.create(user=g.user)
             pic = ImageHelper.resize(f)
             pic.save(picture.get_full_path())
-            return 'ok'#redirect(url_for('render', id=filename))
+            return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
         else:
-            return 'error', 500
+            return jsonify(result='error'), 500
     else:
         return render_template('upload.html')
-
-
-@app.route('/resize')
-def resize():
-    if not g.authorized: return 'error', 500
-    
-    url = request.args.get('url')
-    colors = ImageHelper.get_image_color(request.args.get('url'), 4)
-    return jsonify(colors=colors)
 
 
 @app.route('/img')

@@ -1,4 +1,3 @@
-import urllib2, cStringIO
 from PIL import Image
 
 class ImageHelper:
@@ -11,15 +10,4 @@ class ImageHelper:
         elif h > w and h > max_size:
             img.thumbnail((w * max_size / h, max_size))
         return img
-
-
-    @staticmethod
-    def get_image_color(url, size):
-        try:
-            f = cStringIO.StringIO(urllib2.urlopen(url).read())
-        except urllib2.HTTPError:
-            return None
-
-        img = Image.open(f)
-        img.thumbnail((size, size))
-        return reduce(lambda a, b: a + b, img.getdata(), ())
+        

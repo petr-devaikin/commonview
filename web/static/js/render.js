@@ -1,4 +1,4 @@
-define(['libs/d3', 'libs/instafeed', 'libs/qwest', 'palette'], function(d3, instafeed, qwest, Palette) {
+define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette) {
         var GROUP_SIZE = 4,
             THUMBNAIL_SIZE = 150,
             IMG_URL = '/img';
