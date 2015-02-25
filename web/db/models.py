@@ -1,5 +1,7 @@
 from peewee import *
 from .engine import get_db
+from flask import current_app
+import os
 
 
 class User(Model):
@@ -18,6 +20,9 @@ class Picture(Model):
 
     def get_path(self):
         return '%d_%d.jpg' % (self.user.id, self.id)
+
+    def get_full_path(self):
+        return os.path.join(current_app.config['UPLOAD_FOLDER'], self.get_path())
 
     class Meta:
         database = get_db()

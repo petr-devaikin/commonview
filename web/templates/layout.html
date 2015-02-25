@@ -6,6 +6,18 @@
         {% block style %}{% endblock %}
 
         <script src="{{ url_for('static', filename='js/libs/require.js') }}"></script>
+        <script>
+            requirejs.config({
+                baseUrl: "{{ url_for('static', filename='js') }}",
+                urlArgs: "bust=" + (new Date()).getTime(),
+                paths: {
+                    'libs/d3': "libs/d3.min",
+                    'libs/instafeed': "libs/instafeed.min",
+                }
+                //    jquery: 'jquery-2.1.1.min'
+                //},
+            });
+        </script>
         {% block script %}{% endblock %}
     </head>
     <body>

@@ -1,0 +1,13 @@
+#uploader {
+  margin: 100px;
+  width: 200px;
+  height: 200px;
+  border-width: 5px;
+  border-color: silver;
+  border-style: solid; }
+  #uploader.hover {
+    border-color: green; }
+    #uploader.error {
+      border-color: red; }
+      #uploader.drop {
+        border-color: black; }

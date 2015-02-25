@@ -76,12 +76,8 @@ def insta_code():
 
 
 @app.route('/')
-@app.route('/<id>')
-def index(id=1):
-    #picture = Picture.get(Picture.id == id)
-    #fragments = [f.to_hash() for f in picture.fragments]
-
-    return render_template('index.html', palette=json.dumps([]))
+def index():
+    return render_template('index.html')
 
 
 @app.route('/render/<id>')
@@ -111,9 +107,8 @@ def upload():
         f = request.files['pic']
         if f and allowed_file(f.filename):
             picture = Picture.create(user=g.user)
-            filename = picture.get_path()
             pic = ImageHelper.resize(f)
-            pic.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            pic.save(picture.get_full_path())
             return 'ok'#redirect(url_for('render', id=filename))
         else:
             return 'error', 500
@@ -135,7 +130,10 @@ def img():
     if not g.authorized: return 'error', 500
     
     url = request.args.get('url')
-    f = urllib2.urlopen(url).read()
+    try:
+        f = urllib2.urlopen(url).read()
+    except urllib2.HTTPError:
+        return 'Not found', 404
     response = make_response(f)
     response.headers['Content-Type'] = 'image/jpeg'
     return response

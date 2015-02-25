@@ -1,31 +1,15 @@
 {% extends "layout.html" %}
 
-{% block script %}
-    <script>
-        requirejs.config({
-            baseUrl: "{{ url_for('static', filename='js') }}",
-            urlArgs: "bust=" + (new Date()).getTime(),
-            paths: {
-                'libs/d3': "libs/d3.min",
-                'libs/instafeed': "libs/instafeed.min",
-            }
-            //    jquery: 'jquery-2.1.1.min'
-            //},
-        });
-
-        require(['main'], function(main) {
-            main({{ palette | safe }});
-        })
-    </script>
-{% endblock %}
-
 {% block body %}
     {% if not g.authorized %}
         <a href="{{ url_for('login') }}">Log in</a>
     {% else %}
         <a href="{{ url_for('logout') }}">Log out</a>
-        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('upload') }}">Upload new</a>
+
+        <br /><br />
+        {% for p in g.user.pictures %}
+            <a href="{{ url_for('render', id=p.id) }}">Image {{ p.id }}</a>
+        {% endfor %}
     {% endif %}
-    <div id="mainPhoto">
-    </div>
 {% endblock %}

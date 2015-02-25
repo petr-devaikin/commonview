@@ -50,7 +50,6 @@ define(['pixel_group'], function(PixelGroup) {
             }
 
             var globalDiff = this.groups.reduce(function (a, b) { return a + b.diff; }, 0) / this.groups.length;
-            console.log('Global diff: ' + globalDiff);
             return globalDiff;
         }
     }
