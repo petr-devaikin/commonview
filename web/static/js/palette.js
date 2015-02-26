@@ -49,7 +49,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
         }
 
 
-        this.fromHash = function(accessToken, data, success) {
+        this.fromHash = function(accessToken, data) {
             this.next_max_tag_id = data.next_max_tag_id;
 
             for (var x in data.groups)
@@ -61,14 +61,14 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                     this.addPhoto(g.image, false,
                         function(group) {
                             return function() {
-                                group.loading = false;
                                 console.log('Old photo loaded');
-                                //success();
+                                group.loading = false;
                             }
                         } (g),
                         function(group) {
                             return function() {
                                 console.log('Old photo not found');
+                                group.loading = false;
                                 group.image = undefined;
                             }
                         } (g)

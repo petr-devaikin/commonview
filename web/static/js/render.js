@@ -100,7 +100,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                     palette = new Palette(picture, GROUP_SIZE, THUMBNAIL_SIZE);
                     d3.shuffle(palette.groups);
                     drawPalette();
-                    palette.fromHash(accessToken, hash, drawPalette);
+                    palette.fromHash(accessToken, hash);
                     console.log('Start insta');
                     feed.next();
                 }
