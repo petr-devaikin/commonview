@@ -57,57 +57,38 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                     var g = this.groupIndex[x][y];
                     g.fromHash(data.groups[x][y]);
 
-                    helpers.loadImgInfoById({
-                        accessToken: accessToken,
-                        id: g.image.id,
-                        success: function(group, palette) {
-                            return function(instaImage) {
-                                palette.addPhoto(instaImage, success, function() {}, group);
-                            }
-                        } (g, this),
-                        error: function(group) {
-                            return function() {
-                                group.image = undefined;
-                            }
-                        } (g),
-                });
+                    this.addPhoto(g.image, success, function() {}, g);
                 }
         }
 
 
-        this.addPhoto = function(instaImage, success, error, place) {
+        this.addPhoto = function(colorImage, success, error, group) {
+            var palette = this;
             helpers.loadImgByUrl({
-                url: instaImage.images.thumbnail.url,
-                success: function(instaImg, palette) {
-                    return function(img) {
-                        ctx.drawImage(img, 0, 0, thumbSize, thumbSize, 0, 0, groupSize, groupSize);
-                        var imgData = ctx.getImageData(0, 0, groupSize, groupSize),
-                            colors = helpers.getImgDataColors(imgData);
-                        
-                        var colorImage = {
-                            loaded: true,
-                            id: instaImage.id,
-                            imgUrl: instaImage.images.thumbnail.url,
-                            color: color,
-                        }
+                url: colorImage.imgUrl,
+                success: function(img) {
+                    ctx.drawImage(img, 0, 0, thumbSize, thumbSize, 0, 0, groupSize, groupSize);
+                    var imgData = ctx.getImageData(0, 0, groupSize, groupSize),
+                        colors = helpers.getImgDataColors(imgData);
+                    
+                    colorImage.loaded = true;
+                    colorImage.color = colors;
 
-                        if (place === undefined)
-                            palette._findPlace(colorImage);
-                        else
-                            place.image = colorImage;
+                    if (group === undefined)
+                        palette._findPlace(colorImage);
 
-                        palette.globalDiff = palette.groups.reduce(function (a, b) {return a + b.diff; }, 0) / palette.groups.length;
+                    palette.globalDiff = palette.groups.reduce(function (a, b) {return a + b.diff; }, 0) / palette.groups.length;
 
-                        success();
+                    success();
+                },
+                error: function() {
+                    if (group === undefined) {
+                        console.log('Old image not found');
+                        group.image = undefined;
                     }
-                } (instaImage, this),
-                error: error,
+                    error();
+                },
             });
-        }
-
-
-        this.loadAllImages = function() {
-
         }
 
 

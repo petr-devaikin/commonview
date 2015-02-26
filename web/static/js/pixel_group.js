@@ -31,15 +31,13 @@ define([], function() {
                 return {
                     x: this.x,
                     y: this.y,
-                    imageId: this.image.id,
+                    image: this.image,
                 }
         }
 
         this.fromHash = function(data) {
-            this.image = {
-                loaded: false,
-                id: data.imageId,
-            }
+            this.image = data.image;
+            this.image.loaded = false;
         }
     }
 })

@@ -9,7 +9,6 @@ from .db.models import *
 from picprocess.image_helper import ImageHelper
 from picprocess.pixels import Pixels
 import os
-import requests
 import urllib2
 
 
@@ -129,19 +128,6 @@ def img():
     response = make_response(f)
     response.headers['Content-Type'] = 'image/jpeg'
     return response
-
-
-@app.route('/imginfo')
-def imginfo():
-    if not g.authorized: return 'error', 500
-
-    media_id = request.args.get('id')
-    response = requests.get('https://api.instagram.com/v1/media/%s' % media_id,
-        params={ 'access_token': g.user.access_token })
-    return Response(response.text,
-        status=response.status_code,
-        content_type=response.headers['content-type'],
-    )
 
 
 if __name__ == '__main__':

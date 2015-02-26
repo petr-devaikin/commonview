@@ -54,7 +54,15 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                         feed.next();
                 }
 
-                palette.addPhoto(instaImage, imageProcessed, imageFailed);
+
+                var colorImage = {
+                    loaded: false,   // image is not loaded and color is not calculated
+                    id: instaImage.id,
+                    imgUrl: instaImage.images.thumbnail.url,
+                    color: [],
+                }
+
+                palette.addPhoto(colorImage, imageProcessed, imageFailed);
             }
         }
 

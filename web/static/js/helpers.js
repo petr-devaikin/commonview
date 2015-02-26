@@ -21,17 +21,6 @@ define(['libs/qwest'], function(qwest) {
 
             image.src = '/img?url=' + params.url;
         },
-        loadImgInfoById: function(params) {
-            // params: accessToken, id, success, error
-            qwest.get('/imginfo', { id: params.id })
-                .then(function(imgInfo) {
-                    params.success(imgInfo.data);
-                })
-                .catch(function(m) {
-                    console.log('Previously loaded image not found');
-                    params.error();
-                });
-        },
         getImgDataColors: function(imgData) {
             var colors = [];
             for (var j = 0; j < imgData.data.length; j++)
