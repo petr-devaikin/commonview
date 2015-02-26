@@ -6,6 +6,7 @@ define([], function() {
         this.pixels = new Array(3 * this.size * this.size);
         this.image = undefined;
         this.diff = 255;
+        this.loading = false;
 
         this.calcDiff = function(colors) {
             var summa = 0;
@@ -31,13 +32,14 @@ define([], function() {
                 return {
                     x: this.x,
                     y: this.y,
+                    diff: this.diff,
                     image: this.image,
                 }
         }
 
         this.fromHash = function(data) {
+            this.diff = data.diff;
             this.image = data.image;
-            this.image.loaded = false;
         }
     }
 })

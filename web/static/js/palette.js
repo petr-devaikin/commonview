@@ -55,14 +55,29 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
             for (var x in data.groups)
                 for (var y in data.groups[x]) {
                     var g = this.groupIndex[x][y];
+                    g.loading = true;
                     g.fromHash(data.groups[x][y]);
 
-                    this.addPhoto(g.image, success, function() {}, g);
+                    this.addPhoto(g.image, false,
+                        function(group) {
+                            return function() {
+                                group.loading = false;
+                                console.log('Old photo loaded');
+                                //success();
+                            }
+                        } (g),
+                        function(group) {
+                            return function() {
+                                console.log('Old photo not found');
+                                group.image = undefined;
+                            }
+                        } (g)
+                    );
                 }
         }
 
 
-        this.addPhoto = function(colorImage, success, error, group) {
+        this.addPhoto = function(colorImage, findPlace, success, error) {
             var palette = this;
             helpers.loadImgByUrl({
                 url: colorImage.imgUrl,
@@ -71,23 +86,16 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                     var imgData = ctx.getImageData(0, 0, groupSize, groupSize),
                         colors = helpers.getImgDataColors(imgData);
                     
-                    colorImage.loaded = true;
                     colorImage.color = colors;
 
-                    if (group === undefined)
+                    if (findPlace)
                         palette._findPlace(colorImage);
 
                     palette.globalDiff = palette.groups.reduce(function (a, b) {return a + b.diff; }, 0) / palette.groups.length;
 
                     success();
                 },
-                error: function() {
-                    if (group === undefined) {
-                        console.log('Old image not found');
-                        group.image = undefined;
-                    }
-                    error();
-                },
+                error: error,
             });
         }
 
@@ -97,7 +105,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
             
             for (var i = 0; i < this.groups.length; i++) {
                 var g = this.groups[i];
-                if (g.image !== undefined && !g.image.loaded)
+                if (g.loading)
                     continue;
 
                 var diff = g.calcDiff(freeMedia.color);

@@ -10,7 +10,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
             d3.select('#mainPhoto').selectAll('.miniPhoto')
                 .data(palette.groups, function(d) { return d.x + '/' + d.y; })
                 .style('background-image', function(d) {
-                    if (d.image !== undefined && d.image.loaded)
+                    if (d.image !== undefined)
                         return 'url(' + d.image.imgUrl + ')';
                     else
                         return '';
@@ -20,7 +20,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                 .attr('row', function(d) { return d.y; })
                 .attr('column', function(d) { return d.x; })
                 .style('background-image', function(d) {
-                    if (d.image !== undefined && d.image.loaded)
+                    if (d.image !== undefined)
                         return 'url(' + d.image.imgUrl + ')';
                     else
                         return 'none';
@@ -56,13 +56,12 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
 
 
                 var colorImage = {
-                    loaded: false,   // image is not loaded and color is not calculated
                     id: instaImage.id,
                     imgUrl: instaImage.images.thumbnail.url,
                     color: [],
                 }
 
-                palette.addPhoto(colorImage, imageProcessed, imageFailed);
+                palette.addPhoto(colorImage, true, imageProcessed, imageFailed);
             }
         }
 
@@ -100,8 +99,9 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                 else {
                     palette = new Palette(picture, GROUP_SIZE, THUMBNAIL_SIZE);
                     d3.shuffle(palette.groups);
-                    //drawPalette();
+                    drawPalette();
                     palette.fromHash(accessToken, hash, drawPalette);
+                    console.log('Start insta');
                     feed.next();
                 }
             })
