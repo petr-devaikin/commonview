@@ -1,15 +1,15 @@
 define(['pixel_group'], function(PixelGroup) {
-    return function(picture, groupSize) {
-        this.picture = picture;
+    return function() {
         this.groups = [];
+        this.next_max_tag_id = undefined;
 
-        this.generate = function() {
+        this.generate = function(picture, groupSize) {
             this.groups = [];
 
-            for (var i = 0; i < this.picture.pixels.length; i++) {
-                var x = this.picture.pixels[i].x,
-                    y = this.picture.pixels[i].y,
-                    color = this.picture.pixels[i].color,
+            for (var i = 0; i < picture.pixels.length; i++) {
+                var x = picture.pixels[i].x,
+                    y = picture.pixels[i].y,
+                    color = picture.pixels[i].color,
                     gX = Math.floor(x/groupSize),
                     gY = Math.floor(y/groupSize);
 

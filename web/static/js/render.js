@@ -28,6 +28,8 @@ define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette
 
         function instagramSuccess(photos) {
             var uncomplete = photos.data.length;
+            palette.next_max_tag_id = photos.pagination.next_max_tag_id;
+
             for (var i = 0; i < photos.data.length; i++) {
                 var instaImage = photos.data[i];
                 var canvas = document.createElement('canvas'),
@@ -78,10 +80,10 @@ define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette
             feed.run();
         }
 
-        return function(accessToken, picture) {
+        return function(accessToken, picture, max_tag_id) {
             console.log('Start');
-            palette = new Palette(picture, GROUP_SIZE);
-            palette.generate();
+            palette = new Palette();
+            palette.generate(picture, GROUP_SIZE);
             d3.shuffle(palette.groups);
             console.log('Generated');
 
@@ -97,6 +99,14 @@ define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette
                         limit: 60,
                         success: instagramSuccess,
                         mock: true,
+                        before: function() {
+                            if (max_tag_id !== undefined) {
+                                var oldUrl = this._buildUrl();
+                                this._buildUrl = function() {
+                                    return oldUrl + '&max_tag_id=' + max_tag_id;
+                                }
+                            }
+                        }
                     });
                 }
 
