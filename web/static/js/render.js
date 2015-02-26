@@ -1,7 +1,6 @@
 define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafeed, Palette, helpers) {
         var GROUP_SIZE = 4,
-            THUMBNAIL_SIZE = 150,
-            IMG_URL = '/img';
+            THUMBNAIL_SIZE = 150;
 
         var palette,
             feed = undefined,
@@ -38,8 +37,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                 canvas.width = GROUP_SIZE;
                 canvas.height = GROUP_SIZE;
 
-                function imageProcessed(img, colors) {
-                    palette.fill(img, colors);
+                function imageProcessed() {
                     updateAccuracy();
                     drawPalette();
 
@@ -54,25 +52,13 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                         feed.next();
                 }
 
-                helpers.loadImg({
-                    url: IMG_URL + '?url=' + instaImage.images.thumbnail.url,
-                    success: function(instaImg) {
-                        return function(img) {
-                            ctx.drawImage(img, 0, 0, THUMBNAIL_SIZE, THUMBNAIL_SIZE, 0, 0, GROUP_SIZE, GROUP_SIZE);
-                            var imgData = ctx.getImageData(0, 0, GROUP_SIZE, GROUP_SIZE),
-                                colors = helpers.getImgDataColors(imgData);
-                            imageProcessed(instaImg, colors);
-                        }
-                    } (instaImage),
-                    error: imageFailed,
-                });
+                palette.addPhoto(ctx, instaImage, imageProcessed, imageFailed);
             }
         }
 
         return function(accessToken, picture, max_tag_id) {
             console.log('Start');
-            palette = new Palette();
-            palette.generate(picture, GROUP_SIZE);
+            palette = new Palette(picture, GROUP_SIZE, THUMBNAIL_SIZE);
             d3.shuffle(palette.groups);
             console.log('Generated');
 

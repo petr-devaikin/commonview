@@ -130,5 +130,16 @@ def img():
     return response
 
 
+@app.route('/imginfo')
+def imginfo():
+    if not g.authorized: return 'error', 500
+    
+    media_id = request.args.get('id')
+    api = client.InstagramAPI(access_token=g.user.access_token)
+    media_info = api.media(media_id)
+
+    return jsonify(info=media_info)
+
+
 if __name__ == '__main__':
     app.run()

@@ -36,12 +36,10 @@ define([], function() {
         }
 
         this.fromHash = function(data) {
-            this.x = data.x;
-            this.y = data.y;
-            // Load image by id!
-            return;
-            this.image = data.imageId;
-            this.diff = data.diff;
+            this.image = {
+                loaded: false,
+                id: data.imageId,
+            }
         }
     }
 })

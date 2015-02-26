@@ -1,6 +1,6 @@
-define([], function() {
+define(['libs/qwest'], function(qwest) {
    return {
-        loadImg: function(params) {
+        loadImgByUrl: function(params) {
             // params: url, success, error
 
             var image = new Image();
@@ -19,11 +19,23 @@ define([], function() {
                 params.error();
             }
 
-            image.src = params.url;
+            image.src = '/img?url=' + params.url;
+        },
+        loadImgInfoById: function(params) {
+            // params: id, success, error
+
+            qwest.get('/imginfo', { id: params.id })
+                .then(function(imgInfo) {
+                    success(imgInfo.info);
+                })
+                .catch(function() {
+                    console.log('Previously loaded image not found');
+                    params.error();
+                });
         },
         getImgDataColors: function(imgData) {
             var colors = [];
-            for (var j = imgData.data.length - 1; j >= 0; j--)
+            for (var j = 0; j < imgData.data.length; j++)
                 if (j % 4 < 3)
                     colors.push(imgData.data[j]);
             return colors;
