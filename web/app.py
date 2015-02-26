@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
-from flask import make_response, g
+from flask import make_response, g, Response
 from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
 import json
@@ -8,8 +8,9 @@ from instagram import client
 from .db.models import *
 from picprocess.image_helper import ImageHelper
 from picprocess.pixels import Pixels
-import urllib2
 import os
+import requests
+import urllib2
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -133,12 +134,14 @@ def img():
 @app.route('/imginfo')
 def imginfo():
     if not g.authorized: return 'error', 500
-    
-    media_id = request.args.get('id')
-    api = client.InstagramAPI(access_token=g.user.access_token)
-    media_info = api.media(media_id)
 
-    return jsonify(info=media_info)
+    media_id = request.args.get('id')
+    response = requests.get('https://api.instagram.com/v1/media/%s' % media_id,
+        params={ 'access_token': g.user.access_token })
+    return Response(response.text,
+        status=response.status_code,
+        content_type=response.headers['content-type'],
+    )
 
 
 if __name__ == '__main__':

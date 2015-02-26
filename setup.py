@@ -9,6 +9,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     setup_requires=['Flask'],
-    install_requires=['Flask', 'Flask-Script', 'peewee', 'Flask-Scss',
+    install_requires=['Flask', 'Flask-Script', 'peewee', 'Flask-Scss', 'requests',
         'python-instagram', 'Pillow']
 )

@@ -5,6 +5,12 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
         this.next_max_tag_id = undefined;
         this.globalDiff = 255;
 
+        var canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+
+        canvas.width = groupSize;
+        canvas.height = groupSize;
+
         for (var i = 0; i < picture.pixels.length; i++) {
             var x = picture.pixels[i].x,
                 y = picture.pixels[i].y,
@@ -43,7 +49,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
         }
 
 
-        this.fromHash = function(ctx, data) {
+        this.fromHash = function(accessToken, data, success) {
             this.next_max_tag_id = data.next_max_tag_id;
 
             for (var x in data.groups)
@@ -52,10 +58,11 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                     g.fromHash(data.groups[x][y]);
 
                     helpers.loadImgInfoById({
+                        accessToken: accessToken,
                         id: g.image.id,
                         success: function(group, palette) {
                             return function(instaImage) {
-                                palette.addPhoto(ctx, instaImage, function() {}, function() {}, group);
+                                palette.addPhoto(instaImage, success, function() {}, group);
                             }
                         } (g, this),
                         error: function(group) {
@@ -68,7 +75,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
         }
 
 
-        this.addPhoto = function(ctx, instaImage, success, error, place) {
+        this.addPhoto = function(instaImage, success, error, place) {
             helpers.loadImgByUrl({
                 url: instaImage.images.thumbnail.url,
                 success: function(instaImg, palette) {
@@ -89,6 +96,8 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                         else
                             place.image = colorImage;
 
+                        palette.globalDiff = palette.groups.reduce(function (a, b) {return a + b.diff; }, 0) / palette.groups.length;
+
                         success();
                     }
                 } (instaImage, this),
@@ -106,8 +115,11 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
             var freeMedia = colorImage;
             
             for (var i = 0; i < this.groups.length; i++) {
-                var g = this.groups[i],
-                    diff = g.calcDiff(freeMedia.color);
+                var g = this.groups[i];
+                if (g.image !== undefined && !g.image.loaded)
+                    continue;
+
+                var diff = g.calcDiff(freeMedia.color);
 
                 if (g.diff > diff) {
                     if (g.image !== undefined) {
@@ -123,9 +135,6 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                     }
                 }
             }
-
-            this.globalDiff = this.groups.reduce(function (a, b) { return a + b.diff; }, 0) / this.groups.length;
-            return this.globalDiff;
         }
     }
 })

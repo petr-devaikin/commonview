@@ -8,9 +8,9 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
 
         function drawPalette() {
             d3.select('#mainPhoto').selectAll('.miniPhoto')
-                .data(palette.groups)
+                .data(palette.groups, function(d) { return d.x + '/' + d.y; })
                 .style('background-image', function(d) {
-                    if (d.image !== undefined)
+                    if (d.image !== undefined && d.image.loaded)
                         return 'url(' + d.image.imgUrl + ')';
                     else
                         return '';
@@ -18,10 +18,18 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
             .enter().append('div')
                 .classed('miniPhoto', true)
                 .attr('row', function(d) { return d.y; })
-                .attr('column', function(d) { return d.x; });
+                .attr('column', function(d) { return d.x; })
+                .style('background-image', function(d) {
+                    if (d.image !== undefined && d.image.loaded)
+                        return 'url(' + d.image.imgUrl + ')';
+                    else
+                        return 'none';
+                });
+
+            updateAccuracy();
         }
 
-        function updateAccuracy(globalDiff) {
+        function updateAccuracy() {
             d3.select('#accuracy').text(palette.globalDiff);
         }
 
@@ -31,14 +39,8 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
 
             for (var i = 0; i < photos.data.length; i++) {
                 var instaImage = photos.data[i];
-                var canvas = document.createElement('canvas'),
-                    ctx = canvas.getContext('2d');
-
-                canvas.width = GROUP_SIZE;
-                canvas.height = GROUP_SIZE;
 
                 function imageProcessed() {
-                    updateAccuracy();
                     drawPalette();
 
                     uncomplete--;
@@ -52,7 +54,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                         feed.next();
                 }
 
-                palette.addPhoto(ctx, instaImage, imageProcessed, imageFailed);
+                palette.addPhoto(instaImage, imageProcessed, imageFailed);
             }
         }
 
@@ -88,13 +90,22 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                     feed.run();
                 }
                 else {
+                    palette = new Palette(picture, GROUP_SIZE, THUMBNAIL_SIZE);
+                    d3.shuffle(palette.groups);
+                    //drawPalette();
+                    palette.fromHash(accessToken, hash, drawPalette);
                     feed.next();
                 }
             })
 
+            var hash; 
+
             d3.select('#stopButton').on('click', function() {
                 stopFlag = true;
-                console.log(JSON.stringify(palette.toHash()).length);
+                hash = palette.toHash();
+                console.log(hash);
+                //drawPalette();
+                //console.log(JSON.stringify(palette.toHash()).length);
             })
         }
     });

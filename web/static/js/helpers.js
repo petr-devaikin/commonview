@@ -22,13 +22,12 @@ define(['libs/qwest'], function(qwest) {
             image.src = '/img?url=' + params.url;
         },
         loadImgInfoById: function(params) {
-            // params: id, success, error
-
+            // params: accessToken, id, success, error
             qwest.get('/imginfo', { id: params.id })
                 .then(function(imgInfo) {
-                    success(imgInfo.info);
+                    params.success(imgInfo.data);
                 })
-                .catch(function() {
+                .catch(function(m) {
                     console.log('Previously loaded image not found');
                     params.error();
                 });
