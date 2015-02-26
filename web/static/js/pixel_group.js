@@ -1,9 +1,9 @@
 define([], function() {
-    return function(x, y, size) {
+    return function(size, x, y) {
+        this.size = size;
         this.x = x;
         this.y = y;
-        this.size = size;
-        this.pixels = new Array(3 * size * size);
+        this.pixels = new Array(3 * this.size * this.size);
         this.image = undefined;
         this.diff = 255;
 
@@ -22,6 +22,26 @@ define([], function() {
             this.pixels[3 * (dY * this.size + dX)] = color[0];
             this.pixels[3 * (dY * this.size + dX) + 1] = color[1];
             this.pixels[3 * (dY * this.size + dX) + 2] = color[2];
+        }
+
+        this.toHash = function() {
+            if (this.image === undefined)
+                return undefined;
+            else
+                return {
+                    x: this.x,
+                    y: this.y,
+                    imageId: this.image.id,
+                }
+        }
+
+        this.fromHash = function(data) {
+            this.x = data.x;
+            this.y = data.y;
+            // Load image by id!
+            return;
+            this.image = data.imageId;
+            this.diff = data.diff;
         }
     }
 })

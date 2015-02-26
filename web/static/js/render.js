@@ -1,4 +1,4 @@
-define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette) {
+define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafeed, Palette, helpers) {
         var GROUP_SIZE = 4,
             THUMBNAIL_SIZE = 150,
             IMG_URL = '/img';
@@ -12,7 +12,7 @@ define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette
                 .data(palette.groups)
                 .style('background-image', function(d) {
                     if (d.image !== undefined)
-                        return 'url(' + d.image.images.thumbnail.url + ')';
+                        return 'url(' + d.image.imgUrl + ')';
                     else
                         return '';
                 })
@@ -23,7 +23,7 @@ define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette
         }
 
         function updateAccuracy(globalDiff) {
-            d3.select('#accuracy').text(globalDiff);
+            d3.select('#accuracy').text(palette.globalDiff);
         }
 
         function instagramSuccess(photos) {
@@ -39,45 +39,34 @@ define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette
                 canvas.height = GROUP_SIZE;
 
                 function imageProcessed(img, colors) {
-                    if (colors.length > 0) {
-                        img.color = colors;
-                        var globalDiff = palette.fill(img);
-                        updateAccuracy(globalDiff);
-                    }
-                    uncomplete--;                                
+                    palette.fill(img, colors);
+                    updateAccuracy();
                     drawPalette();
+
+                    uncomplete--;
                     if (uncomplete == 0 && !stopFlag)
                         feed.next();
                 }
 
-                var image = new Image();
-                image.onload = function(instaImg) {
-                    return function() {
-                        var colors = [];
-                        if ('naturalHeight' in this && this.naturalHeight + this.naturalWidth !== 0) {
-                            ctx.drawImage(this, 0, 0, THUMBNAIL_SIZE, THUMBNAIL_SIZE, 0, 0, GROUP_SIZE, GROUP_SIZE);
-                            var imgData = ctx.getImageData(0, 0, GROUP_SIZE, GROUP_SIZE);
-                            for (var j = 0; j < imgData.data.length; j++)
-                                if (j % 4 < 3)
-                                    colors.push(imgData.data[j]);
+                function imageFailed() {
+                    uncomplete--;
+                    if (uncomplete == 0 && !stopFlag)
+                        feed.next();
+                }
+
+                helpers.loadImg({
+                    url: IMG_URL + '?url=' + instaImage.images.thumbnail.url,
+                    success: function(instaImg) {
+                        return function(img) {
+                            ctx.drawImage(img, 0, 0, THUMBNAIL_SIZE, THUMBNAIL_SIZE, 0, 0, GROUP_SIZE, GROUP_SIZE);
+                            var imgData = ctx.getImageData(0, 0, GROUP_SIZE, GROUP_SIZE),
+                                colors = helpers.getImgDataColors(imgData);
+                            imageProcessed(instaImg, colors);
                         }
-                        imageProcessed(instaImg, colors);
-                    }
-                } (instaImage);
-
-                image.onerror = function(instaImg) {
-                    return function(e) {
-                        console.log('Error: ' + e);
-                        imageProcessed(instaImg, []);
-                    }
-                } (instaImage);
-
-                image.src = IMG_URL + '?url=' + instaImage.images.thumbnail.url;
+                    } (instaImage),
+                    error: imageFailed,
+                });
             }
-        }
-
-        function resume() {
-            feed.run();
         }
 
         return function(accessToken, picture, max_tag_id) {
@@ -88,6 +77,7 @@ define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette
             console.log('Generated');
 
             d3.select('#startButton').on('click', function() {
+                stopFlag = false;
                 if (feed === undefined) {
                     var tagName = d3.select('#tagName').attr('value');
 
@@ -108,14 +98,17 @@ define(['libs/d3', 'libs/instafeed', 'palette'], function(d3, instafeed, Palette
                             }
                         }
                     });
-                }
 
-                stopFlag = false;
-                resume();
+                    feed.run();
+                }
+                else {
+                    feed.next();
+                }
             })
 
             d3.select('#stopButton').on('click', function() {
                 stopFlag = true;
+                console.log(JSON.stringify(palette.toHash()).length);
             })
         }
     });

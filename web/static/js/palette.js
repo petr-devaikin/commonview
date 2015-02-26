@@ -1,7 +1,9 @@
 define(['pixel_group'], function(PixelGroup) {
     return function() {
         this.groups = [];
+        this.groupIndex = {};
         this.next_max_tag_id = undefined;
+        this.globalDiff = 255;
 
         this.generate = function(picture, groupSize) {
             this.groups = [];
@@ -13,22 +15,53 @@ define(['pixel_group'], function(PixelGroup) {
                     gX = Math.floor(x/groupSize),
                     gY = Math.floor(y/groupSize);
 
-                var pixelGroup = this.groups.filter(function(el) {
-                    return el.x == gX && el.y == gY;
-                });
-                if (pixelGroup.length == 0) {
-                    pixelGroup = new PixelGroup(gX, gY, groupSize);
+                if (this.groupIndex[gX] === undefined)
+                    this.groupIndex[gX] = {};
+                var pixelGroup = this.groupIndex[gX][gY];
+
+                if (pixelGroup === undefined) {
+                    pixelGroup = new PixelGroup(groupSize, gX, gY);
                     this.groups.push(pixelGroup);
+                    this.groupIndex[gX][gY] = pixelGroup;
                 }
-                else
-                    pixelGroup = pixelGroup[0];
 
                 pixelGroup.addPixel(x % groupSize, y % groupSize, color);
             }
         }
 
-        this.fill = function(insta_image) {
-            var freeMedia = insta_image;
+
+        this.toHash = function() {
+            var trueGroups = {};
+            for (var i = 0; i < this.groups.length; i++) {
+                var groupHash = this.groups[i].toHash();
+                if (groupHash !== undefined) {
+                    if (trueGroups[groupHash.x] === undefined)
+                        trueGroups[groupHash.x] = {};
+                    trueGroups[groupHash.x][groupHash.y] = groupHash;
+                }
+            }
+            return {
+                groups: trueGroups,
+                next_max_tag_id: this.next_max_tag_id
+            }
+        }
+
+
+        this.fromHash = function(data) {
+            this.next_max_tag_id = data.next_max_tag_id;
+
+            for (var x in data.groups)
+                for (var y in data.groups[x])
+                    this.groupIndex[x][y].fromHash(data.groups[x][y]);
+        }
+
+
+        this.fill = function(insta_image, color) {
+            var freeMedia = {
+                id: insta_image.id,
+                imgUrl: insta_image.images.thumbnail.url,
+                color: color
+            }
             
             for (var i = 0; i < this.groups.length; i++) {
                 var g = this.groups[i],
@@ -49,8 +82,8 @@ define(['pixel_group'], function(PixelGroup) {
                 }
             }
 
-            var globalDiff = this.groups.reduce(function (a, b) { return a + b.diff; }, 0) / this.groups.length;
-            return globalDiff;
+            this.globalDiff = this.groups.reduce(function (a, b) { return a + b.diff; }, 0) / this.groups.length;
+            return this.globalDiff;
         }
     }
 })
