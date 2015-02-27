@@ -63,7 +63,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
             }
         }
 
-        return function(accessToken, picture_id, picture, max_tag_id) {
+        return function(accessToken, picture_id, picture) {
             console.log('Start');
             palette = new Palette(picture, GROUP_SIZE);
             d3.shuffle(palette.groups);
@@ -103,10 +103,10 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
                         success: instagramSuccess,
                         mock: true,
                         before: function() {
-                            if (max_tag_id !== undefined) {
+                            if (palette.next_max_tag_id !== undefined) {
                                 var oldUrl = this._buildUrl();
                                 this._buildUrl = function() {
-                                    return oldUrl + '&max_tag_id=' + max_tag_id;
+                                    return oldUrl + '&max_tag_id=' + palette.next_max_tag_id;
                                 }
                             }
                         }

@@ -34,6 +34,7 @@ class Fragment(Model):
     picture = ForeignKeyField(Picture, related_name='fragments')
     row = IntegerField()
     column = IntegerField()
+    color = BlobField()
     diff = IntegerField()
     insta_id = CharField()
     insta_img = CharField()
@@ -50,6 +51,7 @@ class Fragment(Model):
                 'imageUrl': self.insta_img,
                 'link': self.insta_url,
                 'userName': self.insta_user,
+                'color': [ord(c) for c in self.color],
             }
         }
 
@@ -57,6 +59,7 @@ class Fragment(Model):
         self.column = data['x']
         self.row = data['y']
         self.diff = data['diff']
+        self.color = ''.join(chr(x) for x in data['image']['color'])
 
         self.insta_id = data['image']['id']
         self.insta_img = data['image']['imageUrl']

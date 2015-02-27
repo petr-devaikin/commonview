@@ -114,8 +114,11 @@ def palette(id):
 
             picture.save()
 
-            fragments_to_delete = [f.id for f in picture.fragments]
-            Fragment.delete().where(Fragment.id << fragments_to_delete)
+            fragments_to_delete = [f for f in picture.fragments]
+            for f in fragments_to_delete:
+                f.delete_instance()
+            print '11111111111111111111111111111'
+            print picture.fragments.count()
 
             for x in data['groups']:
                 for y in data['groups'][x]:
