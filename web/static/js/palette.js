@@ -1,9 +1,10 @@
 define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
-    return function(picture, groupSize, thumbSize) {
+    return function(picture, groupSize) {
         this.groups = [];
         this.groupIndex = {};
         this.next_max_tag_id = undefined;
         this.globalDiff = 255;
+        this.tagName = '';
 
         var canvas = document.createElement('canvas'),
             ctx = canvas.getContext('2d');
@@ -44,25 +45,46 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
             }
             return {
                 groups: trueGroups,
+                globalDiff: this.globalDiff,
+                tagName: this.tagName,
                 next_max_tag_id: this.next_max_tag_id
             }
         }
 
 
-        this.fromHash = function(accessToken, data) {
+        this.fromHash = function(params) {
+            // params: data, onComplete, onInit, onProgress
+
+            var data = params.data;
             this.next_max_tag_id = data.next_max_tag_id;
+            this.globalDiff = data.globalDiff;
+            this.tagName = data.tagName;
+
+            var counter = 0;
+
+            function decreaseCounter() {
+                counter--;
+
+                if (counter > 0 && counter % 10 == 0 && params.onProgress !== undefined)
+                    params.onProgress();
+
+                if (counter == 0 && params.onComplete !== undefined)
+                    params.onComplete();
+            }
 
             for (var x in data.groups)
                 for (var y in data.groups[x]) {
+                    counter++;
+
                     var g = this.groupIndex[x][y];
                     g.loading = true;
                     g.fromHash(data.groups[x][y]);
-
                     this.addPhoto(g.image, false,
                         function(group) {
                             return function() {
-                                console.log('Old photo loaded');
+                                //console.log('Old photo loaded');
                                 group.loading = false;
+                                decreaseCounter();
                             }
                         } (g),
                         function(group) {
@@ -70,19 +92,22 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                                 console.log('Old photo not found');
                                 group.loading = false;
                                 group.image = undefined;
+                                decreaseCounter();
                             }
                         } (g)
                     );
                 }
+
+            if (params.onInit !== undefined) params.onInit();
         }
 
 
         this.addPhoto = function(colorImage, findPlace, success, error) {
             var palette = this;
             helpers.loadImgByUrl({
-                url: colorImage.imgUrl,
+                url: colorImage.imageUrl,
                 success: function(img) {
-                    ctx.drawImage(img, 0, 0, thumbSize, thumbSize, 0, 0, groupSize, groupSize);
+                    ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, groupSize, groupSize);
                     var imgData = ctx.getImageData(0, 0, groupSize, groupSize),
                         colors = helpers.getImgDataColors(imgData);
                     

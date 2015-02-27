@@ -16,6 +16,8 @@ class User(Model):
 class Picture(Model):
     user = ForeignKeyField(User, related_name='pictures')
     tag = CharField(null=True)
+    next_tag_id = CharField(null=True)
+    global_diff = DoubleField(null=True)
     updated = DateTimeField(null=True)
 
     def get_path(self):
@@ -32,18 +34,34 @@ class Fragment(Model):
     picture = ForeignKeyField(Picture, related_name='fragments')
     row = IntegerField()
     column = IntegerField()
-    insta_id = CharField(null=True)
-    insta_img = CharField(null=True)
-    insta_url = CharField(null=True)
-    insta_user = CharField(null=True)
+    diff = IntegerField()
+    insta_id = CharField()
+    insta_img = CharField()
+    insta_url = CharField()
+    insta_user = CharField()
 
     def to_hash(self):
         return {
             'x': self.column,
             'y': self.row,
-            'img': self.insta_img,
-            'url': self.insta_url,
+            'diff': self.diff,
+            'image': {
+                'id': self.insta_id,
+                'imageUrl': self.insta_img,
+                'link': self.insta_url,
+                'userName': self.insta_user,
+            }
         }
+
+    def from_hash(self, data):
+        self.column = data['x']
+        self.row = data['y']
+        self.diff = data['diff']
+
+        self.insta_id = data['image']['id']
+        self.insta_img = data['image']['imageUrl']
+        self.insta_url = data['image']['link']
+        self.insta_user = data['image']['userName']
 
     class Meta:
         database = get_db()

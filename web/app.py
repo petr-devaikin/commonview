@@ -6,6 +6,7 @@ import json
 import peewee
 from instagram import client
 from .db.models import *
+from .db.engine import get_db
 from picprocess.image_helper import ImageHelper
 from picprocess.pixels import Pixels
 import os
@@ -92,7 +93,54 @@ def render(id):
     #fragments = [f.to_hash() for f in picture.fragments]
 
     return render_template('render.html', access_token=g.user.access_token,
-        picture=json.dumps(pixels.to_hash()))
+        picture=json.dumps(pixels.to_hash()), picture_id=id)
+
+@app.route('/palette/<id>', methods=['GET', 'POST'])
+def palette(id):
+    if not g.authorized: return 'error', 500
+
+    try:
+        picture = Picture.get(Picture.id==id)
+    except Picture.NotFound:
+        return 'Not found', 404
+
+    if request.method == 'POST':
+        data = json.loads(request.form['palette'])
+
+        with get_db().atomic() as txn:
+            picture.global_diff = data['globalDiff']
+            picture.tag = data['tagName']
+            picture.next_tag_id = data['next_max_tag_id']
+
+            picture.save()
+
+            fragments_to_delete = [f.id for f in picture.fragments]
+            Fragment.delete().where(Fragment.id << fragments_to_delete)
+
+            for x in data['groups']:
+                for y in data['groups'][x]:
+                    fragment = Fragment(picture=picture)
+                    fragment.from_hash(data['groups'][x][y])
+                    fragment.save()
+
+
+        return jsonify(result='ok')
+    else:
+        groups = {}
+        for f in picture.fragments:
+            y = str(f.row)
+            x = str(f.column)
+            if not x in groups:
+                groups[x] = {}
+            groups[x][y] = f.to_hash()
+
+        data = {
+            'globalDiff': picture.global_diff,
+            'tagName': picture.tag,
+            'next_max_tag_id': picture.next_tag_id,
+            'groups': groups
+        }
+        return jsonify(**data)
 
 
 def allowed_file(filename):

@@ -1,30 +1,32 @@
-define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafeed, Palette, helpers) {
-        var GROUP_SIZE = 4,
-            THUMBNAIL_SIZE = 150;
+define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
+    function(d3, instafeed, Palette, ColorImage, proxy) {
+        var GROUP_SIZE = 4;
 
         var palette,
             feed = undefined,
             stopFlag = true;
 
+        function setBackground(d) {
+            if (d.image !== undefined)
+                return 'url(' + d.image.imageUrl + ')';
+            else
+                return 'none';
+        }
+
         function drawPalette() {
-            d3.select('#mainPhoto').selectAll('.miniPhoto')
-                .data(palette.groups, function(d) { return d.x + '/' + d.y; })
-                .style('background-image', function(d) {
-                    if (d.image !== undefined)
-                        return 'url(' + d.image.imgUrl + ')';
-                    else
-                        return '';
-                })
-            .enter().append('div')
-                .classed('miniPhoto', true)
-                .attr('row', function(d) { return d.y; })
-                .attr('column', function(d) { return d.x; })
-                .style('background-image', function(d) {
-                    if (d.image !== undefined)
-                        return 'url(' + d.image.imgUrl + ')';
-                    else
-                        return 'none';
-                });
+            var photos = d3.select('#mainPhoto').selectAll('.miniPhoto')
+                    .data(palette.groups, function(d) {
+                        return d.x + '/' + d.y;
+                    })
+                    .style('background-image', setBackground);
+
+            photos.enter().append('div')
+                    .classed('miniPhoto', true)
+                    .attr('row', function(d) { return d.y; })
+                    .attr('column', function(d) { return d.x; })
+                    .style('background-image', setBackground);
+
+            photos.exit().remove();
 
             updateAccuracy();
         }
@@ -55,31 +57,47 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                 }
 
 
-                var colorImage = {
-                    id: instaImage.id,
-                    imgUrl: instaImage.images.thumbnail.url,
-                    color: [],
-                }
+                var colorImage = new ColorImage(instaImage.id, instaImage.images.thumbnail.url);
 
                 palette.addPhoto(colorImage, true, imageProcessed, imageFailed);
             }
         }
 
-        return function(accessToken, picture, max_tag_id) {
+        return function(accessToken, picture_id, picture, max_tag_id) {
             console.log('Start');
-            palette = new Palette(picture, GROUP_SIZE, THUMBNAIL_SIZE);
+            palette = new Palette(picture, GROUP_SIZE);
             d3.shuffle(palette.groups);
             console.log('Generated');
+
+            d3.select('#loadButton').on('click', function() {
+                proxy.loadPalette(
+                    picture_id,
+                    palette,
+                    function() {
+                        drawPalette();
+                        console.log('Palette loaded');
+                    },
+                    undefined,
+                    function() {
+                        d3.select('#tagName').property('value', palette.tagName);
+                        drawPalette();
+                        console.log('Initialized');
+                    },
+                    function() {
+                        drawPalette();
+                        console.log('Progress');
+                    });
+            })
 
             d3.select('#startButton').on('click', function() {
                 stopFlag = false;
                 if (feed === undefined) {
-                    var tagName = d3.select('#tagName').attr('value');
+                    palette.tagName = d3.select('#tagName').property('value');
 
                     feed = new Instafeed({
                         accessToken: accessToken,
                         get: 'tagged',
-                        tagName: tagName,
+                        tagName: palette.tagName,
                         sortBy: 'most-recent',
                         limit: 60,
                         success: instagramSuccess,
@@ -97,11 +115,6 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
                     feed.run();
                 }
                 else {
-                    palette = new Palette(picture, GROUP_SIZE, THUMBNAIL_SIZE);
-                    d3.shuffle(palette.groups);
-                    drawPalette();
-                    palette.fromHash(accessToken, hash);
-                    console.log('Start insta');
                     feed.next();
                 }
             })
@@ -110,8 +123,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'helpers'], function(d3, instafe
 
             d3.select('#stopButton').on('click', function() {
                 stopFlag = true;
-                hash = palette.toHash();
-                console.log(hash);
+                proxy.savePalette(picture_id, palette);
                 //drawPalette();
                 //console.log(JSON.stringify(palette.toHash()).length);
             })

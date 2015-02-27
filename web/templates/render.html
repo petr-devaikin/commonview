@@ -14,7 +14,7 @@
         });
 
         require(['render'], function(render) {
-            render('{{ access_token }}', {{ picture | safe }});
+            render('{{ access_token }}', {{ picture_id }}, {{ picture | safe }});
         })
     </script>
 {% endblock %}
@@ -23,6 +23,7 @@
     <input type="text" value="London" id="tagName" />
     <button id="startButton">Start</button>
     <button id="stopButton">Stop</button>
+    <button id="loadButton">Load from db</button>
     <div id="accuracy"></div>
     <div id="mainPhoto">
     </div>

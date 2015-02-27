@@ -1,4 +1,4 @@
-define(['libs/qwest'], function(qwest) {
+define(['proxy'], function(proxy) {
    return {
         loadImgByUrl: function(params) {
             // params: url, success, error
@@ -19,7 +19,7 @@ define(['libs/qwest'], function(qwest) {
                 params.error();
             }
 
-            image.src = '/img?url=' + params.url;
+            image.src = proxy.getImageUrl(params.url);
         },
         getImgDataColors: function(imgData) {
             var colors = [];
