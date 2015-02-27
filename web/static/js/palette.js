@@ -60,13 +60,14 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
             this.globalDiff = data.globalDiff;
             this.tagName = data.tagName;
 
-            var counter = 0;
+            var counter = 0,
+                maxCounter;
 
             function decreaseCounter() {
                 counter--;
 
                 if (counter > 0 && counter % 10 == 0 && params.onProgress !== undefined)
-                    params.onProgress();
+                    params.onProgress(100 * (maxCounter - counter) / maxCounter);
 
                 if (counter == 0 && params.onComplete !== undefined)
                     params.onComplete();
@@ -98,6 +99,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                     );
                 }
 
+            maxCounter = counter;
             if (params.onInit !== undefined) params.onInit();
         }
 

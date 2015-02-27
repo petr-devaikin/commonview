@@ -83,9 +83,9 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
                         drawPalette();
                         console.log('Initialized');
                     },
-                    function() {
+                    function(procentage) {
                         drawPalette();
-                        console.log('Progress');
+                        console.log('Progress ' + procentage);
                     });
             })
 
@@ -123,7 +123,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
 
             d3.select('#stopButton').on('click', function() {
                 stopFlag = true;
-                proxy.savePalette(picture_id, palette);
+                proxy.savePalette(picture_id, palette, function() { console.log('Palette saved'); });
                 //drawPalette();
                 //console.log(JSON.stringify(palette.toHash()).length);
             })
