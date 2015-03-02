@@ -1,14 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
 from flask import make_response, g, Response
 from flask.ext.scss import Scss
-from .db.engine import init_db, get_db
+from .db.engine import init_db
 import json
 import peewee
 from instagram import client
 from .db.models import *
-from .db.engine import get_db
 from picprocess.image_helper import ImageHelper
 from picprocess.pixels import Pixels
+from picprocess.palette import Palette
 import os
 import urllib2
 
@@ -95,6 +95,7 @@ def render(id):
     return render_template('render.html', access_token=g.user.access_token,
         picture=json.dumps(pixels.to_hash()), picture_id=id)
 
+
 @app.route('/palette/<id>', methods=['GET', 'POST'])
 def palette(id):
     if not g.authorized: return 'error', 500
@@ -105,44 +106,10 @@ def palette(id):
         return 'Not found', 404
 
     if request.method == 'POST':
-        data = json.loads(request.form['palette'])
-
-        with get_db().atomic() as txn:
-            picture.global_diff = data['globalDiff']
-            picture.tag = data['tagName']
-            picture.next_tag_id = data['next_max_tag_id']
-
-            picture.save()
-
-            fragments_to_delete = [f for f in picture.fragments]
-            for f in fragments_to_delete:
-                f.delete_instance()
-            print '11111111111111111111111111111'
-            print picture.fragments.count()
-
-            for x in data['groups']:
-                for y in data['groups'][x]:
-                    fragment = Fragment(picture=picture)
-                    fragment.from_hash(data['groups'][x][y])
-                    fragment.save()
-
-
+        Palette.save_to_db(picture, request.form['palette'])
         return jsonify(result='ok')
     else:
-        groups = {}
-        for f in picture.fragments:
-            y = str(f.row)
-            x = str(f.column)
-            if not x in groups:
-                groups[x] = {}
-            groups[x][y] = f.to_hash()
-
-        data = {
-            'globalDiff': picture.global_diff,
-            'tagName': picture.tag,
-            'next_max_tag_id': picture.next_tag_id,
-            'groups': groups
-        }
+        data = Palette.load_from_db(picture)
         return jsonify(**data)
 
 

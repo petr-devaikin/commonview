@@ -3,6 +3,8 @@ define(['proxy'], function(proxy) {
         loadImgByUrl: function(params) {
             // params: url, success, error
 
+            var _useProxy = params.useProxy !== undefined ? params.useProxy : true;
+
             var image = new Image();
 
             image.onload = function() {
@@ -19,7 +21,7 @@ define(['proxy'], function(proxy) {
                 params.error();
             }
 
-            image.src = proxy.getImageUrl(params.url);
+            image.src = _useProxy ? proxy.getImageUrl(params.url) : params.url;
         },
         getImgDataColors: function(imgData) {
             var colors = [];

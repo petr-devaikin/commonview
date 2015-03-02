@@ -59,7 +59,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
 
                 var colorImage = new ColorImage(instaImage.id, instaImage.images.thumbnail.url);
 
-                palette.addPhoto(colorImage, true, imageProcessed, imageFailed);
+                palette.addPhoto(colorImage, imageProcessed, imageFailed);
             }
         }
 

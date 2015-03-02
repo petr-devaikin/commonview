@@ -60,51 +60,58 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
             this.globalDiff = data.globalDiff;
             this.tagName = data.tagName;
 
-            var counter = 0,
-                maxCounter;
+            var maxCounter = 0,
+                queue = [];
 
-            function decreaseCounter() {
-                counter--;
 
-                if (counter > 0 && counter % 10 == 0 && params.onProgress !== undefined)
-                    params.onProgress(100 * (maxCounter - counter) / maxCounter);
+            function processNext() {
+                var picsLeft = queue.length;
 
-                if (counter == 0 && params.onComplete !== undefined)
+                if (picsLeft > 0 && picsLeft % 10 == 0 && params.onProgress !== undefined)
+                    params.onProgress(100 * (maxCounter - picsLeft) / maxCounter);
+
+                if (picsLeft == 0 && params.onComplete !== undefined)
                     params.onComplete();
+
+                if (picsLeft > 0) {
+                    var group = queue.pop();
+                    helpers.loadImgByUrl({
+                        url: group.image.imageUrl,
+                        useProxy: false,
+                        success: function(img) {
+                            //console.log('Old photo loaded');
+                            group.loading = false;
+                            processNext();
+                        },
+                        error: function() {
+                            console.log('Old photo not found');
+                            group.loading = false;
+                            group.image = undefined;
+                            processNext();
+                        }
+                    });
+                }
             }
+
 
             for (var x in data.groups)
                 for (var y in data.groups[x]) {
-                    counter++;
+                    maxCounter++;
 
                     var g = this.groupIndex[x][y];
                     g.loading = true;
                     g.fromHash(data.groups[x][y]);
-                    this.addPhoto(g.image, false,
-                        function(group) {
-                            return function() {
-                                //console.log('Old photo loaded');
-                                group.loading = false;
-                                decreaseCounter();
-                            }
-                        } (g),
-                        function(group) {
-                            return function() {
-                                console.log('Old photo not found');
-                                group.loading = false;
-                                group.image = undefined;
-                                decreaseCounter();
-                            }
-                        } (g)
-                    );
+
+                    queue.push(g);
+                    if (maxCounter <= 20)
+                        processNext();
                 }
 
-            maxCounter = counter;
             if (params.onInit !== undefined) params.onInit();
         }
 
 
-        this.addPhoto = function(colorImage, findPlace, success, error) {
+        this.addPhoto = function(colorImage, success, error) {
             var palette = this;
             helpers.loadImgByUrl({
                 url: colorImage.imageUrl,
@@ -114,9 +121,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                         colors = helpers.getImgDataColors(imgData);
                     
                     colorImage.color = colors;
-
-                    if (findPlace)
-                        palette._findPlace(colorImage);
+                    palette._findPlace(colorImage);
 
                     palette.globalDiff = palette.groups.reduce(function (a, b) {return a + b.diff; }, 0) / palette.groups.length;
 
