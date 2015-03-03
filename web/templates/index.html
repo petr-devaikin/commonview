@@ -1,9 +1,31 @@
 {% extends "layout.html" %}
 
+
+{% block style %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+
+    {% if g.authorized %}
+
+    {% endif %}
+{% endblock %}
+
+
+{% block script %}
+    {% if g.authorized %}
+        <script>
+            require(['upload'], function(upload) {
+                upload();
+            })
+        </script>
+    {% endif %}
+{% endblock %}
+
+
 {% block body %}
     {% if not g.authorized %}
         <a href="{{ url_for('login') }}">Log in</a>
     {% else %}
+        <div id="uploader"></div>
         <a href="{{ url_for('logout') }}">Log out</a>
         <a href="{{ url_for('upload') }}">Upload new</a>
 

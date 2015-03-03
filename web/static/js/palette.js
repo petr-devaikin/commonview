@@ -1,5 +1,8 @@
 define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
-    return function(picture, groupSize) {
+    var MAX_LOADS = 20;
+
+    return function(picture_id, picture, groupSize) {
+        this.picture_id = picture_id;
         this.groups = [];
         this.groupIndex = {};
         this.next_max_tag_id = undefined;
@@ -54,6 +57,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
 
         this.fromHash = function(params) {
             // params: data, onComplete, onInit, onProgress
+            var completed = false;
 
             var data = params.data;
             this.next_max_tag_id = data.next_max_tag_id;
@@ -70,8 +74,10 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                 if (picsLeft > 0 && picsLeft % 10 == 0 && params.onProgress !== undefined)
                     params.onProgress(100 * (maxCounter - picsLeft) / maxCounter);
 
-                if (picsLeft == 0 && params.onComplete !== undefined)
+                if (!completed && picsLeft == 0 && params.onComplete !== undefined) {
+                    completed = true;
                     params.onComplete();
+                }
 
                 if (picsLeft > 0) {
                     var group = queue.pop();
@@ -103,7 +109,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                     g.fromHash(data.groups[x][y]);
 
                     queue.push(g);
-                    if (maxCounter <= 20)
+                    if (maxCounter <= MAX_LOADS)
                         processNext();
                 }
 

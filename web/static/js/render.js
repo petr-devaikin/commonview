@@ -1,10 +1,14 @@
 define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
     function(d3, instafeed, Palette, ColorImage, proxy) {
-        var GROUP_SIZE = 4;
+        var GROUP_SIZE = 4,
+            SAVE_PERIOD = 1000 * 30;
 
         var palette,
             feed = undefined,
-            stopFlag = true;
+            stopCallback = true;
+            
+        var startButton = d3.select('#startButton');
+        var stopButton = d3.select('#stopButton');
 
         function setBackground(d) {
             if (d.image !== undefined)
@@ -35,6 +39,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
             d3.select('#accuracy').text(palette.globalDiff);
         }
 
+        var lastSave = undefined;
         function instagramSuccess(photos) {
             var uncomplete = photos.data.length;
             palette.next_max_tag_id = photos.pagination.next_max_tag_id;
@@ -45,15 +50,26 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
                 function imageProcessed() {
                     drawPalette();
 
-                    uncomplete--;
-                    if (uncomplete == 0 && !stopFlag)
-                        feed.next();
+                    if (--uncomplete == 0) {
+                        if (stopCallback === undefined) {
+                            if ((new Date()) - lastSave > SAVE_PERIOD) {
+                                lastSave = new Date();
+                                savePalette();
+                            }
+                            feed.next();
+                        }
+                        else
+                            stopCallback();
+                    }
                 }
 
                 function imageFailed() {
-                    uncomplete--;
-                    if (uncomplete == 0 && !stopFlag)
-                        feed.next();
+                    if (--uncomplete == 0) {
+                        if (stopCallback === undefined)
+                            feed.next();
+                        else
+                            stopCallback();
+                    }
                 }
 
 
@@ -63,23 +79,22 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
             }
         }
 
-        return function(accessToken, picture_id, picture) {
-            console.log('Start');
-            palette = new Palette(picture, GROUP_SIZE);
-            d3.shuffle(palette.groups);
-            console.log('Generated');
 
-            d3.select('#loadButton').on('click', function() {
-                proxy.loadPalette(
-                    picture_id,
+        function loadPalette() {
+            proxy.loadPalette(
+                    palette.picture_id,
                     palette,
                     function() {
                         drawPalette();
+                        startButton.attr('disabled', null);
                         console.log('Palette loaded');
                     },
                     undefined,
                     function() {
-                        d3.select('#tagName').property('value', palette.tagName);
+                        if (palette.tagName) {
+                            d3.select('#tagName').property('value', palette.tagName);
+                            d3.select('#tagName').attr('disabled', 'disabled');
+                        }
                         drawPalette();
                         console.log('Initialized');
                     },
@@ -87,12 +102,32 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
                         drawPalette();
                         console.log('Progress ' + procentage);
                     });
-            })
+        }
 
-            d3.select('#startButton').on('click', function() {
-                stopFlag = false;
+        function savePalette() {
+            proxy.savePalette(palette.picture_id, palette, function() {
+                console.log('Palette saved');
+            });
+        }
+
+        return function(accessToken, pic_id, picture) {
+            startButton.attr('disabled', 'disabled');
+            stopButton.attr('disabled', 'disabled');
+
+            console.log('Start');
+            palette = new Palette(pic_id, picture, GROUP_SIZE);
+            d3.shuffle(palette.groups);
+            console.log('Generated');
+
+            loadPalette(palette);
+
+            startButton.on('click', function() {
+                lastSave = new Date();
+                stopCallback = undefined;
+
                 if (feed === undefined) {
-                    palette.tagName = d3.select('#tagName').property('value');
+                    if (!palette.tagName)
+                        palette.tagName = d3.select('#tagName').property('value');
 
                     feed = new Instafeed({
                         accessToken: accessToken,
@@ -103,7 +138,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
                         success: instagramSuccess,
                         mock: true,
                         before: function() {
-                            if (palette.next_max_tag_id !== undefined) {
+                            if (palette.next_max_tag_id) {
                                 var oldUrl = this._buildUrl();
                                 this._buildUrl = function() {
                                     return oldUrl + '&max_tag_id=' + palette.next_max_tag_id;
@@ -114,16 +149,25 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
 
                     feed.run();
                 }
-                else {
+                else
                     feed.next();
-                }
+
+
+                startButton.attr('disabled', 'disabled');
+                stopButton.attr('disabled', null);
             })
 
             var hash; 
 
-            d3.select('#stopButton').on('click', function() {
-                stopFlag = true;
-                proxy.savePalette(picture_id, palette, function() { console.log('Palette saved'); });
+            stopButton.on('click', function() {
+                stopButton.attr('disabled', 'disabled');
+
+                stopCallback = function() {
+                    savePalette();
+
+                    startButton.attr('disabled', null);
+                }
+                
                 //drawPalette();
                 //console.log(JSON.stringify(palette.toHash()).length);
             })

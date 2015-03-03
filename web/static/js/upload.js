@@ -4,14 +4,8 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
         allowedFileTypes = ['image/png', 'image/jpeg', 'image/gif'],
         UPLOAD_URL = '/upload';
 
-    var holder = document.getElementById('uploader');
-
     function setError(text) {
-        uploader.classed('hover', false);
-        uploader.classed('drop', false);
-        uploader.classed('error', true);
-
-        uploader.text(text);
+        console.log(text);
     }
 
     return function() {
@@ -20,21 +14,20 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
             return;
         }
 
-        uploader.node().ondragover = function() {
+        document.ondragover = function() {
             uploader.classed('hover', true);
             return false;
         }
 
 
-        uploader.node().ondragend = function() {
+        uploader.node().ondragleave = function() {
             uploader.classed('hover', false);
             return false;
         }
 
-        uploader.node().ondrop = function(e) {
+        document.ondrop = function(e) {
             e.preventDefault();
             uploader.classed('hover', false);
-            uploader.classed('drop', true);
 
             var file = event.dataTransfer.files[0];
 
@@ -65,7 +58,6 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
                      setError('Error while uploading!');
                      console.log(message);
                  });
-
         }
     }
 });
