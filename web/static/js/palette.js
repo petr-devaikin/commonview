@@ -74,9 +74,9 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                 if (picsLeft > 0 && picsLeft % 10 == 0 && params.onProgress !== undefined)
                     params.onProgress(100 * (maxCounter - picsLeft) / maxCounter);
 
-                if (!completed && picsLeft == 0 && params.onComplete !== undefined) {
+                if (!completed && picsLeft == 0) {
                     completed = true;
-                    params.onComplete();
+                    if (params.onComplete !== undefined) params.onComplete();
                 }
 
                 if (picsLeft > 0) {
@@ -114,6 +114,8 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                 }
 
             if (params.onInit !== undefined) params.onInit();
+            if (maxCounter == 0 && params.onComplete !== undefined)
+                params.onComplete();
         }
 
 

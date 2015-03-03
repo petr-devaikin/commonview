@@ -27,7 +27,6 @@
     {% else %}
         <div id="uploader"></div>
         <a href="{{ url_for('logout') }}">Log out</a>
-        <a href="{{ url_for('upload') }}">Upload new</a>
 
         <br /><br />
         {% for p in g.user.pictures %}

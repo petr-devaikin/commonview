@@ -20,10 +20,13 @@
 {% endblock %}
 
 {% block body %}
+    <a href="{{ url_for('index') }}">All pictures</a>
+
     <input type="text" value="London" id="tagName" />
     <button id="startButton">Start</button>
     <button id="stopButton">Stop</button>
-    <button id="loadButton">Load from db</button>
+    <button id="clearButton">Clear</button>
+    <button id="deleteButton">Delete</button>
     <div id="accuracy"></div>
     <div id="mainPhoto">
     </div>

@@ -27,5 +27,14 @@ define(['libs/qwest'], function(qwest) {
                     if (error !== undefined) error();
                 });
         },
+        deletePalette: function(pictureId, success, error) {
+            qwest.delete('/palette/' + pictureId)
+                .then(function(response) {
+                    if (success !== undefined) success();
+                })
+                .catch(function(ex) {
+                    if (error !== undefined) error();
+                });
+        },
     }
 });

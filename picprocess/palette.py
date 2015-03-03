@@ -10,7 +10,7 @@ class Palette:
         with get_db().atomic() as txn:
             picture.global_diff = data['globalDiff']
             picture.tag = data['tagName']
-            picture.next_tag_id = data['next_max_tag_id']
+            picture.next_tag_id = data['next_max_tag_id'] if 'next_max_tag_id' in data else None
 
             picture.save()
 
@@ -23,6 +23,16 @@ class Palette:
                     fragment = Fragment(picture=picture)
                     fragment.from_hash(data['groups'][x][y])
                     fragment.save()
+
+
+    @staticmethod
+    def remove_from_db(picture):
+        with get_db().atomic() as txn:
+            fragments_to_delete = [f for f in picture.fragments]
+            for f in fragments_to_delete:
+                f.delete_instance()
+
+            picture.delete_instance()
 
 
     @staticmethod

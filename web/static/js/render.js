@@ -6,9 +6,11 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
         var palette,
             feed = undefined,
             stopCallback = true;
-            
+
         var startButton = d3.select('#startButton');
         var stopButton = d3.select('#stopButton');
+        var clearButton = d3.select('#clearButton');
+        var deleteButton = d3.select('#deleteButton');
 
         function setBackground(d) {
             if (d.image !== undefined)
@@ -110,16 +112,28 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
             });
         }
 
-        return function(accessToken, pic_id, picture) {
-            startButton.attr('disabled', 'disabled');
-            stopButton.attr('disabled', 'disabled');
-
+        function clearPalette(pic_id, picture) {
             console.log('Start');
             palette = new Palette(pic_id, picture, GROUP_SIZE);
             d3.shuffle(palette.groups);
             console.log('Generated');
+            d3.select('#tagName').attr('disabled', null);
+            feed = undefined;
+        }
 
-            loadPalette(palette);
+        function deletePalette() {
+            proxy.deletePalette(palette.picture_id, function() {
+                window.location = '/';
+            });
+        }
+
+        return function(accessToken, pic_id, picture) {
+            startButton.attr('disabled', 'disabled');
+            stopButton.attr('disabled', 'disabled');
+
+            clearPalette(pic_id, picture);
+
+            loadPalette();
 
             startButton.on('click', function() {
                 lastSave = new Date();
@@ -155,21 +169,23 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
 
                 startButton.attr('disabled', 'disabled');
                 stopButton.attr('disabled', null);
-            })
-
-            var hash; 
+            });
 
             stopButton.on('click', function() {
                 stopButton.attr('disabled', 'disabled');
 
                 stopCallback = function() {
                     savePalette();
-
                     startButton.attr('disabled', null);
                 }
-                
-                //drawPalette();
-                //console.log(JSON.stringify(palette.toHash()).length);
             })
+
+            clearButton.on('click', function() {
+                clearPalette(pic_id, picture);
+                drawPalette();
+                savePalette();
+            });
+
+            deleteButton.on('click', deletePalette);
         }
     });

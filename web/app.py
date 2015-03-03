@@ -81,7 +81,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/render/<id>')
+@app.route('/pic/<id>')
 def render(id):
     if not g.authorized: return redirect(url_for('index'))
 
@@ -96,7 +96,7 @@ def render(id):
         picture=json.dumps(pixels.to_hash()), picture_id=id)
 
 
-@app.route('/palette/<id>', methods=['GET', 'POST'])
+@app.route('/palette/<id>', methods=['GET', 'POST', 'DELETE'])
 def palette(id):
     if not g.authorized: return 'error', 500
 
@@ -108,6 +108,9 @@ def palette(id):
     if request.method == 'POST':
         Palette.save_to_db(picture, request.form['palette'])
         return jsonify(result='ok')
+    elif request.method == 'DELETE':
+        Palette.remove_from_db(picture)
+        return jsonify(result='ok')
     else:
         data = Palette.load_from_db(picture)
         return jsonify(**data)
@@ -117,21 +120,18 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in current_app.config['ALLOWED_EXTENSIONS']
 
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload():
     if not g.authorized: return redirect(url_for('index'))
 
-    if request.method == 'POST':
-        f = request.files['pic']
-        if f and allowed_file(f.filename):
-            picture = Picture.create(user=g.user)
-            pic = ImageHelper.resize(f)
-            pic.save(picture.get_full_path())
-            return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
-        else:
-            return jsonify(result='error'), 500
+    f = request.files['pic']
+    if f and allowed_file(f.filename):
+        picture = Picture.create(user=g.user)
+        pic = ImageHelper.resize(f)
+        pic.save(picture.get_full_path())
+        return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:
-        return render_template('upload.html')
+        return jsonify(result='error'), 500
 
 
 @app.route('/img')
