@@ -1,11 +1,8 @@
-define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
-    function(d3, instafeed, Palette, ColorImage, proxy) {
+define(['libs/d3', 'palette', 'proxy', 'picgrabber'], function(d3, Palette, proxy, PicGrabber) {
         var GROUP_SIZE = 4,
             SAVE_PERIOD = 1000 * 30;
 
-        var palette,
-            feed = undefined,
-            stopCallback = true;
+        var palette;
 
         var startButton = d3.select('#startButton');
         var stopButton = d3.select('#stopButton');
@@ -83,39 +80,44 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
 
 
         function loadPalette() {
-            proxy.loadPalette(
-                    palette.picture_id,
-                    palette,
-                    function() {
-                        drawPalette();
-                        startButton.attr('disabled', null);
-                        console.log('Palette loaded');
-                    },
-                    undefined,
-                    function() {
-                        if (palette.tagName) {
-                            d3.select('#tagName').property('value', palette.tagName);
-                            d3.select('#tagName').attr('disabled', 'disabled');
-                        }
-                        drawPalette();
-                        console.log('Initialized');
-                    },
-                    function(procentage) {
-                        drawPalette();
-                        console.log('Progress ' + procentage);
-                    });
+            palette.load({
+                onInit: function() {
+                    if (palette.tagName) {
+                        d3.select('#tagName').property('value', palette.tagName);
+                        d3.select('#tagName').attr('disabled', 'disabled');
+                    }
+                    drawPalette();
+                    console.log('Initialized');
+                },
+                onProgress: function(procentage) {
+                    drawPalette();
+                    console.log('Progress ' + procentage);
+                },
+                onComplete: function() {
+                    drawPalette();
+                    startButton.attr('disabled', null);
+                    console.log('Palette loaded');
+                },
+                onError: function() {
+                    console.log('Palette loading error');
+                }
+            });
         }
 
         function savePalette() {
-            proxy.savePalette(palette.picture_id, palette, function() {
-                console.log('Palette saved');
+            palette.save({
+                onSuccess: function() {
+                    console.log('Palette saved');
+                },
+                onError: function() {
+                    console.log('Palette saving error');
+                }
             });
         }
 
         function clearPalette(pic_id, picture) {
             console.log('Start');
             palette = new Palette(pic_id, picture, GROUP_SIZE);
-            d3.shuffle(palette.groups);
             console.log('Generated');
             d3.select('#tagName').attr('disabled', null);
             feed = undefined;
@@ -135,37 +137,36 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
 
             loadPalette();
 
+            var picGrabber = new PicGrabber({
+                accessToken: accessToken,
+                groupSize: GROUP_SIZE,
+                onListReceived: function(nextTag) {
+                    palette.next_max_tag_id = nextTag;
+                },
+                onPhotoLoaded: function(colorImage) {
+                    palette.addPhoto(colorImage);
+                },
+                onComplete: function(isStopped) {
+                    drawPalette();
+                    if (isStopped) {
+                        savePalette();
+                        startButton.attr('disabled', null);
+                    }
+                    else if ((new Date()) - lastSave > SAVE_PERIOD) {
+                        lastSave = new Date();
+                        savePalette();
+                    }
+                },
+            });
+
             startButton.on('click', function() {
                 lastSave = new Date();
                 stopCallback = undefined;
 
-                if (feed === undefined) {
-                    if (!palette.tagName)
-                        palette.tagName = d3.select('#tagName').property('value');
+                if (!palette.tagName)
+                    palette.tagName = d3.select('#tagName').property('value');
 
-                    feed = new Instafeed({
-                        accessToken: accessToken,
-                        get: 'tagged',
-                        tagName: palette.tagName,
-                        sortBy: 'most-recent',
-                        limit: 60,
-                        success: instagramSuccess,
-                        mock: true,
-                        before: function() {
-                            if (palette.next_max_tag_id) {
-                                var oldUrl = this._buildUrl();
-                                this._buildUrl = function() {
-                                    return oldUrl + '&max_tag_id=' + palette.next_max_tag_id;
-                                }
-                            }
-                        }
-                    });
-
-                    feed.run();
-                }
-                else
-                    feed.next();
-
+                picGrabber.start(palette.tagName, palette.next_max_tag_id);
 
                 startButton.attr('disabled', 'disabled');
                 stopButton.attr('disabled', null);
@@ -174,10 +175,7 @@ define(['libs/d3', 'libs/instafeed', 'palette', 'colorimage', 'proxy'],
             stopButton.on('click', function() {
                 stopButton.attr('disabled', 'disabled');
 
-                stopCallback = function() {
-                    savePalette();
-                    startButton.attr('disabled', null);
-                }
+                picGrabber.stop();
             })
 
             clearButton.on('click', function() {

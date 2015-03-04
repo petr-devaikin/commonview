@@ -1,4 +1,4 @@
-define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
+define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, helpers, proxy) {
     var MAX_LOADS = 20;
 
     return function(picture_id, picture, groupSize) {
@@ -9,11 +9,6 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
         this.globalDiff = 255;
         this.tagName = '';
 
-        var canvas = document.createElement('canvas'),
-            ctx = canvas.getContext('2d');
-
-        canvas.width = groupSize;
-        canvas.height = groupSize;
 
         for (var i = 0; i < picture.pixels.length; i++) {
             var x = picture.pixels[i].x,
@@ -35,8 +30,10 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
             pixelGroup.addPixel(x % groupSize, y % groupSize, color);
         }
 
+        d3.shuffle(this.groups);
 
-        this.toHash = function() {
+
+        this._toHash = function() {
             var trueGroups = {};
             for (var i = 0; i < this.groups.length; i++) {
                 var groupHash = this.groups[i].toHash();
@@ -55,7 +52,7 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
         }
 
 
-        this.fromHash = function(params) {
+        this._fromHash = function(params) {
             // params: data, onComplete, onInit, onProgress
             var completed = false;
 
@@ -119,28 +116,39 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
         }
 
 
-        this.addPhoto = function(colorImage, success, error) {
-            var palette = this;
-            helpers.loadImgByUrl({
-                url: colorImage.imageUrl,
-                success: function(img) {
-                    ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, groupSize, groupSize);
-                    var imgData = ctx.getImageData(0, 0, groupSize, groupSize),
-                        colors = helpers.getImgDataColors(imgData);
-                    
-                    colorImage.color = colors;
-                    palette._findPlace(colorImage);
+        this.load = function(params) {
+            // params: onInit, onProgress, onComplete, onError
 
-                    palette.globalDiff = palette.groups.reduce(function (a, b) {return a + b.diff; }, 0) / palette.groups.length;
+            proxy.loadPalette(
+                this.picture_id,
+                function(palette) {
+                    return function(data) {
+                        palette._fromHash({
+                            data: data,
+                            onInit: params.onInit,
+                            onComplete: params.onComplete,
+                            onProgress: params.onProgress,
+                        });
+                    }
+                } (this),
+                params.onError
+            ); 
+        }
 
-                    success();
-                },
-                error: error,
-            });
+        this.save = function(params) {
+            // params: onSuccess, onError
+
+            var hash = JSON.stringify(this._toHash());
+            proxy.savePalette(
+                this.picture_id,
+                hash,
+                params.onSuccess,
+                params.onError
+            );
         }
 
 
-        this._findPlace = function(colorImage) {
+        this.addPhoto = function(colorImage) {
             var freeMedia = colorImage;
             
             for (var i = 0; i < this.groups.length; i++) {
@@ -164,6 +172,8 @@ define(['pixel_group', 'helpers'], function(PixelGroup, helpers) {
                     }
                 }
             }
+
+            this.globalDiff = this.groups.reduce(function (a, b) {return a + b.diff; }, 0) / this.groups.length;
         }
     }
 })
