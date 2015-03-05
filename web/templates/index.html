@@ -23,12 +23,30 @@
 
 {% block body %}
     {% if not g.authorized %}
+        <p>
+            Make your own pazzle
+        </p>
+        <ul>
+            <li><a href="{{ url_for('login') }}">Login</a> via Instagram</li>
+            <li>Upload an image (jpeg, png, gif)</li>
+            <li>Choose a hashtag to find pazzle elements</li>
+            <li>Start compiling and enjoy the process</li>
+            <li>Share your pazzle</li>
+        </ul>
     {% else %}
         <div id="uploader"></div>
 
-        <br /><br />
-        {% for p in g.user.pictures %}
-            <a href="{{ url_for('render', id=p.id) }}">Image {{ p.id }}</a>
-        {% endfor %}
+        <p>You can upload up to 3 pictures</p>
+        <div id="pictures">
+            <div class="picture" id="new">
+                + Drug and drop picture to upload <br />
+                Maximum size is 555 Mb, allowed extentions are JPEG, PNG and OLOLO.
+            </div>
+            {% for p in g.user.pictures %}
+                <div class="picture">
+                    <a href="{{ url_for('render', id=p.id) }}">Image {{ p.id }}</a>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 {% endblock %}

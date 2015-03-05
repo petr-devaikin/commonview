@@ -17,11 +17,18 @@
 {% block body %}
     <a href="{{ url_for('index') }}">All pictures</a>
 
-    <input type="text" value="London" id="tagName" />
-    <button id="startButton">Start</button>
-    <button id="stopButton">Stop</button>
-    <button id="clearButton">Clear</button>
-    <button id="deleteButton">Delete</button>
+    {% if g.authorized %}
+        <input type="text" value="selfie" id="tagName" />
+
+        <button id="startButton">Start</button>
+        <button id="stopButton">Stop</button>
+        <button id="clearButton">Clear</button>
+        <button id="deleteButton">Delete</button>
+    {% else %}
+        <span id="tagName">#{{ tag }}</span>
+        <a href="https://instagram.com/{{ author }}" id="author" target="_blank">@{{ author }}</a>
+    {% endif %}
+
     <div id="accuracy"></div>
     <div id="mainPhoto">
     </div>

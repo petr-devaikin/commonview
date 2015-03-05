@@ -88,11 +88,19 @@ def render(id):
     pixels.get_pixels_from_img(picture)
 
     if not g.authorized or picture.user.id != g.user.id:
-        return render_template('render.html', picture_id=id, picture=json.dumps(pixels.to_hash()))
+        return render_template('render.html',
+                picture_id=id,
+                picture=json.dumps(pixels.to_hash()),
+                tag=picture.tag,
+                author=picture.user.insta_name
+            )
     else:
 
-        return render_template('render.html', picture_id=id, picture=json.dumps(pixels.to_hash()),
-            access_token=g.user.access_token)
+        return render_template('render.html',
+                picture_id=id,
+                picture=json.dumps(pixels.to_hash()),
+                access_token=g.user.access_token
+            )
 
 
 @app.route('/palette/<id>', methods=['GET', 'POST', 'DELETE'])
