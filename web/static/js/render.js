@@ -1,4 +1,5 @@
-define(['libs/d3', 'palette', 'proxy', 'picgrabber'], function(d3, Palette, proxy, PicGrabber) {
+define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
+    function(d3, Palette, proxy, PicGrabber, drawing) {
         var GROUP_SIZE = 4,
             SAVE_PERIOD = 1000 * 30;
 
@@ -9,75 +10,6 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber'], function(d3, Palette, prox
         var clearButton = d3.select('#clearButton');
         var deleteButton = d3.select('#deleteButton');
 
-        function setBackground(d) {
-            if (d.image !== undefined)
-                return 'url(' + d.image.imageUrl + ')';
-            else
-                return 'none';
-        }
-
-        function drawPalette() {
-            var photos = d3.select('#mainPhoto').selectAll('.miniPhoto')
-                    .data(palette.groups, function(d) {
-                        return d.x + '/' + d.y;
-                    })
-                    .style('background-image', setBackground);
-
-            photos.enter().append('div')
-                    .classed('miniPhoto', true)
-                    .attr('row', function(d) { return d.y; })
-                    .attr('column', function(d) { return d.x; })
-                    .style('background-image', setBackground);
-
-            photos.exit().remove();
-
-            updateAccuracy();
-        }
-
-        function updateAccuracy() {
-            d3.select('#accuracy').text(palette.globalDiff);
-        }
-
-        var lastSave = undefined;
-        function instagramSuccess(photos) {
-            var uncomplete = photos.data.length;
-            palette.next_max_tag_id = photos.pagination.next_max_tag_id;
-
-            for (var i = 0; i < photos.data.length; i++) {
-                var instaImage = photos.data[i];
-
-                function imageProcessed() {
-                    drawPalette();
-
-                    if (--uncomplete == 0) {
-                        if (stopCallback === undefined) {
-                            if ((new Date()) - lastSave > SAVE_PERIOD) {
-                                lastSave = new Date();
-                                savePalette();
-                            }
-                            feed.next();
-                        }
-                        else
-                            stopCallback();
-                    }
-                }
-
-                function imageFailed() {
-                    if (--uncomplete == 0) {
-                        if (stopCallback === undefined)
-                            feed.next();
-                        else
-                            stopCallback();
-                    }
-                }
-
-
-                var colorImage = new ColorImage(instaImage.id, instaImage.images.thumbnail.url);
-
-                palette.addPhoto(colorImage, imageProcessed, imageFailed);
-            }
-        }
-
 
         function loadPalette() {
             palette.load({
@@ -86,15 +18,15 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber'], function(d3, Palette, prox
                         d3.select('#tagName').property('value', palette.tagName);
                         d3.select('#tagName').attr('disabled', 'disabled');
                     }
-                    drawPalette();
+                    drawing.drawPalette(palette);
                     console.log('Initialized');
                 },
                 onProgress: function(procentage) {
-                    drawPalette();
+                    drawing.drawPalette(palette);
                     console.log('Progress ' + procentage);
                 },
                 onComplete: function() {
-                    drawPalette();
+                    drawing.drawPalette(palette);
                     startButton.attr('disabled', null);
                     console.log('Palette loaded');
                 },
@@ -120,7 +52,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber'], function(d3, Palette, prox
             palette = new Palette(pic_id, picture, GROUP_SIZE);
             console.log('Generated');
             d3.select('#tagName').attr('disabled', null);
-            feed = undefined;
+            return palette;
         }
 
         function deletePalette() {
@@ -130,6 +62,8 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber'], function(d3, Palette, prox
         }
 
         return function(accessToken, pic_id, picture) {
+            var lastSave = undefined;
+
             startButton.attr('disabled', 'disabled');
             stopButton.attr('disabled', 'disabled');
 
@@ -147,7 +81,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber'], function(d3, Palette, prox
                     palette.addPhoto(colorImage);
                 },
                 onComplete: function(isStopped) {
-                    drawPalette();
+                    drawing.drawPalette(palette);
                     if (isStopped) {
                         savePalette();
                         startButton.attr('disabled', null);
@@ -180,7 +114,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber'], function(d3, Palette, prox
 
             clearButton.on('click', function() {
                 clearPalette(pic_id, picture);
-                drawPalette();
+                drawing.drawPalette(palette);
                 savePalette();
             });
 

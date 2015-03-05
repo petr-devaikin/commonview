@@ -1,9 +1,9 @@
 define([], function() {
-   return function(id, imageUrl) {
+   return function(id, imageUrl, link, username) {
         this.id = id;
         this.imageUrl = imageUrl;
-        this.userName = 'user name';
-        this.link = 'http://link.link';
+        this.userName = username;
+        this.link = link;
         this.color = [];
    } 
 });

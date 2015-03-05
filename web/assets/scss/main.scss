@@ -8,18 +8,20 @@ $miniPhotoSize: 18px;
     position: absolute;
 
     .miniPhoto {
-        position: absolute;
-        width: $miniPhotoSize;
-        height: $miniPhotoSize;
-        background-size: $miniPhotoSize $miniPhotoSize;
-        background-repeat: no-repeat;
+        div {
+            position: absolute;
+            width: $miniPhotoSize;
+            height: $miniPhotoSize;
+            background-size: $miniPhotoSize $miniPhotoSize;
+            background-repeat: no-repeat;
 
-        @for $i from 1 through 100 {
-            &[column="#{$i}"] { left: $miniPhotoSize * $i; }
-        }
+            @for $i from 1 through 100 {
+                &[column="#{$i}"] { left: $miniPhotoSize * $i; }
+            }
 
-        @for $i from 1 through 100 {
-            &[row="#{$i}"] { top: $miniPhotoSize * $i; }
+            @for $i from 1 through 100 {
+                &[row="#{$i}"] { top: $miniPhotoSize * $i; }
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ define(['libs/instafeed', 'colorimage', 'helpers'], function(instafeed, ColorIma
                 for (var i = 0; i < photos.data.length; i++) {
                     var instaImage = photos.data[i];
 
-                    var imageProcessed = function(colorImage, picgrabber) {
+                    var imageProcessed = function(picgrabber, colorImage) {
                         return function(img) {
                             ctx.drawImage(img, 0, 0, img.width, img.height,
                                                0, 0, params.groupSize, params.groupSize);
@@ -41,7 +41,15 @@ define(['libs/instafeed', 'colorimage', 'helpers'], function(instafeed, ColorIma
                                     feed.next();
                             }
                         }
-                    } (new ColorImage(instaImage.id, instaImage.images.thumbnail.url), this);
+                    } (
+                        this,
+                        new ColorImage(
+                            instaImage.id,
+                            instaImage.images.thumbnail.url,
+                            instaImage.link,
+                            instaImage.user.username
+                        )
+                    );
 
                     function imageFailed(picgrabber) {
                         if (--uncomplete == 0) {

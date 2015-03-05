@@ -53,7 +53,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
 
 
         this._fromHash = function(params) {
-            // params: data, onComplete, onInit, onProgress
+            // params: data, ignoreCheck, onComplete, onInit, onProgress
             var completed = false;
 
             var data = params.data;
@@ -99,15 +99,17 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
 
             for (var x in data.groups)
                 for (var y in data.groups[x]) {
-                    maxCounter++;
-
                     var g = this.groupIndex[x][y];
                     g.loading = true;
                     g.fromHash(data.groups[x][y]);
 
-                    queue.push(g);
-                    if (maxCounter <= MAX_LOADS)
-                        processNext();
+                    if (params.ignoreCheck) {
+                        maxCounter++;
+
+                        queue.push(g);
+                        if (maxCounter <= MAX_LOADS)
+                            processNext();
+                    }
                 }
 
             if (params.onInit !== undefined) params.onInit();
@@ -117,7 +119,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
 
 
         this.load = function(params) {
-            // params: onInit, onProgress, onComplete, onError
+            // params: ignoreCheck, onInit, onProgress, onComplete, onError
 
             proxy.loadPalette(
                 this.picture_id,
@@ -125,6 +127,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                     return function(data) {
                         palette._fromHash({
                             data: data,
+                            ignoreCheck: params.ignoreCheck,
                             onInit: params.onInit,
                             onComplete: params.onComplete,
                             onProgress: params.onProgress,

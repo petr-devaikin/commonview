@@ -83,41 +83,41 @@ def index():
 
 @app.route('/pic/<id>')
 def render(id):
-    if not g.authorized: return redirect(url_for('index'))
-
-    #check picture owner
-
     picture = Picture.get(Picture.id == id)
     pixels = Pixels()
     pixels.get_pixels_from_img(picture)
-    #fragments = [f.to_hash() for f in picture.fragments]
 
-    return render_template('render.html', access_token=g.user.access_token,
-        picture=json.dumps(pixels.to_hash()), picture_id=id)
+    if not g.authorized or picture.user.id != g.user.id:
+        return render_template('render.html', picture_id=id, picture=json.dumps(pixels.to_hash()))
+    else:
+
+        return render_template('render.html', picture_id=id, picture=json.dumps(pixels.to_hash()),
+            access_token=g.user.access_token)
 
 
 @app.route('/palette/<id>', methods=['GET', 'POST', 'DELETE'])
 def palette(id):
-    if not g.authorized: return 'error', 500
-
     try:
         picture = Picture.get(Picture.id==id)
     except Picture.NotFound:
         return 'Not found', 404
 
-    if request.method == 'POST':
-        Palette.save_to_db(picture, request.form['palette'])
-        return jsonify(result='ok')
-    elif request.method == 'DELETE':
-        Palette.remove_from_db(picture)
-        return jsonify(result='ok')
-    else:
+    if request.method == 'GET':
         data = Palette.load_from_db(picture)
         return jsonify(**data)
+    else:
+        if not g.authorized: return 'error', 500
+
+        if request.method == 'POST':
+            Palette.save_to_db(picture, request.form['palette'])
+            return jsonify(result='ok')
+        else: #request.method == 'DELETE':
+            Palette.remove_from_db(picture)
+            return jsonify(result='ok')
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1] in current_app.config['ALLOWED_EXTENSIONS']
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
 
 @app.route('/upload', methods=['POST'])

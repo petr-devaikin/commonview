@@ -21,6 +21,14 @@
         {% block script %}{% endblock %}
     </head>
     <body>
+        <div id="header">
+            <h1>Pazzla</h1>
+            {% if g.authorized %}
+                <a href="{{ url_for('logout') }}">Log out</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Log in</a>
+            {% endif %}
+        </div>
         {% block body %}{% endblock %}
     </body>
 </html>

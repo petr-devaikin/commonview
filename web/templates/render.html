@@ -2,20 +2,15 @@
 
 {% block script %}
     <script>
-        requirejs.config({
-            baseUrl: "{{ url_for('static', filename='js') }}",
-            urlArgs: "bust=" + (new Date()).getTime(),
-            paths: {
-                'libs/d3': "libs/d3.min",
-                'libs/instafeed': "libs/instafeed.min",
-            }
-            //    jquery: 'jquery-2.1.1.min'
-            //},
-        });
-
-        require(['render'], function(render) {
-            render('{{ access_token }}', {{ picture_id }}, {{ picture | safe }});
-        })
+        {% if g.authorized %}
+            require(['render'], function(render) {
+                render('{{ access_token }}', {{ picture_id }}, {{ picture | safe }});
+            })
+        {% else %}
+            require(['showpazzle'], function(showpazzle) {
+                showpazzle({{ picture_id }}, {{ picture | safe }});
+            })
+        {% endif %}
     </script>
 {% endblock %}
 
