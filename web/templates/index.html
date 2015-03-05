@@ -13,7 +13,8 @@
 {% block script %}
     {% if g.authorized %}
         <script>
-            require(['upload'], function(upload) {
+            require(['index', 'upload'], function(index, upload) {
+                index();
                 upload();
             })
         </script>
@@ -22,31 +23,41 @@
 
 
 {% block body %}
-    {% if not g.authorized %}
-        <p>
-            Make your own pazzle
-        </p>
-        <ul>
-            <li><a href="{{ url_for('login') }}">Login</a> via Instagram</li>
-            <li>Upload an image (jpeg, png, gif)</li>
-            <li>Choose a hashtag to find pazzle elements</li>
-            <li>Start compiling and enjoy the process</li>
-            <li>Share your pazzle</li>
-        </ul>
-    {% else %}
-        <div id="uploader"></div>
+    <div id="leftColumn">&nbsp;</div>
+    <div id="rightColumn">
+        {% if not g.authorized %}
+            <p>
+                Make your own pazzle
+            </p>
+            <ul>
+                <li><a href="{{ url_for('login') }}">Log in</a> via Instagram</li>
+                <li>Upload an image (jpeg, png, gif)</li>
+                <li>Choose a hashtag to find pazzle elements</li>
+                <li>Start compiling and enjoy the process</li>
+                <li>Share your pazzle</li>
+            </ul>
+        {% else %}
+            <div id="uploader"></div>
 
-        <p>You can upload up to 3 pictures</p>
-        <div id="pictures">
-            <div class="picture" id="new">
-                + Drug and drop picture to upload <br />
-                Maximum size is 555 Mb, allowed extentions are JPEG, PNG and OLOLO.
-            </div>
-            {% for p in g.user.pictures %}
-                <div class="picture">
-                    <a href="{{ url_for('render', id=p.id) }}">Image {{ p.id }}</a>
+            <p>You can upload up to 3 pictures</p>
+            <div id="pictures">
+                <div class="picture" id="new">
+                    <div class="original"></div>
+                    + Drug and drop picture to upload <br />
+                    Maximum size is 555 Mb, allowed extentions are JPEG, PNG and OLOLO.
                 </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+                {% for p in g.user.pictures %}
+                    <div class="picture">
+                        <a href="{{ url_for('render', id=p.id) }}">
+                            <div class="original"></div>
+                        </a>
+                        <p class="tag">#{{ p.tag }}</p>
+                        <p class="accurancy">Accurancy: {{ p.diff_percentage() }}%</p>
+
+                        <a class="delete" href="{{ url_for('palette', id=p.id) }}">Delete</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

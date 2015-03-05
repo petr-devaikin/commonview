@@ -9,3 +9,15 @@
   opacity: 0.3; }
   #uploader.hover {
     display: block; }
+
+#pictures .picture {
+  height: 100px;
+  margin-bottom: 15px;
+  background: white; }
+  #pictures .picture .original {
+    position: relative;
+    float: left;
+    height: 100%;
+    width: 180px;
+    margin-right: 20px;
+    background: gray; }

@@ -2,26 +2,49 @@ body {
     margin: 0;
 }
 
-$miniPhotoSize: 18px;
+$columnCount: 6;
+$mainColumn: 180px;
+$mainColumnMargin: 20px;
 
-#mainPhoto {
-    position: absolute;
+$mainRow: 100px;
+$mainRowMargin: 15px;
 
-    .miniPhoto {
-        div {
-            position: absolute;
-            width: $miniPhotoSize;
-            height: $miniPhotoSize;
-            background-size: $miniPhotoSize $miniPhotoSize;
-            background-repeat: no-repeat;
+.container {
+    width: $mainColumn * $columnCount + $mainColumnMargin * ($columnCount - 1);
+    margin: auto;
+}
 
-            @for $i from 1 through 100 {
-                &[column="#{$i}"] { left: $miniPhotoSize * $i; }
-            }
+#header {
+    margin: $mainRowMargin 0;
+    height: $mainRow;
+    
+    background: silver;
 
-            @for $i from 1 through 100 {
-                &[row="#{$i}"] { top: $miniPhotoSize * $i; }
-            }
-        }
+    h1 {
+        margin: 0;
+        padding: 0;
+    }
+
+    #login {
+        position: relative;
+        float: right;
+    }
+}
+
+#content {
+    background: silver;
+    overflow: hidden;
+
+    #leftColumn {
+        position: relative;
+        float: left;
+        width: $mainColumn;
+        margin-right: $mainColumnMargin;
+    }
+
+    #rightColumn {
+        position: relative;
+        float: left;
+        width: $mainColumn * ($columnCount - 1) + $mainColumnMargin * ($columnCount - 2);
     }
 }

@@ -26,6 +26,9 @@ class Picture(Model):
     def get_full_path(self):
         return os.path.join(current_app.config['UPLOAD_FOLDER'], self.get_path())
 
+    def diff_percentage(self):
+        return round(100 * (255 - self.global_diff) / 255, 1) if self.global_diff else 0
+
     class Meta:
         database = get_db()
 

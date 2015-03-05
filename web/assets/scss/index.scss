@@ -13,3 +13,28 @@
         display: block;
     }
 }
+
+$mainRow: 100px;
+$mainRowMargin: 15px;
+
+$mainColumn: 180px;
+$mainColumnMargin: 20px;
+
+#pictures {
+    .picture {
+        height: $mainRow;
+        margin-bottom: $mainRowMargin;
+        background: white;
+
+        .original {
+            position: relative;
+            float: left;
+
+            height: 100%;
+            width: $mainColumn;
+            margin-right: $mainColumnMargin;
+
+            background: gray;
+        }
+    }
+}
