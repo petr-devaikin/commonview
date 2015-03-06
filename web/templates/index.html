@@ -15,7 +15,9 @@
         <script>
             require(['index', 'upload'], function(index, upload) {
                 index();
-                upload();
+                {% if can_upload %}
+                    upload();
+                {% endif %}
             })
         </script>
     {% endif %}
@@ -37,15 +39,15 @@
                 <li>Share your pazzle</li>
             </ul>
         {% else %}
-            <div id="uploader"></div>
-
             <p>You can upload up to 3 pictures</p>
             <div id="pictures">
-                <div class="picture" id="new">
-                    <div class="original"></div>
-                    + Drug and drop picture to upload <br />
-                    Maximum size is 555 Mb, allowed extentions are JPEG, PNG and OLOLO.
-                </div>
+                {% if can_upload %}
+                    <div class="picture" id="new">
+                        <div class="original"></div>
+                        + Drug and drop picture to upload <br />
+                        Maximum size is 555 Mb, allowed extentions are JPEG, PNG and OLOLO.
+                    </div>
+                {% endif %}
                 {% for p in g.user.pictures %}
                     <div class="picture">
                         <a href="{{ url_for('render', id=p.id) }}">
@@ -57,6 +59,11 @@
                         <a class="delete" href="{{ url_for('palette', id=p.id) }}">Delete</a>
                     </div>
                 {% endfor %}
+            </div>
+
+
+            <div id="uploader">
+                <div id="uploaderHelp">Drop picture to upload</div>
             </div>
         {% endif %}
     </div>

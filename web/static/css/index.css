@@ -5,19 +5,34 @@
   top: 0px;
   right: 0px;
   bottom: 0px;
-  background: #000;
-  opacity: 0.3; }
+  background: rgba(0, 0, 0, 0.4); }
   #uploader.hover {
     display: block; }
+    #uploader #uploaderHelp {
+      position: absolute;
+      top: 30px;
+      bottom: 30px;
+      left: 30px;
+      right: 30px;
+      border: 4px dashed #fff;
+      color: #fff;
+      text-align: center;
+      font-size: 40px;
+      padding-top: 30px; }
 
 #pictures .picture {
-  height: 100px;
+  height: 150px;
   margin-bottom: 15px;
   background: white; }
   #pictures .picture .original {
     position: relative;
     float: left;
-    height: 100%;
-    width: 180px;
+    height: 150px;
+    width: 200px;
     margin-right: 20px;
     background: gray; }
+    #pictures .picture#new .original {
+      background: none;
+      border: 4px dashed #1C212D;
+      height: 142px;
+      width: 192px; }

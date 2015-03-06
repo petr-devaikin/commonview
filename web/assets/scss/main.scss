@@ -1,12 +1,16 @@
 body {
     margin: 0;
+    color: #1C212D;
+    background: #fff;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
 }
 
-$columnCount: 6;
-$mainColumn: 180px;
+$columnCount: 4;
+$mainColumn: 250px;
 $mainColumnMargin: 20px;
 
-$mainRow: 100px;
+$mainRow: 89px;
 $mainRowMargin: 15px;
 
 .container {
@@ -15,24 +19,28 @@ $mainRowMargin: 15px;
 }
 
 #header {
-    margin: $mainRowMargin 0;
+    position: relative;
+    margin: $mainRowMargin 0 $mainRowMargin * 2;
     height: $mainRow;
-    
-    background: silver;
+    overflow: hidden;
 
     h1 {
+        position: relative;
+        float: left;
+        font-family: 'Roboto Slab', serif;
+        font-size: 80px;
         margin: 0;
         padding: 0;
     }
 
     #login {
-        position: relative;
-        float: right;
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
     }
 }
 
 #content {
-    background: silver;
     overflow: hidden;
 
     #leftColumn {
@@ -47,4 +55,8 @@ $mainRowMargin: 15px;
         float: left;
         width: $mainColumn * ($columnCount - 1) + $mainColumnMargin * ($columnCount - 2);
     }
+}
+
+p {
+    margin: 0;
 }
