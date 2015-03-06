@@ -34,6 +34,7 @@ $photoWidth: 200px;
 $mainColumnMargin: 20px;
 
 #pictures {
+    margin-top: 25px;
     .picture {
         height: $photoHeight;
         margin-bottom: $mainRowMargin;
@@ -52,11 +53,35 @@ $mainColumnMargin: 20px;
 
         &#new {
             .original {
+                cursor: pointer;
                 background: none;
                 border: 4px dashed #1C212D;
-                height: $photoHeight - 8;
-                width: $photoWidth - 8;
+                height: $photoHeight - 78;
+                width: $photoWidth - 48;
+                text-align: center;
+                padding: 35px 20px;
+
+                &:hover {
+                    border-color: #AEC0AC;
+                    color: #AEC0AC;
+                }
             }
         }
+    }
+}
+
+h2 {
+    margin: 0;
+    padding: 0;
+    font-size: 24px;
+}
+
+ol {
+    margin: 15px 0;
+    padding: 0;
+    font-size: 18px;
+
+    li {
+        margin-bottom: 0.5em;
     }
 }

@@ -1,7 +1,7 @@
 define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
     var uploader = d3.select('#uploader'),
         maxFileSize = 1024 * 1024,
-        allowedFileTypes = ['image/png', 'image/jpeg', 'image/gif'],
+        allowedFileTypes = ['image/png', 'image/jpeg'],
         UPLOAD_URL = '/upload';
 
     function setError(text) {
@@ -25,12 +25,7 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
             return false;
         }
 
-        document.ondrop = function(e) {
-            e.preventDefault();
-            uploader.classed('hover', false);
-
-            var file = event.dataTransfer.files[0];
-
+        function uploadFile(file) {
             if (file.size > maxFileSize) {
                 setError('Too big file!');
                 return false;
@@ -59,5 +54,20 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
                      console.log(message);
                  });
         }
+
+        document.ondrop = function(event) {
+            event.preventDefault();
+            uploader.classed('hover', false);
+
+            uploadFile(event.dataTransfer.files[0]);
+        }
+
+        document.getElementById('inputfile').addEventListener('change', function(e) {
+            uploadFile(e.target.files[0]);
+        }, false);
+
+        d3.select('#new').on('click', function() {
+            document.getElementById('inputfile').click();
+        });
     }
 });

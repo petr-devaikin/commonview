@@ -20,19 +20,39 @@
       font-size: 40px;
       padding-top: 30px; }
 
-#pictures .picture {
-  height: 150px;
-  margin-bottom: 15px;
-  background: white; }
-  #pictures .picture .original {
-    position: relative;
-    float: left;
+#pictures {
+  margin-top: 25px; }
+  #pictures .picture {
     height: 150px;
-    width: 200px;
-    margin-right: 20px;
-    background: gray; }
-    #pictures .picture#new .original {
-      background: none;
-      border: 4px dashed #1C212D;
-      height: 142px;
-      width: 192px; }
+    margin-bottom: 15px;
+    background: white; }
+    #pictures .picture .original {
+      position: relative;
+      float: left;
+      height: 150px;
+      width: 200px;
+      margin-right: 20px;
+      background: gray; }
+      #pictures .picture#new .original {
+        cursor: pointer;
+        background: none;
+        border: 4px dashed #1C212D;
+        height: 72px;
+        width: 152px;
+        text-align: center;
+        padding: 35px 20px; }
+        #pictures .picture#new .original:hover {
+          border-color: #AEC0AC;
+          color: #AEC0AC; }
+
+h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 24px; }
+
+  ol {
+    margin: 15px 0;
+    padding: 0;
+    font-size: 18px; }
+    ol li {
+      margin-bottom: 0.5em; }

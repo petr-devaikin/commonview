@@ -18,5 +18,6 @@ MATCH_THRESHOLD = 27
 MAX_UPLOADS = 3
 
 
-ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif']
+ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png']
+MAXIMUM_SIZE = 5
 UPLOAD_FOLDER = 'img/'
