@@ -9,6 +9,9 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
         this.globalDiff = 255;
         this.tagName = '';
 
+        this.cols = 0;
+        this.rows = 0;
+
 
         for (var i = 0; i < picture.pixels.length; i++) {
             var x = picture.pixels[i].x,
@@ -16,6 +19,9 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                 color = picture.pixels[i].color,
                 gX = Math.floor(x/groupSize),
                 gY = Math.floor(y/groupSize);
+
+            if (gX + 1 > this.cols) this.cols = gX + 1;
+            if (gX + 1> this.rows) this.rows = gY + 1;
 
             if (this.groupIndex[gX] === undefined)
                 this.groupIndex[gX] = {};

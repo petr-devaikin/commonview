@@ -14,6 +14,10 @@ define(['libs/d3'], function(d3) {
     }
 
     function drawPalette(palette) {
+        d3.select('#mainPhoto')
+            .classed('width' + palette.cols, true)
+            .classed('height' + palette.rows, true);
+            
         var photos = d3.select('#mainPhoto').selectAll('.miniPhoto')
                 .data(palette.groups, function(d) {
                     return d.x + '/' + d.y;

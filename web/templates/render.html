@@ -19,21 +19,28 @@
 {% endblock %}
 
 {% block body %}
-    <a href="{{ url_for('index') }}">All pictures</a>
+    <div id="leftColumn">
+        {% if g.authorized %}
 
-    {% if g.authorized %}
-        <input type="text" value="selfie" id="tagName" />
+            <a href="{{ url_for('index') }}">← All pictures</a>
+            <div id="preview"></div>
+            <div id="tagForm">
+                #<input type="text" value="selfie" id="tagName" />
+            </div>
 
-        <button id="startButton">Start</button>
-        <button id="stopButton">Stop</button>
-        <button id="clearButton">Clear</button>
-        <button id="deleteButton">Delete</button>
-    {% else %}
-        <span id="tagName">#{{ tag }}</span>
-        <a href="https://instagram.com/{{ author }}" id="author" target="_blank">@{{ author }}</a>
-    {% endif %}
+            Accuracy
+            <div id="accuracy"></div>
 
-    <div id="accuracy"></div>
-    <div id="mainPhoto">
+            <div id="startButton" class="button">Start</div>
+            <div id="stopButton" class="button">Stop</div>
+            <div id="clearButton" class="button">Clear</div> and start with another tag
+            <div id="deleteButton" class="button">Delete</div>
+        {% else %}
+            <span id="tagName">#{{ tag }}</span>
+            <a href="https://instagram.com/{{ author }}" id="author" target="_blank">@{{ author }}</a>
+        {% endif %}
+    </div>
+    <div id="rightColumn">
+        <div id="mainPhoto"></div>
     </div>
 {% endblock %}

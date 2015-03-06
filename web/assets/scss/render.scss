@@ -1,7 +1,12 @@
 $miniPhotoSize: 18px;
 
 #mainPhoto {
-    position: absolute;
+    position: relative;
+
+    @for $i from 1 through 100 {
+        &.width#{$i} { width: $miniPhotoSize * $i; }
+        &.height#{$i} { height: $miniPhotoSize * $i; }
+    }
 
     .miniPhoto {
         div {
