@@ -1,5 +1,5 @@
 define(['palette', 'drawing'], function(Palette, drawing) {
-    var GROUP_SIZE = 4,
+    var GROUP_SIZE = 5,
         palette;
 
     return function(pic_id, picture) {

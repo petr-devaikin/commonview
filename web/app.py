@@ -149,7 +149,7 @@ def upload():
     f = request.files['pic']
     if f and allowed_file(f.filename):
         picture = Picture.create(user=g.user)
-        pic = ImageHelper.resize(f)
+        pic = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
         pic.save(picture.get_full_path())
         return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:

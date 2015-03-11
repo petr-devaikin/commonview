@@ -1,6 +1,6 @@
 define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
     function(d3, Palette, proxy, PicGrabber, drawing) {
-        var GROUP_SIZE = 4,
+        var GROUP_SIZE = 5,
             SAVE_PERIOD = 1000 * 30;
 
         var palette;
@@ -97,6 +97,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
 
                 picGrabber.start(palette.tagName, palette.next_max_tag_id);
 
+                d3.select('#tagName').attr('disabled', 'disabled');
                 startButton.attr('disabled', 'disabled');
                 stopButton.attr('disabled', null);
             });

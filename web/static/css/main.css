@@ -9,7 +9,7 @@ html, body {
   font-size: 18px; }
 
   .container {
-    width: 1070px;
+    width: 1050px;
     margin-left: auto;
     margin-right: auto; }
 
@@ -47,7 +47,7 @@ html, body {
     #content #rightColumn {
       position: relative;
       float: left;
-      width: 800px; }
+      width: 780px; }
 
 p {
   margin: 0 0 15px 0; }

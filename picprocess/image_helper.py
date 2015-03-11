@@ -2,7 +2,7 @@ from PIL import Image
 
 class ImageHelper:
     @staticmethod
-    def resize(f, max_size=200):
+    def resize(f, max_size):
         img = Image.open(f)
         w, h = img.size
         if w >= h and w > max_size:

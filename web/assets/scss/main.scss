@@ -5,9 +5,9 @@ $blueColor: #2966C3;
 $blueHoverColor: #365A91;
 $backgroundColor: #eee;
 
-$columnCount: 4;
 $mainColumn: 250px;
 $mainColumnMargin: 20px;
+$rightColumn: 780px;
 
 $mainRow: 91px;
 $mainRowMargin: 15px;
@@ -25,7 +25,7 @@ html, body {
 }
 
 .container {
-    width: $mainColumn * $columnCount + $mainColumnMargin * ($columnCount - 1) + 10;
+    width: $mainColumn + $mainColumnMargin + $rightColumn;
     margin-left: auto;
     margin-right: auto;
 }
@@ -75,7 +75,7 @@ html, body {
     #rightColumn {
         position: relative;
         float: left;
-        width: $mainColumn * ($columnCount - 1) + $mainColumnMargin * ($columnCount - 2) + 10;
+        width: $rightColumn;
     }
 
     padding-bottom: 42px;

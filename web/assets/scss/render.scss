@@ -1,4 +1,4 @@
-$miniPhotoSize: 16px;
+$miniPhotoSize: 13px;
 
 $fontColor: #1C212D;
 $silverColor: #BAC0B9;
@@ -13,18 +13,11 @@ p {
 
 #allPictures {
     text-decoration: none;
-    color: $fontColor;
     padding: 10px;
     position: fixed;
     left: 0px;
     top: 135px;
     font-size: 24px;
-
-    background: $backgroundColor;
-
-    &:hover {
-        background: #ccc;
-    }
 }
 
 #preview {
@@ -59,6 +52,7 @@ p {
 
         &[disabled] {
             border: 1px solid $backgroundColor !important;
+            color: $silverColor;
         }
     }
 
@@ -123,6 +117,7 @@ p {
 #mainPhoto {
     position: relative;
     background: url('/static/img/tbg.png');
+    background-size: $miniPhotoSize;
 
     @for $i from 1 through 100 {
         &.width#{$i} { width: $miniPhotoSize * $i; }

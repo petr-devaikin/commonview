@@ -51,7 +51,7 @@
                         Allowed extentions: JPEG and PNG
                     </div>
                 {% endif %}
-                {% for p in g.user.pictures %}
+                {% for p in g.user.pictures | reverse %}
                     <div class="picture">
                         <div class="original" style="background-image: url({{ url_for('preview', id=p.id) }});">
                             <a class="pictureLink" href="{{ url_for('render', id=p.id) }}">
