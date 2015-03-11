@@ -26,24 +26,59 @@
     height: 150px;
     margin-bottom: 15px;
     background: white; }
-    #pictures .picture .original {
-      position: relative;
-      float: left;
-      height: 150px;
-      width: 200px;
-      margin-right: 20px;
-      background: gray; }
-      #pictures .picture#new .original {
-        cursor: pointer;
-        background: none;
-        border: 4px dashed #1C212D;
-        height: 72px;
-        width: 152px;
-        text-align: center;
-        padding: 35px 20px; }
-        #pictures .picture#new .original:hover {
-          border-color: #AEC0AC;
-          color: #AEC0AC; }
+    #pictures .picture p {
+      margin-bottom: 0; }
+      #pictures .picture .accuracy {
+        color: #BAC0B9; }
+        #pictures .picture .notSpecified {
+          font-style: italic; }
+          #pictures .picture .original {
+            position: relative;
+            float: left;
+            overflow: hidden;
+            height: 150px;
+            width: 200px;
+            margin-right: 20px;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center center; }
+            #pictures .picture .original .pictureLink {
+              display: block;
+              position: absolute;
+              left: 0px;
+              top: 0px;
+              width: 100%;
+              bottom: 20px; }
+              #pictures .picture .original .delete {
+                display: block;
+                transition: right 0.1s ease-out 0s;
+                position: absolute;
+                right: -50px;
+                height: 20px;
+                width: 50px;
+                bottom: 0;
+                color: rgba(0, 0, 0, 0.5);
+                text-decoration: none;
+                text-align: center;
+                line-height: 20px;
+                font-size: 12px;
+                background: rgba(255, 255, 255, 0.3); }
+                #pictures .picture .original .delete:hover {
+                  background: rgba(255, 255, 255, 0.7);
+                  color: #1C212D; }
+            #pictures .picture .original:hover .delete {
+              right: 0; }
+    #pictures .picture#new .original {
+      cursor: pointer;
+      background: none;
+      border: 4px dashed #1C212D;
+      height: 72px;
+      width: 152px;
+      text-align: center;
+      padding: 35px 20px; }
+      #pictures .picture#new .original:hover {
+        border-color: #BAC0B9;
+        color: #BAC0B9; }
 
 h2 {
   margin: 0;

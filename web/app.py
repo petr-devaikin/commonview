@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
-from flask import make_response, g, Response
+from flask import make_response, g, Response, send_file
 from flask.ext.scss import Scss
 from .db.engine import init_db
 import json
@@ -103,6 +103,16 @@ def render(id):
                 picture=json.dumps(pixels.to_hash()),
                 access_token=g.user.access_token
             )
+
+
+@app.route('/pic/<id>/preview')
+def preview(id):
+    try:
+        picture = Picture.get(Picture.id==id)
+    except Picture.NotFound:
+        return 'Not found', 404
+
+    return send_file('../' + picture.get_full_path())
 
 
 @app.route('/palette/<id>', methods=['GET', 'POST', 'DELETE'])

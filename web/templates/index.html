@@ -53,13 +53,17 @@
                 {% endif %}
                 {% for p in g.user.pictures %}
                     <div class="picture">
-                        <a href="{{ url_for('render', id=p.id) }}">
-                            <div class="original"></div>
-                        </a>
-                        <p class="tag">#{{ p.tag }}</p>
-                        <p class="accurancy">Accurancy: {{ p.diff_percentage() }}%</p>
-
-                        <a class="delete" href="{{ url_for('palette', id=p.id) }}">Delete</a>
+                        <div class="original" style="background-image: url({{ url_for('preview', id=p.id) }});">
+                            <a class="pictureLink" href="{{ url_for('render', id=p.id) }}">
+                            </a>
+                            <a class="delete" href="{{ url_for('palette', id=p.id) }}">Delete</a>
+                        </div>
+                        {% if p.tag %}
+                            <p class="tag">#{{ p.tag }}</p>
+                        {% else %}
+                            <p class="tag notSpecified">Tag is not specified</p>
+                        {% endif %}
+                        <p class="accuracy">Accuracy: {{ p.diff_percentage() }}%</p>
                     </div>
                 {% endfor %}
             </div>
