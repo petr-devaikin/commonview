@@ -21,7 +21,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                 gY = Math.floor(y/groupSize);
 
             if (gX + 1 > this.cols) this.cols = gX + 1;
-            if (gX + 1> this.rows) this.rows = gY + 1;
+            if (gY + 1> this.rows) this.rows = gY + 1;
 
             if (this.groupIndex[gX] === undefined)
                 this.groupIndex[gX] = {};
