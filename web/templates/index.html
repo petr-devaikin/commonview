@@ -60,10 +60,12 @@
                         </div>
                         {% if p.tag %}
                             <p class="tag">#{{ p.tag }}</p>
+                            <p class="accuracy" style="color: hsl({{ 120 * p.diff_percentage() }}, 35%, 75%)">
+                                Accuracy: {{ p.diff_percentage() }}%
+                            </p>
                         {% else %}
                             <p class="tag notSpecified">Tag is not specified</p>
                         {% endif %}
-                        <p class="accuracy">Accuracy: {{ p.diff_percentage() }}%</p>
                     </div>
                 {% endfor %}
             </div>

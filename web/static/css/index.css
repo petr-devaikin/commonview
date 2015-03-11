@@ -31,7 +31,8 @@
       #pictures .picture .accuracy {
         color: #BAC0B9; }
         #pictures .picture .notSpecified {
-          font-style: italic; }
+          font-style: italic;
+          color: #BAC0B9; }
           #pictures .picture .original {
             position: relative;
             float: left;

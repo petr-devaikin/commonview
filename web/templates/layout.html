@@ -23,21 +23,26 @@
         {% block script %}{% endblock %}
     </head>
     <body>
-        <div class="container">
-            <div id="header">
-                <h1>Pazzla</h1>
-                <div id="login">
-                    {% if g.authorized %}
-                        <span id="username">@{{ g.user.insta_name }}</span> |
-                        <a href="{{ url_for('logout') }}">Log out</a>
-                    {% else %}
-                        <a href="{{ url_for('login') }}">Log in</a>
-                    {% endif %}
+        <div id="wrap">
+            <div class="container">
+                <div id="header">
+                    <h1>Pazzla</h1>
+                    <div id="login">
+                        {% if g.authorized %}
+                            <span id="username">@{{ g.user.insta_name }}</span> |
+                            <a href="{{ url_for('logout') }}">Log out</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}">Log in</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div id="content">
+                    {% block body %}{% endblock %}
                 </div>
             </div>
-            <div id="content">
-                {% block body %}{% endblock %}
-            </div>
         </div>
+        <footer>
+            &copy; 2015 Petr Devaikin
+        </footer>
     </body>
 </html>
