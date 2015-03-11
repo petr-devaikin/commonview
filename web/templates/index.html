@@ -16,7 +16,7 @@
             require(['index', 'upload'], function(index, upload) {
                 index();
                 {% if can_upload %}
-                    upload();
+                    upload({{ max_size * 1024 * 1024 }});
                 {% endif %}
             })
         </script>

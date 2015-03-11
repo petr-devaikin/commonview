@@ -1,6 +1,5 @@
 define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
     var uploader = d3.select('#uploader'),
-        maxFileSize = 1024 * 1024,
         allowedFileTypes = ['image/png', 'image/jpeg'],
         UPLOAD_URL = '/upload';
 
@@ -8,7 +7,7 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
         console.log(text);
     }
 
-    return function() {
+    return function(maxFileSize) {
         if (window.FileReader === undefined) {
             setText('Not supported!'); // !!!
             return;
@@ -66,7 +65,7 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
             uploadFile(e.target.files[0]);
         }, false);
 
-        d3.select('#new').on('click', function() {
+        d3.select('#new .original').on('click', function() {
             document.getElementById('inputfile').click();
         });
     }

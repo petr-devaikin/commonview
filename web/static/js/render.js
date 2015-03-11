@@ -13,13 +13,14 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
 
         function loadPalette() {
             palette.load({
+                checkDeleted: true,
                 onInit: function() {
                     drawing.drawPalette(palette);
                     console.log('Initialized');
                 },
-                onProgress: function(procentage) {
-                    drawing.drawPalette(palette);
-                    console.log('Progress ' + procentage);
+                onProgress: function(percentage) {
+                    drawing.showLoading(percentage);
+                    console.log('Progress ' + percentage);
                 },
                 onComplete: function() {
                     drawing.drawPalette(palette);

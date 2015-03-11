@@ -44,17 +44,25 @@ define(['libs/d3'], function(d3) {
     function updateAccuracy(palette) {
         var v = palette.globalDiff ? (100 * (255 - palette.globalDiff) / 255) : 0;
         console.log(v);
+        d3.select('#status').text('Accuracy');
         d3.select('#accuracy').text(v.toFixed(1) + '%');
         d3.select('#accuracyContainer p').style('color', 'hsl(' + (120 * v / 100) + ', 50%, 60%)');
     }
 
     function showSaving() {
-        d3.select('#accuracy').text('saving...');
+        d3.select('#status').text('Saving');
         d3.select('#accuracyContainer p').style('color', null);
+    }
+
+    function showLoading(percentage) {
+        d3.select('#status').text('Loading');
+        d3.select('#accuracy').text(percentage.toFixed(1) + '%');
+        d3.select('#accuracyContainer p').style('color', 'hsl(' + (120 * percentage / 100) + ', 50%, 60%)');
     }
 
     return {
         drawPalette: drawPalette,
         showSaving: showSaving,
+        showLoading: showLoading,
     }
 });

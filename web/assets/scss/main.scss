@@ -12,6 +12,8 @@ $rightColumn: 780px;
 $mainRow: 91px;
 $mainRowMargin: 15px;
 
+$footerHeight: 47px;
+
 
 html, body {
     width: 100%;
@@ -78,7 +80,7 @@ html, body {
         width: $rightColumn;
     }
 
-    padding-bottom: 42px;
+    padding-bottom: $footerHeight;
 }
 
 p {
@@ -105,12 +107,12 @@ p {
 }
 
 footer {
-    padding: 20px 0 5px;
+    padding: 20px 0 10px;
     text-align: center;
     font-size: 12px;
     color: $silverColor;
 
     position: relative;
-    margin-top: -42px;
+    margin-top: -$footerHeight;
     clear: both;
 }
