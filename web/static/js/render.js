@@ -103,7 +103,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
 
             stopButton.on('click', function() {
                 stopButton.attr('disabled', 'disabled');
-
+                drawing.showSaving();
                 picGrabber.stop();
             })
 

@@ -29,10 +29,10 @@
                     <h1><a href="{{ url_for('index') }}">Pazzla</a></h1>
                     <div id="login">
                         {% if g.authorized %}
-                            <span id="username">@{{ g.user.insta_name }}</span> |
-                            <a href="{{ url_for('logout') }}">Log out</a>
+                            <span id="username">@{{ g.user.insta_name }}</span>
+                            <a href="{{ url_for('logout') }}" class="button">Log out</a>
                         {% else %}
-                            <a href="{{ url_for('login') }}">Log in</a>
+                            <a href="{{ url_for('login') }}" class="button">Log in</a>
                         {% endif %}
                     </div>
                 </div>

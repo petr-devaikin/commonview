@@ -9,68 +9,75 @@ p {
     position: fixed;
     left: 0px;
     top: 135px;
-    font-size: 24px; }
+    font-size: 24px;
+    background: #eee; }
+    #allPictures:hover {
+      background: #ccc; }
 
-    #tagForm {
-      position: relative;
-      height: 34px; }
-      #tagForm input {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: 223px;
-        border: none;
-        font-family: 'Open Sans', sans-serif;
-        color: #1C212D;
-        background: white;
-        font-size: 18px;
-        padding: 4px 5px 4px 20px;
-        border: 1px solid #1C212D; }
-        #tagForm input[disabled] {
-          border: 1px solid #eee !important; }
-      #tagForm span {
-        position: absolute;
-        left: 7px;
-        top: 5px;
-        color: #BAC0B9; }
+#preview {
+  overflow: hidden;
+  margin-bottom: 10px;
+  max-height: 250px; }
+  #preview img {
+    display: block;
+    width: 100%; }
+
+#tagForm {
+  position: relative;
+  height: 34px; }
+  #tagForm input {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 223px;
+    border: none;
+    font-family: 'Open Sans', sans-serif;
+    color: #1C212D;
+    background: white;
+    font-size: 18px;
+    padding: 4px 5px 4px 20px;
+    border: 1px solid #1C212D; }
+    #tagForm input[disabled] {
+      border: 1px solid #eee !important; }
+  #tagForm span {
+    position: absolute;
+    left: 7px;
+    top: 5px;
+    color: #BAC0B9; }
 
 #accuracyContainer {
-  margin-top: 30px;
+  margin-top: 20px;
+  margin-bottom: 60px;
   text-align: center;
   color: #BAC0B9; }
   #accuracyContainer p {
     text-align: center;
     font-size: 42px;
     line-height: 42px;
-    font-weight: bolder;
-    color: #c66; }
-
-.button {
-  cursor: pointer;
-  text-align: center;
-  background: #eee; }
-  .button:hover {
-    background: #ccc; }
-    .button[disabled] {
-      display: none; }
+    font-weight: bolder; }
 
 #buttonGroup {
-  margin-top: 20px;
-  height: 47px;
-  background: url('/static/img/ajax-loader.gif') center center no-repeat; }
+  margin-top: 5px;
+  height: 47px; }
 
   #startButton, #stopButton {
     font-size: 24px;
-    padding: 0.3em; }
+    padding: 8px;
+    position: relative;
+    float: left;
+    width: 109px; }
+    #startButton:hover, #stopButton:hover {
+      background: #eee; }
+      #startButton[disabled], #stopButton[disabled] {
+        opacity: 0.1;
+        cursor: default;
+        background: white; }
 
-    #otherActions {
-      margin-top: 50px;
-      font-size: 12px;
-      color: #BAC0B9; }
-      #otherActions .button {
-        padding: 0.3em;
-        display: inline-block;
-        line-height: 1.3em; }
+#otherActions {
+  font-size: 12px;
+  color: #BAC0B9; }
+  #otherActions .button {
+    display: inline-block; }
 
 #mainPhoto {
   position: relative;
