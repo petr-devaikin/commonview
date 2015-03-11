@@ -5,9 +5,9 @@ class ImageHelper:
     def resize(f, max_size=200):
         img = Image.open(f)
         w, h = img.size
-        if w > h and w > max_size:
+        if w >= h and w > max_size:
             img.thumbnail((max_size, h * max_size / w))
-        elif h > w and h > max_size:
+        elif h >= w and h > max_size:
             img.thumbnail((w * max_size / h, max_size))
         return img
         

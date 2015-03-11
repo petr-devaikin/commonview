@@ -91,16 +91,14 @@ def render(id):
 
     if not g.authorized or picture.user.id != g.user.id:
         return render_template('render.html',
-                picture_id=id,
-                picture=json.dumps(pixels.to_hash()),
-                tag=picture.tag,
-                author=picture.user.insta_name
+                picture=picture,
+                pixels=json.dumps(pixels.to_hash())
             )
     else:
 
         return render_template('render.html',
-                picture_id=id,
-                picture=json.dumps(pixels.to_hash()),
+                picture=picture,
+                pixels=json.dumps(pixels.to_hash()),
                 access_token=g.user.access_token
             )
 
@@ -125,13 +123,16 @@ def palette(id):
     if request.method == 'GET':
         data = Palette.load_from_db(picture)
         return jsonify(**data)
+    elif not g.authorized:
+        return 'error', 500
+    elif picture.user.id != g.user.id:
+        return 'error', 500
     else:
-        if not g.authorized: return 'error', 500
-
         if request.method == 'POST':
             Palette.save_to_db(picture, request.form['palette'])
             return jsonify(result='ok')
         else: #request.method == 'DELETE':
+            os.remove(picture.get_full_path())
             Palette.remove_from_db(picture)
             return jsonify(result='ok')
 

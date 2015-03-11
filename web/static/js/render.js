@@ -14,10 +14,6 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
         function loadPalette() {
             palette.load({
                 onInit: function() {
-                    if (palette.tagName) {
-                        d3.select('#tagName').property('value', palette.tagName);
-                        d3.select('#tagName').attr('disabled', 'disabled');
-                    }
                     drawing.drawPalette(palette);
                     console.log('Initialized');
                 },
@@ -51,7 +47,6 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             console.log('Start');
             palette = new Palette(pic_id, picture, GROUP_SIZE);
             console.log('Generated');
-            d3.select('#tagName').attr('disabled', null);
             return palette;
         }
 
@@ -113,11 +108,18 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             })
 
             clearButton.on('click', function() {
+                // stop before clear!!!!!!!!!!!!!!!!
+
                 clearPalette(pic_id, picture);
                 drawing.drawPalette(palette);
                 savePalette();
+                d3.select('#tagName').attr('disabled', null);
             });
 
             deleteButton.on('click', deletePalette);
+
+            d3.select('#tagName').on('focus', function() {
+                this.select();
+            });
         }
     });

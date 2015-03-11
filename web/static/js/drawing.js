@@ -42,8 +42,10 @@ define(['libs/d3'], function(d3) {
     }
 
     function updateAccuracy(palette) {
-        console.log(palette.globalDiff);
-        d3.select('#accuracy').text((100 * (255 - palette.globalDiff) / 255).toFixed(1));
+        var v = palette.globalDiff ? (100 * (255 - palette.globalDiff) / 255) : 0;
+        console.log(v);
+        d3.select('#accuracy').text(v.toFixed(1));
+        d3.select('#accuracyContainer p').style('color', 'hsl(' + (120 * v / 100) + ', 50%, 60%)');
     }
 
     return {

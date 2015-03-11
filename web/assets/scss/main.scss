@@ -22,7 +22,7 @@ html, body {
 }
 
 .container {
-    width: $mainColumn * $columnCount + $mainColumnMargin * ($columnCount - 1);
+    width: $mainColumn * $columnCount + $mainColumnMargin * ($columnCount - 1) + 10;
     margin-left: auto;
     margin-right: auto;
 }
@@ -41,6 +41,11 @@ html, body {
         font-size: 80px;
         margin: 0;
         padding: 0;
+
+        a {
+            text-decoration: none;
+            color: $fontColor;
+        }
     }
 
     #login {
@@ -63,7 +68,7 @@ html, body {
     #rightColumn {
         position: relative;
         float: left;
-        width: $mainColumn * ($columnCount - 1) + $mainColumnMargin * ($columnCount - 2);
+        width: $mainColumn * ($columnCount - 1) + $mainColumnMargin * ($columnCount - 2) + 10;
     }
 
     padding-bottom: 42px;

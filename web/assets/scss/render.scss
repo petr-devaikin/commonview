@@ -1,7 +1,116 @@
-$miniPhotoSize: 15px;
+$miniPhotoSize: 16px;
+
+$fontColor: #1C212D;
+$silverColor: #BAC0B9;
+$backgroundColor: #eee;
+
+$mainColumn: 250px;
+
+p {
+    margin: 0;
+    text-align: right;
+}
+
+#allPictures {
+    text-decoration: none;
+    color: $fontColor;
+    padding: 10px;
+    position: fixed;
+    left: 0px;
+    top: 135px;
+    font-size: 24px;
+}
+
+#preview {
+}
+
+#tagForm {
+    position: relative;
+    height: 34px;
+
+    input {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: $mainColumn - 27;
+        border: none;
+
+        font-family: 'Open Sans', sans-serif;
+        color: $fontColor;
+        background: white;
+        font-size: 18px;
+        padding: 4px 5px 4px 20px;
+
+        border: 1px solid $fontColor;
+
+        &[disabled] {
+            border: 1px solid $backgroundColor !important;
+        }
+    }
+
+    span {
+        position: absolute;
+        left: 7px;
+        top: 5px;
+        color: $silverColor;
+    }
+}
+
+#accuracyContainer {
+    margin-top: 30px;
+    text-align: center;
+    color: $silverColor;
+
+    p {
+        text-align: center;
+        font-size: 42px;
+        line-height: 42px;
+        font-weight: bolder;
+        color: hsl(0, 50%, 60%);
+    }
+}
+
+.button {
+    cursor: pointer;
+    text-align: center;
+    background: $backgroundColor;
+
+    &:hover {
+        background: #ccc;
+    }
+
+    &[disabled] {
+        display: none;
+    }
+}
+
+#buttonGroup {
+    margin-top: 20px;
+    height: 47px;
+    background: url('/static/img/ajax-loader.gif') center center no-repeat;
+}
+
+#startButton, #stopButton {
+    font-size: 24px;
+    padding: 0.3em;
+}
+
+#otherActions {
+    margin-top: 50px;
+    font-size: 12px;
+    color: $silverColor;
+
+    .button {
+        padding: 0.3em;
+        display: inline-block;
+        line-height: 1.3em;
+    }
+}
+
 
 #mainPhoto {
     position: relative;
+    background: url('/static/img/tbg.png');
 
     @for $i from 1 through 100 {
         &.width#{$i} { width: $miniPhotoSize * $i; }

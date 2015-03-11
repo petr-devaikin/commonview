@@ -8,11 +8,11 @@
     <script>
         {% if g.authorized %}
             require(['render'], function(render) {
-                render('{{ access_token }}', {{ picture_id }}, {{ picture | safe }});
+                render('{{ access_token }}', {{ picture.id }}, {{ pixels | safe }});
             })
         {% else %}
             require(['showpazzle'], function(showpazzle) {
-                showpazzle({{ picture_id }}, {{ picture | safe }});
+                showpazzle({{ picture.id }}, {{ pixels | safe }});
             })
         {% endif %}
     </script>
@@ -21,26 +21,46 @@
 {% block body %}
     <div id="leftColumn">
         {% if g.authorized %}
-
-            <a href="{{ url_for('index') }}">← All pictures</a>
-            <div id="preview"></div>
+            <div id="preview">
+                <img src="{{ url_for('preview', id=picture.id) }}" />
+            </div>
             <div id="tagForm">
-                #<input type="text" value="selfie" id="tagName" />
+                <input type="text" value="{{ picture.tag if picture.tag else 'enter_tag_before_start' }}" id="tagName" {% if picture.tag != None %}disabled="disabled"{% endif %} />
+                <span>#</span>
             </div>
 
-            Accuracy
-            <div id="accuracy"></div>
+            <div id="buttonGroup">
+                <div id="startButton" class="button">Start</div>
+                <div id="stopButton" class="button" disabled="disabled">Stop</div>
+            </div>
 
-            <div id="startButton" class="button">Start</div>
-            <div id="stopButton" class="button">Stop</div>
-            <div id="clearButton" class="button">Clear</div> and start with another tag
-            <div id="deleteButton" class="button">Delete</div>
+            <div id="accuracyContainer">
+                Accuracy
+                <p>
+                    <span id="accuracy">{{ picture.diff_percentage() }}</span>%
+                </p>
+            </div>
+
+            <div id="otherActions">
+                You can also
+                <div id="clearButton" class="button">clear</div> the picture and start again with another tag or
+                <div id="deleteButton" class="button">delete it</div>
+            </div>
         {% else %}
-            <span id="tagName">#{{ tag }}</span>
-            <a href="https://instagram.com/{{ author }}" id="author" target="_blank">@{{ author }}</a>
+            <p>
+                <a href="https://instagram.com/{{ picture.user.insta_name }}" id="author" target="_blank">
+                    @{{ picture.user.insta_name }}
+                </a>
+            </p>
+            {% if picture.tag %}
+                <p id="tagName">#{{ picture.tag }}</p>
+            {% endif %}
         {% endif %}
     </div>
     <div id="rightColumn">
         <div id="mainPhoto"></div>
     </div>
+    {% if g.authorized %}
+        <a href="{{ url_for('index') }}" id="allPictures" title="All photos" class="button">←</a>
+    {% endif %}
 {% endblock %}

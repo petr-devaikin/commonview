@@ -9,7 +9,7 @@ html, body {
   font-size: 18px; }
 
   .container {
-    width: 1060px;
+    width: 1070px;
     margin-left: auto;
     margin-right: auto; }
 
@@ -26,10 +26,13 @@ html, body {
         font-size: 80px;
         margin: 0;
         padding: 0; }
-        #header #login {
-          position: absolute;
-          bottom: 0px;
-          right: 0px; }
+        #header h1 a {
+          text-decoration: none;
+          color: #1C212D; }
+      #header #login {
+        position: absolute;
+        bottom: 0px;
+        right: 0px; }
 
 #content {
   overflow: hidden;
@@ -42,7 +45,7 @@ html, body {
     #content #rightColumn {
       position: relative;
       float: left;
-      width: 790px; }
+      width: 800px; }
 
 p {
   margin: 0 0 15px 0; }
