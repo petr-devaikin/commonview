@@ -4,7 +4,8 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
 
         var palette;
 
-        var startButton = d3.selectAll('.startButton');
+        var startButton = d3.select('#startButton');
+        var resumeButton = d3.select('#resumeButton');
         var stopButton = d3.select('#pauseButton');
         var clearButton = d3.selectAll('.clearButton');
         var deleteButton = d3.select('#deleteButton');
@@ -105,11 +106,17 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                         savePalette();
                     }
                 },
+                onEmpty: function(error) {
+                    drawing.drawPalette(palette);
+                    savePalette();
+                    allPanels.style('display', 'none');
+                    interruptionPanel.style('display', 'block');
+                    console.log('Empty feed');
+                }
             });
 
-            startButton.on('click', function() {
+            function startProcess () {
                 lastSave = new Date();
-                stopCallback = undefined;
 
                 if (!palette.tagName)
                     palette.tagName = d3.select('#tagName').property('value');
@@ -119,7 +126,10 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 d3.select('#tagName').attr('disabled', 'disabled');
                 allPanels.style('display', 'none');
                 processingPanel.style('display', 'block');
-            });
+            }
+
+            startButton.on('click', startProcess);
+            resumeButton.on('click', startProcess);
 
             stopButton.on('click', function() {
                 picGrabber.stop();

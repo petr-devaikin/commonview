@@ -47,9 +47,11 @@ p {
   margin: 10px 0;
   height: 250px; }
 
-  .startButton, #stopButton {
+  #startButton, #resumeButton, #pauseButton {
     font-size: 24px;
-    padding: 8px; }
+    padding: 8px;
+    display: block;
+    width: 100%; }
 
     #otherActions {
       font-size: 12px;

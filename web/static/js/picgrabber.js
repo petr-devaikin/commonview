@@ -1,6 +1,6 @@
 define(['libs/instafeed', 'colorimage', 'helpers'], function(instafeed, ColorImage, helpers) {
     return function(params) {
-        // params: groupSize, accessToken, onListReceived, onPhotoLoaded, onComplete
+        // params: groupSize, accessToken, onListReceived, onPhotoLoaded, onComplete, onEmpty
 
         var stopped = true;
 
@@ -75,28 +75,26 @@ define(['libs/instafeed', 'colorimage', 'helpers'], function(instafeed, ColorIma
         this.start = function(tagName, nextTag) {
             stopped = false;
 
-            if (feed === undefined) {
-                feed = new Instafeed({
-                    accessToken: params.accessToken,
-                    get: 'tagged',
-                    tagName: tagName,
-                    sortBy: 'most-recent',
-                    limit: 60,
-                    success: this._onSuccess,
-                    mock: true,
-                    before: function() {
-                        if (nextTag) {
-                            var oldUrl = this._buildUrl();
-                            this._buildUrl = function() {
-                                return oldUrl + '&max_tag_id=' + nextTag;
-                            }
+            feed = new Instafeed({
+                accessToken: params.accessToken,
+                get: 'tagged',
+                tagName: tagName,
+                sortBy: 'most-recent',
+                limit: 60,
+                success: this._onSuccess,
+                error: params.onEmpty,
+                mock: true,
+                before: function() {
+                    if (nextTag) {
+                        var oldUrl = this._buildUrl();
+                        this._buildUrl = function() {
+                            return oldUrl + '&max_tag_id=' + nextTag;
                         }
                     }
-                });
-                feed.run();
-            }
-            else
-                feed.next();
+                }
+            });
+
+            feed.run();
         }
 
         this.stop = function() {
