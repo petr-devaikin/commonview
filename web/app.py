@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
 from flask import make_response, g, Response, send_file
 from flask.ext.scss import Scss
-from .db.engine import init_db
+from .db.engine import init_db, get_db
 import json
 import peewee
 from instagram import client
@@ -81,7 +81,7 @@ def index():
     can_upload = g.authorized and g.user.pictures.count() < current_app.config['MAX_UPLOADS'] 
     return render_template('index.html',
         can_upload=can_upload,
-        max_size=current_app.config['MAXIMUM_SIZE'])
+        max_size=current_app.config['MAX_CONTENT_LENGTH'])
 
 
 @app.route('/pic/<id>')
@@ -93,14 +93,15 @@ def render(id):
     if not g.authorized or picture.user.id != g.user.id:
         return render_template('render.html',
                 picture=picture,
-                pixels=json.dumps(pixels.to_hash())
+                pixels=json.dumps(pixels.to_hash()),
+                group_size=current_app.config['GROUP_SIZE']
             )
     else:
-
         return render_template('render.html',
                 picture=picture,
                 pixels=json.dumps(pixels.to_hash()),
-                access_token=g.user.access_token
+                access_token=g.user.access_token,
+                group_size=current_app.config['GROUP_SIZE']
             )
 
 
@@ -149,9 +150,10 @@ def upload():
 
     f = request.files['pic']
     if f and allowed_file(f.filename):
-        picture = Picture.create(user=g.user)
-        pic = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
-        pic.save(picture.get_full_path())
+        with get_db().atomic() as txn:
+            pic = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
+            picture = Picture.create(user=g.user, width=pic.size[0], height=pic.size[1])
+            pic.save(picture.get_full_path())
         return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:
         return jsonify(result='error'), 500

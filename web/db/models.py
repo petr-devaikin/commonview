@@ -15,6 +15,8 @@ class User(Model):
 
 class Picture(Model):
     user = ForeignKeyField(User, related_name='pictures')
+    width = IntegerField()
+    height = IntegerField()
     tag = CharField(null=True)
     next_tag_id = CharField(null=True)
     global_diff = DoubleField(null=True)

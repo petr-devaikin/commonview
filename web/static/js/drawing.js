@@ -14,10 +14,6 @@ define(['libs/d3'], function(d3) {
     }
 
     function drawPalette(palette) {
-        d3.select('#mainPhoto')
-            .classed('width' + palette.cols, true)
-            .classed('height' + palette.rows, true);
-            
         var photos = d3.select('#mainPhoto').selectAll('.miniPhoto')
                 .data(palette.groups, function(d) {
                     return d.x + '/' + d.y;
@@ -44,25 +40,17 @@ define(['libs/d3'], function(d3) {
     function updateAccuracy(palette) {
         var v = palette.globalDiff ? (100 * (255 - palette.globalDiff) / 255) : 0;
         console.log(v);
-        d3.select('#status').text('Accuracy');
-        d3.select('#accuracy').text(v.toFixed(1) + '%');
-        d3.select('#accuracyContainer p').style('color', 'hsl(' + (120 * v / 100) + ', 50%, 60%)');
-    }
-
-    function showSaving() {
-        d3.select('#status').text('Saving');
-        d3.select('#accuracyContainer p').style('color', null);
+        d3.selectAll('.accuracyPercentage')
+            .text(v.toFixed(1) + '%')
+            .style('color', 'hsl(' + (120 * v / 100) + ', 50%, 60%)');
     }
 
     function showLoading(percentage) {
-        d3.select('#status').text('Loading');
-        d3.select('#accuracy').text(percentage.toFixed(1) + '%');
-        d3.select('#accuracyContainer p').style('color', 'hsl(' + (120 * percentage / 100) + ', 50%, 60%)');
+        d3.select('#loadingPercentage').text(percentage.toFixed(1) + '%');
     }
 
     return {
         drawPalette: drawPalette,
-        showSaving: showSaving,
         showLoading: showLoading,
     }
 });

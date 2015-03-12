@@ -16,7 +16,7 @@
             require(['index', 'upload'], function(index, upload) {
                 index();
                 {% if can_upload %}
-                    upload({{ max_size * 1024 * 1024 }});
+                    upload({{ max_size }});
                 {% endif %}
             })
         </script>
@@ -47,8 +47,9 @@
                         <div class="original">
                             Choose photo or drug it here to upload
                         </div>
-                        Maximum size: {{ max_size}}Mb<br />
-                        Allowed extentions: JPEG and PNG
+                        <p>Maximum size: {{ (max_size / 1024 / 1024) | int }}Mb</p>
+                        <p>Allowed extentions: JPEG and PNG</p>
+                        <p id="uploadError"></p>
                     </div>
                 {% endif %}
                 {% for p in g.user.pictures | reverse %}

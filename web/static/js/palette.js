@@ -7,10 +7,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
         this.groupIndex = {};
         this.next_max_tag_id = undefined;
         this.globalDiff = 255;
-        this.tagName = '';
-
-        this.cols = 0;
-        this.rows = 0;
+        this.tagName = undefined;
 
 
         for (var i = 0; i < picture.pixels.length; i++) {
@@ -19,9 +16,6 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                 color = picture.pixels[i].color,
                 gX = Math.floor(x/groupSize),
                 gY = Math.floor(y/groupSize);
-
-            if (gX + 1 > this.cols) this.cols = gX + 1;
-            if (gY + 1> this.rows) this.rows = gY + 1;
 
             if (this.groupIndex[gX] === undefined)
                 this.groupIndex[gX] = {};
@@ -95,6 +89,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                         error: function() {
                             console.log('Old photo not found');
                             group.loading = false;
+                            //group.diff = 255;
                             group.image = undefined;
                             processNext();
                         }
@@ -167,7 +162,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
 
                 var diff = g.calcDiff(freeMedia.color);
 
-                if (g.diff > diff) {
+                if (g.diff > diff || g.image === undefined) {
                     if (g.image !== undefined) {
                         var tmp = g.image;
                         g.image = freeMedia;

@@ -91,3 +91,6 @@ h2 {
     font-size: 18px; }
     ol li {
       margin-bottom: 0.5em; }
+
+#uploadError {
+  color: #da5050; }

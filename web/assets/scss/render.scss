@@ -64,45 +64,18 @@ p {
     }
 }
 
-#accuracyContainer {
-    margin-top: 20px;
-    margin-bottom: 60px;
-    text-align: center;
-    color: $silverColor;
-
-    p {
-        text-align: center;
-        font-size: 42px;
-        line-height: 42px;
-        font-weight: bolder;
-    }
+.panel {
+    display: none;
+    margin: 10px 0;
+    height: 250px;
 }
 
-#buttonGroup {
-    margin-top: 5px;
-    height: 47px;
-    /*background: url('/static/img/ajax-loader.gif') center center no-repeat;*/
-}
-
-#startButton, #stopButton {
+.startButton, #stopButton {
     font-size: 24px;
     padding: 8px;
-
-    position: relative;
-    float: left;
-
-    width: $mainColumn / 2 - 16;
-
-    &:hover {
-        background: $backgroundColor;
-    }
-
-    &[disabled] {
-        opacity: 0.1;
-        cursor: default;
-        background: white;
-    }
 }
+
+
 
 #otherActions {
     font-size: 12px;

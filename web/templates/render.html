@@ -8,11 +8,11 @@
     <script>
         {% if g.authorized %}
             require(['render'], function(render) {
-                render('{{ access_token }}', {{ picture.id }}, {{ pixels | safe }});
+                render('{{ access_token }}', {{ picture.id }}, {{ pixels | safe }}, {{ group_size }});
             })
         {% else %}
             require(['showpazzle'], function(showpazzle) {
-                showpazzle({{ picture.id }}, {{ pixels | safe }});
+                showpazzle({{ picture.id }}, {{ pixels | safe }}, {{ group_size }});
             })
         {% endif %}
     </script>
@@ -29,21 +29,61 @@
                 <span>#</span>
             </div>
 
-            <div id="buttonGroup">
-                <div id="startButton" class="button" disabled="disabled">Start</div>
-                <div id="stopButton" class="button" disabled="disabled">Stop</div>
+
+            <div id="startPanel" class="panel">
+                <div class="startButton button">Start</div>
             </div>
 
-            <div id="accuracyContainer">
-                <span id="status">&nbsp;</span>
+            <div id="loadingPanel" class="panel" style="display: block;">
+                <p class="status">Loading</p>
+                <p id="loadingPercentage" class="percentage">0%</p>
+            </div>
+
+            <div id="resumePanel" class="panel">
+                <p class="status">Paused</p>
+                <p>Accuracy:</p>
+                <p class="accuracyPercentage percentage">0.0%</p>
+                <div class="startButton button">Resume</div>
                 <p>
-                    <span id="accuracy">&nbsp;</span>
+                    or <div class="clearButton button">clear</div> the picture to start
+                    with another tag
                 </p>
             </div>
 
+            <div id="processingPanel" class="panel">
+                <p class="status">Compiling</p>
+                <p>Accuracy:</p>
+                <p class="accuracyPercentage percentage">0.0%</p>
+                <div id="pauseButton" class="button" disabled="disabled">Pause</div>
+            </div>
+
+            <div id="completePanel" class="panel">
+                <p class="status">Complete</p>
+                <p>Accuracy:</p>
+                <p class="accuracyPercentage percentage">100.0%</p>
+                <p>
+                    You can <div class="clearButton button">clear</div> the picture to start
+                    with another tag
+                </p>
+            </div>
+
+            <div id="interruptionPanel" class="panel">
+                <p class="status">Interrupted</p>
+                <p>Accuracy:</p>
+                <p class="accuracyPercentage percentage">50.0%</p>
+                <p>
+                    Unfortunately, there is no enough tags to complete the process.
+                    You can <div class="clearButton button">clear</div> the picture to start
+                    with more popular tag
+                </p>
+            </div>
+
+            <div id="savingPanel" class="panel">
+                <p class="status">Saving</p>
+            </div>
+
+
             <div id="otherActions">
-                You can also
-                <div id="clearButton" class="button">clear</div> the picture and start again with another tag or
                 <div id="deleteButton" class="button">delete it</div>
             </div>
         {% else %}
@@ -58,7 +98,7 @@
         {% endif %}
     </div>
     <div id="rightColumn">
-        <div id="mainPhoto"></div>
+        <div id="mainPhoto" class="width{{ (picture.width / group_size) | round(0, 'ceil') | int }} height{{ (picture.height / group_size) | round(0, 'ceil') | int }}"></div>
     </div>
     {% if g.authorized %}
         <a href="{{ url_for('index') }}" id="allPictures" title="All photos" class="button">←</a>

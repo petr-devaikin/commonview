@@ -4,16 +4,18 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
         UPLOAD_URL = '/upload';
 
     function setError(text) {
+        d3.select('#uploadError').text(text);
         console.log(text);
     }
 
     return function(maxFileSize) {
         if (window.FileReader === undefined) {
-            setText('Not supported!'); // !!!
+            console.log('Not supported!'); // !!!
             return;
         }
 
         document.ondragover = function() {
+            setError('');
             uploader.classed('hover', true);
             return false;
         }
@@ -66,6 +68,7 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
         }, false);
 
         d3.select('#new .original').on('click', function() {
+            setError('');
             document.getElementById('inputfile').click();
         });
     }

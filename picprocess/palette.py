@@ -9,7 +9,7 @@ class Palette:
 
         with get_db().atomic() as txn:
             picture.global_diff = data['globalDiff']
-            picture.tag = data['tagName']
+            picture.tag = data['tagName'] if 'tagName' in data else None
             picture.next_tag_id = data['next_max_tag_id'] if 'next_max_tag_id' in data else None
 
             picture.save()

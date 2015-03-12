@@ -1,9 +1,6 @@
 define(['palette', 'drawing'], function(Palette, drawing) {
-    var GROUP_SIZE = 5,
-        palette;
-
-    return function(pic_id, picture) {
-        var palette = new Palette(pic_id, picture, GROUP_SIZE);
+    return function(pic_id, picture, groupSize) {
+        var palette = new Palette(pic_id, picture, groupSize);
 
         palette.load({
             onComplete: function() {
