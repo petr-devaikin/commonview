@@ -1,5 +1,5 @@
-define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
-    function(d3, Palette, proxy, PicGrabber, drawing) {
+define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', 'export'],
+    function(d3, Palette, proxy, PicGrabber, drawing, exporter) {
         var SAVE_PERIOD = 1000 * 30;
 
         var palette;
@@ -176,5 +176,11 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             });
 
             drawing.setZoomer();
+
+            d3.select('#exportButton').on('click', function() {
+                d3.event.preventDefault();
+
+                exporter(groupSize, palette, 10);
+            });
         }
     });

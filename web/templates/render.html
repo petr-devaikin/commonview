@@ -32,7 +32,7 @@
 
 
             <div id="startPanel" class="panel">
-                <button id="startButton" class="button">Start</button>
+                <button id="startButton" class="button" {% if picture.tag == None %}disabled="disabled"{% endif %}>Start</button>
             </div>
 
             <div id="loadingPanel" class="panel" style="display: block;">
@@ -97,10 +97,15 @@
                 <p id="tagName">#{{ picture.tag }}</p>
             {% endif %}
         {% endif %}
+        <a href="#" id="exportButton">export</a>
+        <a id="downloader" href="#">download</a>
     </div>
     <div id="rightColumn">
         <div id="mainPhoto" class="width{{ (picture.width / group_size) | round(0, 'ceil') | int }} height{{ (picture.height / group_size) | round(0, 'ceil') | int }}"></div>
+
+        <canvas id="result"></canvas>
     </div>
+
     {% if g.authorized %}
         <a href="{{ url_for('index') }}" id="allPictures" title="All photos" class="button">←</a>
     {% endif %}
