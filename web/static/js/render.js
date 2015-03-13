@@ -156,5 +156,12 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             d3.select('#tagName').on('focus', function() {
                 this.select();
             });
+
+            d3.select('#tagName').on('input', function() {
+                var s = d3.select('#tagName').property('value');
+                var filter = /[\s`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+                if (s.match(filter))
+                    d3.select('#tagName').property('value', s.replace(filter, ''));
+            });
         }
     });
