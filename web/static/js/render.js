@@ -33,21 +33,21 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 },
                 onComplete: function() {
                     drawing.drawPalette(palette);
+
+                    allPanels.style('display', 'none');
                     if (palette.tagName == null) {
-                        allPanels.style('display', 'none');
                         startPanel.style('display', 'block');
                     }
                     else if (palette.globalDiff > 0) {
-                        allPanels.style('display', 'none');
                         if (palette.next_max_tag_id !== null)
                             resumePanel.style('display', 'block');
                         else
                             interruptionPanel.style('display', 'block');
                     }
                     else {
-                        allPanels.style('display', 'none');
                         completePanel.style('display', 'block');
                     }
+
                     console.log('Palette loaded');
                 },
                 onError: function() {
@@ -95,6 +95,10 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 },
                 onPhotoLoaded: function(colorImage) {
                     palette.addPhoto(colorImage);
+
+                    console.log(palette.globalDiff);
+                    if (palette.globalDiff == 0)
+                        picGrabber.stop();
                 },
                 onComplete: function(isStopped) {
                     drawing.drawPalette(palette);
@@ -102,7 +106,10 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                         savePalette();
 
                         allPanels.style('display', 'none');
-                        resumePanel.style('display', 'block');
+                        if (palette.globalDiff > 0)
+                            resumePanel.style('display', 'block');
+                        else
+                            completePanel.style('display', 'block');
                     }
                     else if ((new Date()) - lastSave > SAVE_PERIOD) {
                         lastSave = new Date();
