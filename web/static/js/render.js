@@ -96,7 +96,6 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 onPhotoLoaded: function(colorImage) {
                     palette.addPhoto(colorImage);
 
-                    console.log(palette.globalDiff);
                     if (palette.globalDiff == 0)
                         picGrabber.stop();
                 },

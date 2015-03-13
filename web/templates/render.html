@@ -54,7 +54,10 @@
             </div>
 
             <div id="processingPanel" class="panel">
-                <p class="status">Compiling</p>
+                <p class="status">
+                    Compiling
+                    <img src="{{ url_for('static', filename='img/ajax-loader.gif') }}" />
+                </p>
                 <p class="accuracy">Accuracy:</p>
                 <p class="accuracyPercentage">0.0%</p>
                 <button id="pauseButton" class="button">Pause</button>
