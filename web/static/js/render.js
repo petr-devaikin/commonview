@@ -162,6 +162,11 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 var filter = /[\s`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
                 if (s.match(filter))
                     d3.select('#tagName').property('value', s.replace(filter, ''));
+
+                if (d3.select('#tagName').property('value') == '')
+                    startButton.attr('disabled', 'disabled');
+                else
+                    startButton.attr('disabled', null);
             });
         }
     });

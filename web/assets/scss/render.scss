@@ -115,6 +115,11 @@ p {
     width: 100%;
 }
 
+#startButton[disabled] {
+    opacity: 0.2;
+    cursor: default;
+}
+
 
 .status {
     font-size: 24px;
