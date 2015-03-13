@@ -174,5 +174,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 else
                     startButton.attr('disabled', null);
             });
+
+            drawing.setZoomer();
         }
     });
