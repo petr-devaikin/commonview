@@ -26,7 +26,7 @@
                 <button id="deleteButton">Delete</button>
             </div>
             <div id="tagForm">
-                <input type="text" value="{{ picture.tag if picture.tag else 'enter_tag_before_start' }}" id="tagName" {% if picture.tag != None %}disabled="disabled"{% endif %} />
+                <input type="text" value="{{ picture.tag if picture.tag else '' }}" id="tagName" {% if picture.tag != None %}disabled="disabled"{% endif %} placeholder="enter tag before start" />
                 <span>#</span>
             </div>
 

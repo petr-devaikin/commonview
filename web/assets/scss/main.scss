@@ -10,7 +10,7 @@ $mainColumnMargin: 20px;
 $rightColumn: 780px;
 
 $mainRow: 91px;
-$mainRowMargin: 15px;
+$mainRowMargin: 20px;
 
 $footerHeight: 47px;
 
@@ -56,7 +56,7 @@ html, body {
     #login {
         position: absolute;
         bottom: 2px;
-        right: 0px;
+        left: $mainColumn + $mainColumnMargin;
 
         #username {
             margin-right: 5px;

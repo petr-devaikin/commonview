@@ -15,5 +15,7 @@ define(['palette', 'drawing'], function(Palette, drawing) {
                 console.log('Palette loading error');
             }
         });
+        
+        drawing.setZoomer();
     }
 });

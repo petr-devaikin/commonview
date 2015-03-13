@@ -31,9 +31,10 @@ $fontColor: #1C212D;
 $silverColor: #BAC0B9;
 $blueColor: #2966C3;
 
-$photoHeight: 150px;
+$photoHeight: 160px;
 $mainRowMargin: 15px;
 
+$pictureWidth: 390px;
 $photoWidth: 200px;
 $mainColumnMargin: 20px;
 
@@ -42,13 +43,24 @@ $deleteHeight: 20px;
 
 #pictures {
     margin-top: 25px;
+    overflow: hidden;
+
     .picture {
+        position: relative;
+        float: left;
+
+        width: $pictureWidth;
+
         height: $photoHeight;
-        margin-bottom: $mainRowMargin;
+        margin-bottom: 2 * $mainRowMargin;
         background: white;
 
         p {
-            margin-bottom: 0;
+            margin: 0 $mainColumnMargin 0;
+        }
+
+        .tag {
+            word-break: break-all;
         }
 
         .accuracy {
@@ -138,9 +150,9 @@ h2 {
 }
 
 ol {
-    margin: 15px 0;
-    padding: 0;
+    margin: 0;
     font-size: 18px;
+    padding: 0;
 
     li {
         margin-bottom: 0.5em;

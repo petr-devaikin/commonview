@@ -15,8 +15,8 @@ html, body {
 
     #header {
       position: relative;
-      margin: 0 0 30px;
-      padding-top: 15px;
+      margin: 0 0 40px;
+      padding-top: 20px;
       height: 91px;
       overflow: hidden; }
       #header h1 {
@@ -32,7 +32,7 @@ html, body {
       #header #login {
         position: absolute;
         bottom: 2px;
-        right: 0px; }
+        left: 270px; }
         #header #login #username {
           margin-right: 5px; }
 

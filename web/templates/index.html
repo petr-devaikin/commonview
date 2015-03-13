@@ -28,18 +28,15 @@
     <div id="leftColumn">&nbsp;</div>
     <div id="rightColumn">
         {% if not g.authorized %}
-            <h2>
-                Make your own pazzle:
-            </h2>
             <ol>
-                <li><a href="{{ url_for('login') }}" class="button">Log in</a> via Instagram</li>
+                <li>Log in via Instagram</li>
                 <li>Upload an image (jpeg or png)</li>
                 <li>Choose a hashtag to find pazzle elements</li>
                 <li>Start compiling and enjoy the process</li>
                 <li>Share your pazzle</li>
             </ol>
         {% else %}
-            <p>You can upload up to 3 pictures</p>
+            <p>You can upload up to {{ max_count }} pictures</p>
             <div id="pictures">
                 {% if can_upload %}
                     <div class="picture" id="new">
@@ -47,8 +44,8 @@
                         <div class="original">
                             Choose photo or drug it here to upload
                         </div>
-                        <p>Maximum size: {{ (max_size / 1024 / 1024) | int }}Mb</p>
-                        <p>Allowed extentions: JPEG and PNG</p>
+                        <p>JPEG or PNG</p>
+                        <p>Up to {{ (max_size / 1024 / 1024) | int }}Mb</p>
                         <p id="uploadError"></p>
                     </div>
                 {% endif %}
