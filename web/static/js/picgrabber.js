@@ -36,9 +36,9 @@ define(['libs/instafeed', 'colorimage', 'helpers'], function(instafeed, ColorIma
                             if (--uncomplete == 0) {
                                 if (params.onComplete !== undefined)
                                     params.onComplete(stopped);
-
                                 if (!stopped)
-                                    feed.next();
+                                    if (!feed.next() && params.onEmpty !== undefined)
+                                        params.onEmpty();
                             }
                         }
                     } (

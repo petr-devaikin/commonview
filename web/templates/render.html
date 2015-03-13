@@ -23,6 +23,7 @@
         {% if g.authorized %}
             <div id="preview">
                 <img src="{{ url_for('preview', id=picture.id) }}" />
+                <button id="deleteButton">Delete</button>
             </div>
             <div id="tagForm">
                 <input type="text" value="{{ picture.tag if picture.tag else 'enter_tag_before_start' }}" id="tagName" {% if picture.tag != None %}disabled="disabled"{% endif %} />
@@ -35,16 +36,18 @@
             </div>
 
             <div id="loadingPanel" class="panel" style="display: block;">
-                <p class="status">Loading</p>
-                <p id="loadingPercentage" class="percentage">0%</p>
+                <p class="status">
+                    Loading:
+                    <span id="loadingPercentage">0%</span>
+                </p>
             </div>
 
             <div id="resumePanel" class="panel">
                 <p class="status">Paused</p>
-                <p>Accuracy:</p>
-                <p class="accuracyPercentage percentage">0.0%</p>
+                <p class="accuracy">Accuracy:</p>
+                <p class="accuracyPercentage">0.0%</p>
                 <button id="resumeButton" class="button">Resume</button>
-                <p>
+                <p class="hint">
                     or <button class="clearButton button">clear</button> the picture to start
                     with another tag
                 </p>
@@ -52,16 +55,16 @@
 
             <div id="processingPanel" class="panel">
                 <p class="status">Compiling</p>
-                <p>Accuracy:</p>
-                <p class="accuracyPercentage percentage">0.0%</p>
+                <p class="accuracy">Accuracy:</p>
+                <p class="accuracyPercentage">0.0%</p>
                 <button id="pauseButton" class="button">Pause</button>
             </div>
 
             <div id="completePanel" class="panel">
                 <p class="status">Complete</p>
-                <p>Accuracy:</p>
-                <p class="accuracyPercentage percentage">100.0%</p>
-                <p>
+                <p class="accuracy">Accuracy:</p>
+                <p class="accuracyPercentage">100.0%</p>
+                <p class="hint">
                     You can <button class="clearButton button">clear</button> the picture to start
                     with another tag
                 </p>
@@ -69,9 +72,9 @@
 
             <div id="interruptionPanel" class="panel">
                 <p class="status">Interrupted</p>
-                <p>Accuracy:</p>
-                <p class="accuracyPercentage percentage">50.0%</p>
-                <p>
+                <p class="accuracy">Accuracy:</p>
+                <p class="accuracyPercentage">50.0%</p>
+                <p class="hint">
                     Unfortunately, there is no enough tags to complete the process.
                     You can <button class="clearButton button">clear</button> the picture to start
                     with more popular tag
@@ -80,11 +83,6 @@
 
             <div id="savingPanel" class="panel">
                 <p class="status">Saving</p>
-            </div>
-
-
-            <div id="otherActions">
-                <button id="deleteButton" class="button">delete it</button>
             </div>
         {% else %}
             <p>

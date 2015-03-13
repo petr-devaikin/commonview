@@ -3,6 +3,7 @@ $miniPhotoSize: 13px;
 $fontColor: #1C212D;
 $silverColor: #BAC0B9;
 $backgroundColor: #eee;
+$blueColor: #2966C3;
 
 $mainColumn: 250px;
 
@@ -21,6 +22,7 @@ p {
 }
 
 #preview {
+    position: relative;
     overflow: hidden;
     margin-bottom: 10px;
     max-height: 250px;
@@ -28,6 +30,42 @@ p {
     img {
         display: block;
         width: 100%;
+    }
+
+
+    #deleteButton {
+        transition: right 0.1s ease-out 0s;
+
+        display: block;
+
+        border: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+
+        position: absolute;
+        right: -50px;
+        height: 20px;
+        width: 50px;
+        top: 0;
+
+        color: $blueColor;
+        text-decoration: none;
+        text-align: center;
+        line-height: 20px;
+        font-size: 12px;
+
+        background: rgba(255, 255, 255, 0.7);
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+    }
+
+    &:hover {
+        #deleteButton {
+            right: 0;
+        }
     }
 }
 
@@ -66,7 +104,7 @@ p {
 
 .panel {
     display: none;
-    margin: 10px 0;
+    margin: 25px 0 0;
     height: 250px;
 }
 
@@ -78,13 +116,34 @@ p {
 }
 
 
+.status {
+    font-size: 24px;
+    text-align: center;
+}
 
-#otherActions {
+.accuracy {
     font-size: 12px;
     color: $silverColor;
+    text-align: center;
+}
+
+.accuracyPercentage {
+    font-size: 42px;
+    line-height: 42px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.hint {
+    margin-top: 10px;
+    font-size: 12px;
+    color: $silverColor;
+    text-align: left;
 
     .button {
-        display: inline-block;
+        background: none;
+        font-size: 12px;
+        padding: 0;
     }
 }
 

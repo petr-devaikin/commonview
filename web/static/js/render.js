@@ -39,7 +39,10 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                     }
                     else if (palette.globalDiff > 0) {
                         allPanels.style('display', 'none');
-                        resumePanel.style('display', 'block');
+                        if (palette.next_max_tag_id !== null)
+                            resumePanel.style('display', 'block');
+                        else
+                            interruptionPanel.style('display', 'block');
                     }
                     else {
                         allPanels.style('display', 'none');

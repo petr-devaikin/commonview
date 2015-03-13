@@ -11,12 +11,35 @@ p {
     font-size: 24px; }
 
     #preview {
+      position: relative;
       overflow: hidden;
       margin-bottom: 10px;
       max-height: 250px; }
       #preview img {
         display: block;
         width: 100%; }
+        #preview #deleteButton {
+          transition: right 0.1s ease-out 0s;
+          display: block;
+          border: none;
+          padding: 0;
+          margin: 0;
+          cursor: pointer;
+          position: absolute;
+          right: -50px;
+          height: 20px;
+          width: 50px;
+          top: 0;
+          color: #2966C3;
+          text-decoration: none;
+          text-align: center;
+          line-height: 20px;
+          font-size: 12px;
+          background: rgba(255, 255, 255, 0.7); }
+          #preview #deleteButton:hover {
+            background: rgba(255, 255, 255, 0.9); }
+      #preview:hover #deleteButton {
+        right: 0; }
 
 #tagForm {
   position: relative;
@@ -44,7 +67,7 @@ p {
 
 .panel {
   display: none;
-  margin: 10px 0;
+  margin: 25px 0 0;
   height: 250px; }
 
   #startButton, #resumeButton, #pauseButton {
@@ -53,11 +76,30 @@ p {
     display: block;
     width: 100%; }
 
-    #otherActions {
-      font-size: 12px;
-      color: #BAC0B9; }
-      #otherActions .button {
-        display: inline-block; }
+    .status {
+      font-size: 24px;
+      text-align: center; }
+
+      .accuracy {
+        font-size: 12px;
+        color: #BAC0B9;
+        text-align: center; }
+
+        .accuracyPercentage {
+          font-size: 42px;
+          line-height: 42px;
+          text-align: center;
+          margin-bottom: 25px; }
+
+          .hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #BAC0B9;
+            text-align: left; }
+            .hint .button {
+              background: none;
+              font-size: 12px;
+              padding: 0; }
 
 #mainPhoto {
   position: relative;
