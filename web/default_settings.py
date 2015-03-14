@@ -4,6 +4,9 @@ SEND_FILE_MAX_AGE_DEFAULT = 0
 
 import os
 SECRET_KEY = os.urandom(24)
+
+import re
+ALLOWED_INSTA_URL = re.compile('^[a-zA-Z0-9_-]+$')
   
 INSTA_ID = ''
 INSTA_SECRET = ''

@@ -3,7 +3,8 @@ define([], function() {
         this.id = id;
         this.imageUrl = imageUrl;
         this.userName = username;
-        this.link = link;
+        var linkParts = link.split('/');
+        this.link = linkParts[linkParts.length - 2];
         this.color = [];
    } 
 });

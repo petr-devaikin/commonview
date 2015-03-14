@@ -132,8 +132,10 @@ def palette(id):
         return 'error', 500
     else:
         if request.method == 'POST':
-            Palette.save_to_db(picture, request.form['palette'])
-            return jsonify(result='ok')
+            if (Palette.save_to_db(picture, request.form['palette'])):
+                return jsonify(result='ok')
+            else:
+                return jsonify(error='wrong data'), 500
         else: #request.method == 'DELETE':
             os.remove(picture.get_full_path())
             Palette.remove_from_db(picture)

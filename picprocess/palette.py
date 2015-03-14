@@ -2,27 +2,37 @@ import json
 from web.db.engine import get_db
 from web.db.models import Fragment
 
+class WrongDataException(Exception):
+    pass
+
 class Palette:
     @staticmethod
     def save_to_db(picture, json_data):
         data = json.loads(json_data)
 
-        with get_db().atomic() as txn:
-            picture.global_diff = data['globalDiff']
-            picture.tag = data['tagName'] if 'tagName' in data else None
-            picture.next_tag_id = data['next_max_tag_id'] if 'next_max_tag_id' in data else None
+        try:
+            with get_db().atomic() as txn:
+                picture.global_diff = data['globalDiff']
+                picture.tag = data['tagName'] if 'tagName' in data else None
+                picture.next_tag_id = data['next_max_tag_id'] if 'next_max_tag_id' in data else None
 
-            picture.save()
+                picture.save()
 
-            fragments_to_delete = [f for f in picture.fragments]
-            for f in fragments_to_delete:
-                f.delete_instance()
+                fragments_to_delete = [f for f in picture.fragments]
+                for f in fragments_to_delete:
+                    f.delete_instance()
 
-            for x in data['groups']:
-                for y in data['groups'][x]:
-                    fragment = Fragment(picture=picture)
-                    fragment.from_hash(data['groups'][x][y])
-                    fragment.save()
+                for x in data['groups']:
+                    for y in data['groups'][x]:
+                        fragment = Fragment(picture=picture)
+                        print data['groups'][x][y]
+                        if (fragment.from_hash(data['groups'][x][y])):
+                            fragment.save()
+                        else:
+                            raise WrongDataException('Wrong data')
+            return True
+        except WrongDataException:
+            return False
 
 
     @staticmethod

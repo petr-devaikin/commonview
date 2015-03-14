@@ -36,7 +36,7 @@ define(['libs/d3'], function(d3) {
     }
 
     function setHref(d) {
-        return d.image ? d.image.link : '#';
+        return d.image ? 'https://instagram.com/p/' + d.image.link + '/' : '#';
     }
 
     function setDisplay(d) {

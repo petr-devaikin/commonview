@@ -18,7 +18,7 @@ define(['proxy'], function(proxy) {
 
             image.onerror = function(e) {
                 console.log('Error: ' + e);
-                params.error();
+                if (params.error !== undefined) params.error();
             }
 
             image.src = _useProxy ? proxy.getImageUrl(params.url) : params.url;

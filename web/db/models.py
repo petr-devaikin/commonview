@@ -68,8 +68,15 @@ class Fragment(Model):
 
         self.insta_id = data['image']['id']
         self.insta_img = data['image']['imageUrl']
+        
         self.insta_url = data['image']['link']
+        if not current_app.config['ALLOWED_INSTA_URL'].match(self.insta_url):
+            return False
+        
         self.insta_user = data['image']['userName']
+
+        return True
+
 
     class Meta:
         database = get_db()
