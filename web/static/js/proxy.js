@@ -8,11 +8,6 @@ define(['libs/qwest'], function(qwest) {
                 .then(success)
                 .catch(error);
         },
-        loadPalette: function(pictureId, success, error) {
-            qwest.get('/palette/' + pictureId)
-                .then(success)
-                .catch(error);
-        },
         deletePalette: function(pictureId, success, error) {
             qwest.delete('/palette/' + pictureId)
                 .then(function(response) {

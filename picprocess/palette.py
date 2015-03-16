@@ -1,6 +1,7 @@
 import json
 from web.db.engine import get_db
 from web.db.models import Fragment
+from picprocess.image_helper import ImageHelper
 
 class WrongDataException(Exception):
     pass
@@ -25,11 +26,12 @@ class Palette:
                 for x in data['groups']:
                     for y in data['groups'][x]:
                         fragment = Fragment(picture=picture)
-                        print data['groups'][x][y]
                         if (fragment.from_hash(data['groups'][x][y])):
                             fragment.save()
                         else:
                             raise WrongDataException('Wrong data')
+
+                ImageHelper.save_export_image(picture.get_export_path(), data['export'], picture.width, picture.height)
             return True
         except WrongDataException:
             return False
@@ -59,6 +61,6 @@ class Palette:
             'globalDiff': picture.global_diff,
             'tagName': picture.tag,
             'next_max_tag_id': picture.next_tag_id,
-            'groups': groups
+            'groups': groups,
         }
 

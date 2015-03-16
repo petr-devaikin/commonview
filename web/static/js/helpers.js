@@ -1,5 +1,20 @@
-define(['proxy'], function(proxy) {
-   return {
+define(['proxy', 'settings'], function(proxy, settings) {
+    var canvas = document.createElement('canvas'),
+        ctx = canvas.getContext('2d');
+
+    canvas.width = settings.exportPhotoSize;
+    canvas.height = settings.exportPhotoSize;
+
+
+    function RGBfromRGBA(imgData) {
+        var colors = [];
+        for (var j = 0; j < imgData.data.length; j++)
+            if (j % 4 < 3)
+                colors.push(imgData.data[j]);
+        return colors;
+    }
+
+    return {
         loadImgByUrl: function(params) {
             // params: url, success, error
 
@@ -23,12 +38,35 @@ define(['proxy'], function(proxy) {
 
             image.src = _useProxy ? proxy.getImageUrl(params.url) : params.url;
         },
-        getImgDataColors: function(imgData) {
-            var colors = [];
-            for (var j = 0; j < imgData.data.length; j++)
-                if (j % 4 < 3)
-                    colors.push(imgData.data[j]);
-            return colors;
-        }
-   } 
+        
+        getImgDataColorsFromImage: function(img, groupSize) {
+            ctx.drawImage(img, 0, 0, img.width, img.height,
+                               0, 0, groupSize, groupSize);
+            var imgData = ctx.getImageData(0, 0, groupSize, groupSize); 
+            return RGBfromRGBA(imgData);
+        },
+        getImgDataColorsFromCanvas: function(exportCtx, x, y) {
+            var data = exportCtx.getImageData(x * settings.exportPhotoSize,
+                                              y * settings.exportPhotoSize,
+                                              settings.exportPhotoSize,
+                                              settings.exportPhotoSize);
+            return RGBfromRGBA(data);
+        },
+
+        getExportFragmentFromImage: function(img) {
+            ctx.drawImage(img, 0, 0, img.width, img.height,
+                               0, 0, settings.exportPhotoSize, settings.exportPhotoSize);
+            return ctx.getImageData(0, 0, settings.exportPhotoSize, settings.exportPhotoSize); 
+        },
+        getExportFragment: function(exportCtx, x, y) {
+            return exportCtx.getImageData(x * settings.exportPhotoSize,
+                                          y * settings.exportPhotoSize,
+                                          settings.exportPhotoSize,
+                                          settings.exportPhotoSize);
+        },
+
+        drawExportFragment: function(ctx, x, y, data) {
+            ctx.putImageData(data, x * settings.exportPhotoSize, y * settings.exportPhotoSize);
+        },
+    } 
 });

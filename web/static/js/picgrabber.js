@@ -1,15 +1,12 @@
-define(['libs/instafeed', 'colorimage', 'helpers'], function(instafeed, ColorImage, helpers) {
+define(['libs/instafeed', 'colorimage', 'helpers', 'settings'],
+    function(instafeed, ColorImage, helpers, settings) {
     return function(params) {
-        // params: groupSize, accessToken, onListReceived, onPhotoLoaded, onComplete, onEmpty
+        // params: groupSize, accessToken,
+        // onListReceived, onPhotoLoaded, onComplete, onEmpty
 
         var stopped = true;
 
         var feed = undefined;
-        var canvas = document.createElement('canvas'),
-            ctx = canvas.getContext('2d');
-
-        canvas.width = params.groupSize;
-        canvas.height = params.groupSize;
 
         this._onSuccess = function(picgrabber) {
             return function(photos) {
@@ -22,13 +19,9 @@ define(['libs/instafeed', 'colorimage', 'helpers'], function(instafeed, ColorIma
                     var instaImage = photos.data[i];
 
                     var imageProcessed = function(picgrabber, colorImage) {
-                        return function(img) {
-                            ctx.drawImage(img, 0, 0, img.width, img.height,
-                                               0, 0, params.groupSize, params.groupSize);
-                            var imgData = ctx.getImageData(0, 0, params.groupSize, params.groupSize),
-                                colors = helpers.getImgDataColors(imgData);
-                            
-                            colorImage.color = colors;
+                        return function(img) {                         
+                            colorImage.color = helpers.getImgDataColorsFromImage(img, params.groupSize);
+                            colorImage.exportData = helpers.getExportFragmentFromImage(img);
 
                             if (params.onPhotoLoaded !== undefined) 
                                 params.onPhotoLoaded(colorImage);

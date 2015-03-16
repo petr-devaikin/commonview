@@ -4,10 +4,13 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
     return function(picture_id, picture, groupSize) {
         this.picture_id = picture_id;
         this.groups = [];
-        this.groupIndex = {};
+        var groupIndex = {};
         this.next_max_tag_id = undefined;
         this.globalDiff = 255;
         this.tagName = undefined;
+
+        var exportCanvas = document.getElementById('exportCanvas'),
+            exportCtx = exportCanvas.getContext('2d');
 
 
         for (var i = 0; i < picture.pixels.length; i++) {
@@ -17,14 +20,14 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                 gX = Math.floor(x/groupSize),
                 gY = Math.floor(y/groupSize);
 
-            if (this.groupIndex[gX] === undefined)
-                this.groupIndex[gX] = {};
-            var pixelGroup = this.groupIndex[gX][gY];
+            if (groupIndex[gX] === undefined)
+                groupIndex[gX] = {};
+            var pixelGroup = groupIndex[gX][gY];
 
             if (pixelGroup === undefined) {
                 pixelGroup = new PixelGroup(groupSize, gX, gY);
                 this.groups.push(pixelGroup);
-                this.groupIndex[gX][gY] = pixelGroup;
+                groupIndex[gX][gY] = pixelGroup;
             }
 
             pixelGroup.addPixel(x % groupSize, y % groupSize, color);
@@ -47,13 +50,14 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                 groups: trueGroups,
                 globalDiff: this.globalDiff,
                 tagName: this.tagName,
-                next_max_tag_id: this.next_max_tag_id
+                next_max_tag_id: this.next_max_tag_id,
+                export: exportCanvas.toDataURL(),
             }
         }
 
 
-        this._fromHash = function(params) {
-            // params: data, checkDeleted, onComplete, onInit, onProgress
+        this.load = function(params) {
+            // params: checkDeleted, onComplete, onInit, onProgress, exportImgUrl
             var completed = false;
 
             var data = params.data;
@@ -63,7 +67,6 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
 
             var maxCounter = 0,
                 queue = [];
-
 
             function processNext() {
                 var picsLeft = queue.length;
@@ -98,46 +101,34 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
             }
 
 
-            for (var x in data.groups)
-                for (var y in data.groups[x]) {
-                    var g = this.groupIndex[x][y];
-                    g.loading = true;
-                    g.fromHash(data.groups[x][y]);
+            var exportImage = new Image();
+            exportImage.src = params.exportImgUrl;
+            exportImage.onload = function() {
+                exportCtx.drawImage(exportImage, 0, 0);
 
-                    if (params.checkDeleted) {
-                        maxCounter++;
+                for (var x in data.groups)
+                    for (var y in data.groups[x]) {
+                        var g = groupIndex[x][y];
+                        g.loading = true;
+                        g.fromHash(data.groups[x][y]);
 
-                        queue.push(g);
-                        if (maxCounter <= MAX_LOADS)
-                            processNext();
+                        if (params.checkDeleted) {
+                            g.color = helpers.getImgDataColorsFromCanvas(exportCtx, x, y);
+                            maxCounter++;
+
+                            queue.push(g);
+                            if (maxCounter <= MAX_LOADS)
+                                processNext();
+                        }
                     }
-                }
+
+                if (maxCounter == 0 && params.onComplete !== undefined)
+                    params.onComplete();
+            }
 
             if (params.onInit !== undefined) params.onInit();
-            if (maxCounter == 0 && params.onComplete !== undefined)
-                params.onComplete();
         }
 
-
-        this.load = function(params) {
-            // params: checkDeleted, onInit, onProgress, onComplete, onError
-
-            proxy.loadPalette(
-                this.picture_id,
-                function(palette) {
-                    return function(data) {
-                        palette._fromHash({
-                            data: data,
-                            checkDeleted: params.checkDeleted,
-                            onInit: params.onInit,
-                            onComplete: params.onComplete,
-                            onProgress: params.onProgress,
-                        });
-                    }
-                } (this),
-                params.onError
-            ); 
-        }
 
         this.save = function(params) {
             // params: onSuccess, onError
@@ -168,10 +159,17 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                         g.image = freeMedia;
                         g.diff = diff;
                         freeMedia = tmp;
+                        freeMedia.exportData = helpers.getExportFragment(exportCtx, g.x, g.y);
+
+                        helpers.drawExportFragment(exportCtx, g.x, g.y, g.image.exportData);
+                        g.image.exportData = undefined;
                     }
                     else {
                         g.image = freeMedia;
                         g.diff = diff;
+
+                        helpers.drawExportFragment(exportCtx, g.x, g.y, g.image.exportData);
+                        g.image.exportData = undefined;
                         break;
                     }
                 }

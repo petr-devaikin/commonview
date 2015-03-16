@@ -1,8 +1,10 @@
 define(['palette', 'drawing'], function(Palette, drawing) {
-    return function(pic_id, picture, groupSize) {
+    return function(pic_id, picture, paletteData, exportImgUrl, groupSize) {
         var palette = new Palette(pic_id, picture, groupSize);
 
         palette.load({
+            data: paletteData,
+            exportImgUrl: exportImgUrl,
             onComplete: function() {
                 if (palette.tagName) {
                     d3.select('#tagName').property('value', palette.tagName);
@@ -11,9 +13,6 @@ define(['palette', 'drawing'], function(Palette, drawing) {
                 drawing.drawPalette(palette);
                 console.log('Palette loaded');
             },
-            onError: function() {
-                console.log('Palette loading error');
-            }
         });
         
         drawing.setZoomer();

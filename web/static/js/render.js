@@ -1,6 +1,6 @@
-define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', 'export'],
-    function(d3, Palette, proxy, PicGrabber, drawing, exporter) {
-        var SAVE_PERIOD = 1000 * 30;
+define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
+    function(d3, Palette, proxy, PicGrabber, drawing) {
+        var SAVE_PERIOD = 1000 * 60;
 
         var palette;
 
@@ -20,8 +20,10 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', 'export'],
             savingPanel = d3.select('#savingPanel');
 
 
-        function loadPalette() {
+        function loadPalette(paletteData, exportImgUrl) {
             palette.load({
+                data: paletteData,
+                exportImgUrl: exportImgUrl,
                 checkDeleted: true,
                 onInit: function() {
                     //drawing.drawPalette(palette);
@@ -80,12 +82,12 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', 'export'],
             });
         }
 
-        return function(accessToken, pic_id, picture, groupSize) {
+        return function(accessToken, pic_id, picture, paletteData, exportImgUrl, groupSize) {
             var lastSave = undefined;
 
             clearPalette(pic_id, picture, groupSize);
 
-            loadPalette();
+            loadPalette(paletteData, exportImgUrl);
 
             var picGrabber = new PicGrabber({
                 accessToken: accessToken,
@@ -177,10 +179,22 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', 'export'],
 
             drawing.setZoomer();
 
+            /*
             d3.select('#exportButton').on('click', function() {
                 d3.event.preventDefault();
-
-                exporter(groupSize, palette, 10);
-            });
+                //facebook.postOnWall();
+                exporter({
+                    palette: palette,
+                    onProcess: function(percentage) {
+                        console.log(percentage);
+                    },
+                    onComplete: function(canvas) {
+                        console.log('export complete');
+                        var link = document.getElementById('downloader');
+                        link.href = canvas.toDataURL();
+                        link.download = 'pazzla.png';
+                    }
+                });
+            }); */
         }
     });

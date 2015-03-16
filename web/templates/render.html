@@ -6,13 +6,15 @@
 
 {% block script %}
     <script>
+        var paletteData = {{ palette | safe }};
+        var exportImgUrl = '{{ url_for('export', id=picture.id) }}';
         {% if g.authorized %}
             require(['render'], function(render) {
-                render('{{ access_token }}', {{ picture.id }}, {{ pixels | safe }}, {{ group_size }});
+                render('{{ access_token }}', {{ picture.id }}, {{ pixels | safe }}, paletteData, exportImgUrl, {{ group_size }});
             })
         {% else %}
             require(['showpazzle'], function(showpazzle) {
-                showpazzle({{ picture.id }}, {{ pixels | safe }}, {{ group_size }});
+                showpazzle({{ picture.id }}, {{ pixels | safe }}, paletteData, exportImgUrl, {{ group_size }});
             })
         {% endif %}
     </script>
@@ -103,7 +105,8 @@
     <div id="rightColumn">
         <div id="mainPhoto" class="width{{ (picture.width / group_size) | round(0, 'ceil') | int }} height{{ (picture.height / group_size) | round(0, 'ceil') | int }}"></div>
 
-        <canvas id="result"></canvas>
+        <canvas id="exportCanvas" width="{{ picture.width * export_pic_size / group_size }}"
+                height="{{ picture.height * export_pic_size / group_size }}"></canvas>
     </div>
 
     {% if g.authorized %}

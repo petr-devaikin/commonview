@@ -1,4 +1,7 @@
 from PIL import Image
+import StringIO
+from flask import current_app
+import base64
 
 class ImageHelper:
     @staticmethod
@@ -10,4 +13,25 @@ class ImageHelper:
         elif h >= w and h > max_size:
             img.thumbnail((w * max_size / h, max_size))
         return img
+
+    @staticmethod
+    def new_export_image(width, height):
+        return Image.new('RGBA',
+            (width * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE'],
+             height * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE']))
+
+    @staticmethod
+    def save_export_image(path, data, width, height):
+        with open(path, "wb") as image_file:
+            image_file.write(data[22:].decode('base64'))
+        #return
+        export = Image.fromstring('RGBA',
+            (width * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE'],
+             height * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE']),
+            data[22:].decode('base64'))
+        export.save(path)
+
+    @staticmethod
+    def load_image(path):
+        return Image.open(path)
         

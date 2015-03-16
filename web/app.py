@@ -11,6 +11,7 @@ from picprocess.pixels import Pixels
 from picprocess.palette import Palette
 import os
 import urllib2
+import io
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -95,14 +96,18 @@ def render(id):
         return render_template('render.html',
                 picture=picture,
                 pixels=json.dumps(pixels.to_hash()),
-                group_size=current_app.config['GROUP_SIZE']
+                group_size=current_app.config['GROUP_SIZE'],
+                export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
+                palette=json.dumps(Palette.load_from_db(picture)),
             )
     else:
         return render_template('render.html',
                 picture=picture,
                 pixels=json.dumps(pixels.to_hash()),
                 access_token=g.user.access_token,
-                group_size=current_app.config['GROUP_SIZE']
+                group_size=current_app.config['GROUP_SIZE'],
+                export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
+                palette=json.dumps(Palette.load_from_db(picture)),
             )
 
 
@@ -116,30 +121,36 @@ def preview(id):
     return send_file('../' + picture.get_full_path())
 
 
-@app.route('/palette/<id>', methods=['GET', 'POST', 'DELETE'])
+@app.route('/pic/<id>/export')
+def export(id):
+    try:
+        picture = Picture.get(Picture.id==id)
+    except Picture.NotFound:
+        return 'Not found', 404
+
+    return send_file('../' + picture.get_export_path())
+
+
+@app.route('/palette/<id>', methods=['POST', 'DELETE'])
 def palette(id):
     try:
         picture = Picture.get(Picture.id==id)
     except Picture.NotFound:
         return 'Not found', 404
 
-    if request.method == 'GET':
-        data = Palette.load_from_db(picture)
-        return jsonify(**data)
-    elif not g.authorized:
+    if not g.authorized or picture.user.id != g.user.id:
         return 'error', 500
-    elif picture.user.id != g.user.id:
-        return 'error', 500
-    else:
-        if request.method == 'POST':
-            if (Palette.save_to_db(picture, request.form['palette'])):
-                return jsonify(result='ok')
-            else:
-                return jsonify(error='wrong data'), 500
-        else: #request.method == 'DELETE':
-            os.remove(picture.get_full_path())
-            Palette.remove_from_db(picture)
+
+    if request.method == 'POST':
+        if (Palette.save_to_db(picture, request.form['palette'])):
             return jsonify(result='ok')
+        else:
+            return jsonify(error='wrong data'), 500
+    else: #request.method == 'DELETE':
+        os.remove(picture.get_full_path())
+        os.remove(picture.get_export_path())
+        Palette.remove_from_db(picture)
+        return jsonify(result='ok')
 
 
 def allowed_file(filename):
@@ -155,8 +166,15 @@ def upload():
     if f and allowed_file(f.filename):
         with get_db().atomic() as txn:
             pic = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
-            picture = Picture.create(user=g.user, width=pic.size[0], height=pic.size[1])
+            picture = Picture.create(
+                user=g.user,
+                width=pic.size[0],
+                height=pic.size[1])
             pic.save(picture.get_full_path())
+
+            export = ImageHelper.new_export_image(pic.size[0], pic.size[1])
+            export.save(picture.get_export_path())
+
         return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:
         return jsonify(result='error'), 500

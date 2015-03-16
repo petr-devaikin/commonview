@@ -1,6 +1,4 @@
-define(['libs/d3'], function(d3) {
-    var MINI_PHOTO_SIZE = 13;
-
+define(['libs/d3', 'settings'], function(d3, settings) {
     function setZoomer() {
         var zoom = d3.select('#zoom');
 
@@ -9,8 +7,8 @@ define(['libs/d3'], function(d3) {
             if (e.x >= photoBounds.left && e.x  <= photoBounds.right &&
                 e.y >= photoBounds.top && e.y  <= photoBounds.bottom) {
 
-                var photoX = Math.floor((e.x - photoBounds.left) / MINI_PHOTO_SIZE),
-                    photoY = Math.floor((e.y - photoBounds.top) / MINI_PHOTO_SIZE);
+                var photoX = Math.floor((e.x - photoBounds.left) / settings.miniPhotoSize),
+                    photoY = Math.floor((e.y - photoBounds.top) / settings.miniPhotoSize);
 
                 var photo = d3.select('.miniPhoto[column=\'' + photoX + '\'][row=\'' + photoY + '\']');
                 if (!photo.empty() && photo.datum().image !== undefined) {
