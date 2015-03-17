@@ -24,9 +24,6 @@
         {% if picture.tag %}
             <p id="tagName">#{{ picture.tag }}</p>
         {% endif %}
-
-        <a href="#" id="exportButton">export</a>
-        <a id="downloader" href="#">download</a>
     </div>
     <div id="rightColumn">
         <div id="mainPhoto" class="width{{ (picture.width / group_size) | round(0, 'ceil') | int }} height{{ (picture.height / group_size) | round(0, 'ceil') | int }}"></div>

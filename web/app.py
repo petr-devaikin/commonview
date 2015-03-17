@@ -118,7 +118,6 @@ def render(id):
                 )
     else:
         os.remove(picture.get_full_path())
-        os.remove(picture.get_export_path())
         Palette.remove_from_db(picture)
         return jsonify(result='ok')
 
@@ -141,7 +140,19 @@ def export(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    return send_file('../' + picture.get_export_path())
+    export_size = current_app.config['EXPORT_GROUP_SIZE']
+    width = picture.width * export_size / current_app.config['GROUP_SIZE']
+    height = picture.height * export_size / current_app.config['GROUP_SIZE']
+
+    img = Image.new('RGBA', (width, height))
+    for f in picture.fragments:
+        fimg = Image.fromstring('RGB', (export_size, export_size), f.high_pic, 'raw')
+        img.paste(fimg, (f.x * export_size, f.y * export_size))
+
+    img_io = cStringIO.StringIO()
+    img.save(img_io, 'JPEG', quality=70)
+    img_io.seek(0)
+    return send_file(img_io, mimetype='image/jpeg')
 
 
 @app.route('/palette/<id>', methods=['POST'])

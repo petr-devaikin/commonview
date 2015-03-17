@@ -197,23 +197,5 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 }
             );
             */
-
-            /*
-            d3.select('#exportButton').on('click', function() {
-                d3.event.preventDefault();
-                //facebook.postOnWall();
-                exporter({
-                    palette: palette,
-                    onProcess: function(percentage) {
-                        console.log(percentage);
-                    },
-                    onComplete: function(canvas) {
-                        console.log('export complete');
-                        var link = document.getElementById('downloader');
-                        link.href = canvas.toDataURL();
-                        link.download = 'pazzla.png';
-                    }
-                });
-            }); */
         }
     });
