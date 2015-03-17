@@ -1,10 +1,7 @@
-define(['libs/instafeed', 'colorimage', 'helpers', 'settings'],
-    function(instafeed, ColorImage, helpers, settings) {
+define(['libs/instafeed', 'proxy', 'settings'],
+    function(instafeed, proxy, settings) {
     return function(params) {
-        // params: accessToken, onListReceived, onPhotoLoaded, onComplete, onEmpty
-
-        var stopped = true;
-
+        // params: accessToken, picId, onListReceived, onPhotoLoaded, onComplete, onEmpty
         var feed = undefined;
 
         this._onSuccess = function(picgrabber) {
@@ -17,61 +14,47 @@ define(['libs/instafeed', 'colorimage', 'helpers', 'settings'],
                 for (var i = 0; i < photos.data.length; i++) {
                     var instaImage = photos.data[i];
 
-                    var imageProcessed = function(picgrabber, colorImage) {
-                        return function(img) {                         
-                            colorImage.color = helpers.getImgDataColorsFromImage(img);
-                            colorImage.exportData = helpers.getExportFragmentFromImage(img);
+                    function imageProcessed(newImage) {
+                        if (params.onPhotoLoaded !== undefined) 
+                            params.onPhotoLoaded(newImage);
 
-                            if (params.onPhotoLoaded !== undefined) 
-                                params.onPhotoLoaded(colorImage);
-
-                            if (--uncomplete == 0) {
-                                if (params.onComplete !== undefined)
-                                    params.onComplete(stopped);
-                                if (!stopped && !feed.next() && params.onEmpty !== undefined)
-                                    params.onEmpty();
-                            }
-                        }
-                    } (
-                        this,
-                        new ColorImage(
-                            instaImage.id,
-                            instaImage.images.thumbnail.url,
-                            instaImage.link,
-                            instaImage.user.username
-                        )
-                    );
-
-                    function imageFailed(picgrabber) {
                         if (--uncomplete == 0) {
                             if (params.onComplete !== undefined)
-                                params.onComplete(stopped);
+                                params.onComplete();
+                        }
+                    } 
 
-                            if (!stopped)
-                                feed.next();
+                    function imageFailed() {
+                        console.log('Cannot load new image');
+                        if (--uncomplete == 0) {
+                            if (params.onComplete !== undefined)
+                                params.onComplete();
                         }
                     }
 
                     var palette = this;
-                    helpers.loadImgByUrl({
-                        url: instaImage.images.thumbnail.url,
-                        success: imageProcessed,
-                        error: imageFailed,
-                    });
-                    //////palette.addPhoto(colorImage, imageProcessed, imageFailed);
+                    proxy.getImageColor(
+                        params.picId,
+                        {
+                            insta_id: instaImage.id,
+                            insta_img: instaImage.images.thumbnail.url,
+                            insta_url: instaImage.link,
+                            insta_user: instaImage.user.username,
+                        },
+                        imageProcessed,
+                        imageFailed
+                    );
                 }
             }
         } (this);
 
         this.start = function(tagName, nextTag) {
-            stopped = false;
-
             feed = new Instafeed({
                 accessToken: params.accessToken,
                 get: 'tagged',
                 tagName: tagName,
                 sortBy: 'most-recent',
-                limit: 60,
+                limit: settings.uploadStep,
                 success: this._onSuccess,
                 error: params.onEmpty,
                 mock: true,
@@ -86,10 +69,6 @@ define(['libs/instafeed', 'colorimage', 'helpers', 'settings'],
             });
 
             feed.run();
-        }
-
-        this.stop = function() {
-            stopped = true;
         }
     }
 })

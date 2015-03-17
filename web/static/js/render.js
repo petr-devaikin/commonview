@@ -19,12 +19,13 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             interruptionPanel = d3.select('#interruptionPanel'),
             savingPanel = d3.select('#savingPanel');
 
+        var isStopped = true;
 
-        function loadPalette(paletteData, exportImgUrl) {
+
+        function loadPalette(paletteData) {
             console.log(paletteData);
             palette.load({
                 data: paletteData,
-                exportImgUrl: exportImgUrl,
                 checkDeleted: true,
                 onInit: function() {
                     //drawing.drawPalette(palette);
@@ -59,13 +60,15 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             });
         }
 
-        function savePalette() {
+        function savePalette(success, error) {
             palette.save({
                 onSuccess: function() {
                     console.log('Palette saved');
+                    if (success !== undefined) success();
                 },
                 onError: function() {
                     console.log('Palette saving error');
+                    if (error !== undefined) error();
                 }
             });
         }
@@ -83,14 +86,15 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             });
         }
 
-        return function(accessToken, pic_id, picture, paletteData, exportImgUrl) {
+        return function(accessToken, pic_id, picture, paletteData) {
             var lastSave = undefined;
 
             clearPalette(pic_id, picture);
 
-            loadPalette(paletteData, exportImgUrl);
+            loadPalette(paletteData);
 
             var picGrabber = new PicGrabber({
+                picId: pic_id,
                 accessToken: accessToken,
                 onListReceived: function(nextTag) {
                     palette.next_max_tag_id = nextTag;
@@ -101,7 +105,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                     if (palette.globalDiff == 0)
                         picGrabber.stop();
                 },
-                onComplete: function(isStopped) {
+                onComplete: function() {
                     drawing.drawPalette(palette);
                     if (isStopped) {
                         savePalette();
@@ -112,9 +116,10 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                         else
                             completePanel.style('display', 'block');
                     }
-                    else if ((new Date()) - lastSave > SAVE_PERIOD) {
-                        lastSave = new Date();
-                        savePalette();
+                    else {
+                        savePalette(function() {
+                            picGrabber.start(palette.tagName, palette.next_max_tag_id);
+                        });
                     }
                 },
                 onEmpty: function(error) {
@@ -126,12 +131,11 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 }
             });
 
-            function startProcess () {
-                lastSave = new Date();
-
+            function startProcess() {
                 if (!palette.tagName)
                     palette.tagName = d3.select('#tagName').property('value');
 
+                isStopped = false;
                 picGrabber.start(palette.tagName, palette.next_max_tag_id);
 
                 d3.select('#tagName').attr('disabled', 'disabled');
@@ -143,21 +147,20 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             resumeButton.on('click', startProcess);
 
             stopButton.on('click', function() {
-                picGrabber.stop();
+                isStopped = true;
 
                 allPanels.style('display', 'none');
                 savingPanel.style('display', 'block');
             })
 
             clearButton.on('click', function() {
-                proxy.clearPalette(pic_id, function() {
-                    clearPalette(pic_id, picture);
-                    drawing.drawPalette(palette);
-                    d3.select('#tagName').attr('disabled', null);
-                    startPanel.style('display', 'block');
-                });
+                clearPalette(pic_id, picture);
+                savePalette();
+                drawing.drawPalette(palette);
 
+                d3.select('#tagName').attr('disabled', null);
                 allPanels.style('display', 'none');
+                startPanel.style('display', 'block');
             });
 
             deleteButton.on('click', deletePalette);
@@ -179,6 +182,21 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             });
 
             drawing.setZoomer();
+
+            /*
+            proxy.getImageColor(
+                pic_id,
+                {
+                    insta_id: '123',
+                    insta_img: 'https://scontent-ams.cdninstagram.com/hphotos-xaf1/t51.2885-15/e15/11024323_354048768115499_2017163424_n.jpg',
+                    insta_url: 'qweqweqwe',
+                    insta_user: 'user',
+                },
+                function(result) {
+                    console.log(result);
+                }
+            );
+            */
 
             /*
             d3.select('#exportButton').on('click', function() {

@@ -30,9 +30,6 @@
     </div>
     <div id="rightColumn">
         <div id="mainPhoto" class="width{{ (picture.width / group_size) | round(0, 'ceil') | int }} height{{ (picture.height / group_size) | round(0, 'ceil') | int }}"></div>
-
-        <canvas id="exportCanvas" width="{{ picture.width * export_pic_size / group_size }}"
-                height="{{ picture.height * export_pic_size / group_size }}"></canvas>
     </div>
 
     <div id="zoom">

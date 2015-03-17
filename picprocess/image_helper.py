@@ -12,30 +12,4 @@ class ImageHelper:
         elif h >= w and h > max_size:
             img.thumbnail((w * max_size / h, max_size))
         return img
-
-    @staticmethod
-    def new_export_image(width, height):
-        return Image.new('RGBA',
-            (width * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE'],
-             height * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE']))
-
-    @staticmethod
-    def draw_fragment(original, x, y, data):
-        width = current_app.config['EXPORT_GROUP_SIZE']
-        img = Image.new('RGB', (width, width))
-        pixels = [tuple(data[i:i+3]) for i in xrange(0, 3 * width * width, 3)]
-        img.putdata(pixels)
-        original.paste(img, (int(x) * current_app.config['EXPORT_GROUP_SIZE'],
-                             int(y) * current_app.config['EXPORT_GROUP_SIZE']))
- 
-    #@staticmethod
-    #def save_export_image(path, data, width, height):
-    #    st = StringIO.StringIO(data[22:].decode('base64'))
-    #    export = Image.open(st)
-    #    #Check image size 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #    export.save(path)
-
-    @staticmethod
-    def load_image(path):
-        return Image.open(path)
         

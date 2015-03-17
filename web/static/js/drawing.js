@@ -18,7 +18,7 @@ define(['libs/d3', 'settings'], function(d3, settings) {
                         .style('left', e.pageX + 'px')
                         .style('top', e.pageY + 'px');
 
-                    zoom.select('#username').text('@' + photo.datum().image.userName);
+                    zoom.select('#username').text('@' + photo.datum().image.instaUser);
                 }
                 else {
                     zoom.style('display', null);
@@ -30,11 +30,11 @@ define(['libs/d3', 'settings'], function(d3, settings) {
     }
 
     function setBackground(d) {
-        return d.image ? 'url(' + d.image.imageUrl + ')' : 'none';
+        return d.image ? 'url(' + d.image.instaImg + ')' : 'none';
     }
 
     function setHref(d) {
-        return d.image ? 'https://instagram.com/p/' + d.image.link + '/' : '#';
+        return d.image ? 'https://instagram.com/p/' + d.image.instaUrl + '/' : '#';
     }
 
     function setDisplay(d) {
@@ -66,7 +66,7 @@ define(['libs/d3', 'settings'], function(d3, settings) {
 
     function updateAccuracy(palette) {
         var v = palette.globalDiff ? (100 * (255 - palette.globalDiff) / 255) : 0;
-        console.log(v);
+        console.log('Accurancy: ' + v);
         d3.selectAll('.accuracyPercentage')
             .text(v.toFixed(1) + '%')
             .style('color', 'hsl(' + (120 * v / 100) + ', 50%, 60%)');

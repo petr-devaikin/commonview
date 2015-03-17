@@ -1,4 +1,4 @@
-define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
+define(['libs/d3', 'libs/qwest', 'proxy'], function(d3, qwest, proxy) {
     return function() {
         d3.selectAll('.delete').on('click', function() {
             d3.event.preventDefault();

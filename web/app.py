@@ -12,6 +12,8 @@ from picprocess.palette import Palette
 import os
 import urllib2
 import io
+import cStringIO
+from PIL import Image
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -142,7 +144,7 @@ def export(id):
     return send_file('../' + picture.get_export_path())
 
 
-@app.route('/palette/<id>', methods=['POST', 'DELETE'])
+@app.route('/palette/<id>', methods=['POST'])
 def palette(id):
     try:
         picture = Picture.get(Picture.id==id)
@@ -152,14 +154,11 @@ def palette(id):
     if not g.authorized or picture.user.id != g.user.id:
         return 'error', 500
 
-    if request.method == 'POST':
-        if (Palette.save_to_db(picture, request.form['palette'])):
-            return jsonify(result='ok')
-        else:
-            return jsonify(error='wrong data'), 500
-    else: #request.method == 'DELETE':
-        Palette.clear(picture)
+    if (Palette.save_to_db(picture, request.form['palette'])):
+        print picture.fragments.where(Fragment.x == None).count()
         return jsonify(result='ok')
+    else:
+        return jsonify(error='wrong data'), 500
 
 
 def allowed_file(filename):
@@ -180,27 +179,52 @@ def upload():
                 width=pic.size[0],
                 height=pic.size[1])
             pic.save(picture.get_full_path())
-
-            export = ImageHelper.new_export_image(pic.size[0], pic.size[1])
-            export.save(picture.get_export_path())
-
         return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:
         return jsonify(result='error'), 500
 
 
-@app.route('/img')
-def img():
-    if not g.authorized: return 'error', 500
-    
-    url = request.args.get('url')
+@app.route('/img/<id>')
+def img(id):
     try:
-        f = urllib2.urlopen(url).read()
+        picture = Picture.get(Picture.id==id)
+    except Picture.DoesNotExist:
+        return 'Not found', 404
+
+    if not g.authorized or picture.user.id != g.user.id: return 'error', 500
+    
+    insta_img = request.args.get('insta_img')
+    insta_id = request.args.get('insta_id')
+    insta_url = request.args.get('insta_url').split('/')[-2] # remain just id
+    insta_user = request.args.get('insta_user')
+
+    try:
+        f = cStringIO.StringIO(urllib2.urlopen(insta_img).read())
+        img = Image.open(f)
+
+        img.thumbnail((current_app.config['EXPORT_GROUP_SIZE'], current_app.config['EXPORT_GROUP_SIZE']))
+        high_pic = img.tostring('raw', 'RGB')
+
+        img.thumbnail((current_app.config['GROUP_SIZE'], current_app.config['GROUP_SIZE']))
+        low_pic = img.tostring('raw', 'RGB')
+
+        while picture.fragments.where(Fragment.x == None).count() > current_app.config['MAX_CACHED_PHOTOS']:
+            picture.fragments.where(Fragment.x == None).first().delete_instance()
+
+        fragment = Fragment.create(picture=picture,
+                                   insta_img=insta_img,
+                                   insta_id=insta_id,
+                                   insta_url=insta_url,
+                                   insta_user=insta_user,
+                                   high_pic=high_pic,
+                                   low_pic=low_pic)
+
+         #''.join(chr(x) for x in olololo)
+
+        return jsonify(fragment.to_hash())
     except urllib2.HTTPError:
         return 'Not found', 404
-    response = make_response(f)
-    response.headers['Content-Type'] = 'image/jpeg'
-    return response
+
 
 
 if __name__ == '__main__':

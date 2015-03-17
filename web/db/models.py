@@ -28,9 +28,6 @@ class Picture(Model):
     def get_full_path(self):
         return os.path.join(current_app.config['UPLOAD_FOLDER'], self.get_path())
 
-    def get_export_path(self):
-        return os.path.join(current_app.config['UPLOAD_FOLDER'], 'e_'+self.get_path())
-
     def diff_percentage(self):
         return round(100 * (255 - self.global_diff) / 255, 1) if self.global_diff != None else 0
 
@@ -40,46 +37,29 @@ class Picture(Model):
 
 class Fragment(Model):
     picture = ForeignKeyField(Picture, related_name='fragments')
-    x = IntegerField()
-    y = IntegerField()
-    diff = IntegerField()
+    x = IntegerField(null=True)
+    y = IntegerField(null=True)
+    diff = IntegerField(null=True)
     insta_id = CharField()
     insta_img = CharField()
     insta_url = CharField()
     insta_user = CharField()
+    low_pic = BlobField()
+    high_pic = BlobField()
 
     def to_hash(self):
         return {
-            'x': self.x,
-            'y': self.y,
+            'id': self.id,
+            #'x': self.x,
+            #'y': self.y,
             'diff': self.diff,
-            'image': {
-                'id': self.insta_id,
-                'imageUrl': self.insta_img,
-                'link': self.insta_url,
-                'userName': self.insta_user,
-            }
+            'instaId': self.insta_id,
+            'instaImg': self.insta_img,
+            'instaUrl': self.insta_url,
+            'instaUser': self.insta_user,
+            'lowPic': [ord(c) for c in self.low_pic]
         }
-
-    def from_hash(self, data):
-        self.x = data['x']
-        self.y = data['y']
-        self.diff = data['diff']
-
-        self.insta_id = data['image']['id']
-        self.insta_img = data['image']['imageUrl']
-        
-        self.insta_url = data['image']['link']
-        if not current_app.config['ALLOWED_INSTA_URL'].match(self.insta_url):
-            return False
-        
-        self.insta_user = data['image']['userName']
-
-        return True
 
 
     class Meta:
         database = get_db()
-        indexes = (
-            (('picture', 'x', 'y'), True),
-        )

@@ -10,9 +10,6 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
         this.globalDiff = 255;
         this.tagName = undefined;
 
-        var exportCanvas = document.getElementById('exportCanvas'),
-            exportCtx = exportCanvas.getContext('2d');
-
 
         for (var i = 0; i < picture.pixels.length; i++) {
             var x = picture.pixels[i].x,
@@ -38,16 +35,15 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
 
 
         this._toHash = function() {
-            var trueGroups = {};
-            for (var i = 0; i < this.groups.length; i++) {
-                var groupHash = this.groups[i].toHash();
-                if (groupHash !== undefined) {
-                    if (trueGroups[groupHash.x] === undefined)
-                        trueGroups[groupHash.x] = {};
-                    trueGroups[groupHash.x][groupHash.y] = groupHash;
-                    groupHash.changed = false;
-                }
-            }
+            var trueGroups = [];
+            for (var i = 0; i < this.groups.length; i++)
+                if (this.groups[i].image)
+                    trueGroups.push({
+                        x: this.groups[i].x,
+                        y: this.groups[i].y,
+                        id: this.groups[i].image.id,
+                        diff: this.groups[i].image.diff
+                    });
             return {
                 groups: trueGroups,
                 globalDiff: this.globalDiff,
@@ -83,7 +79,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                 if (picsLeft > 0) {
                     var group = queue.pop();
                     helpers.loadImgByUrl({
-                        url: group.image.imageUrl,
+                        url: group.image.instaImg,
                         useProxy: false,
                         success: function(img) {
                             group.loading = false;
@@ -99,39 +95,23 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                 }
             }
 
+            for (var x in data.groups)
+                for (var y in data.groups[x]) {
+                    var g = groupIndex[x][y];
+                    g.loading = true;
+                    g.fromHash(data.groups[x][y]);
 
-            var exportImage = new Image();
-            exportImage.src = params.exportImgUrl;
-            exportImage.onload = function() {
-                console.log('Export image loaded');
-                exportCtx.drawImage(exportImage, 0, 0);
+                    if (params.checkDeleted) {
+                        maxCounter++;
 
-                for (var x in data.groups)
-                    for (var y in data.groups[x]) {
-                        var g = groupIndex[x][y];
-                        g.loading = true;
-                        g.fromHash(data.groups[x][y]);
-
-                        if (params.checkDeleted) {
-                            g.image.color = helpers.getImgDataColorsFromCanvas(exportCtx, x, y);
-                            if (g.image.color === undefined) {
-                                console.log('Cannot get photo info from canvas');
-                                g.loading = false;
-                                g.image = undefined;
-                            }
-                            else {
-                                maxCounter++;
-
-                                queue.push(g);
-                                if (maxCounter <= MAX_LOADS)
-                                    processNext();
-                            }
-                        }
+                        queue.push(g);
+                        if (maxCounter <= MAX_LOADS)
+                            processNext();
                     }
+                }
 
-                if (maxCounter == 0 && params.onComplete !== undefined)
-                    params.onComplete();
-            }
+            if (maxCounter == 0 && params.onComplete !== undefined)
+                params.onComplete();
 
             if (params.onInit !== undefined) params.onInit();
         }
@@ -139,7 +119,6 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
 
         this.save = function(params) {
             // params: onSuccess, onError
-
             var hash = JSON.stringify(this._toHash());
             proxy.savePalette(
                 this.picture_id,
@@ -150,40 +129,41 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
         }
 
 
-        this.addPhoto = function(colorImage) {
-            var freeMedia = colorImage;
+        this.addPhoto = function(newImage) {
+            var freeImage = newImage;
             
             for (var i = 0; i < this.groups.length; i++) {
                 var g = this.groups[i];
                 if (g.loading)
                     continue;
 
-                var diff = g.calcDiff(freeMedia.color);
+                var diff = g.calcDiff(freeImage.lowPic);
 
-                if (g.diff > diff || g.image === undefined) {
+                if (g.image === undefined || g.image.diff > diff) {
                     if (g.image !== undefined) {
                         var tmp = g.image;
-                        g.image = freeMedia;
-                        g.diff = diff;
-                        freeMedia = tmp;
-                        if (!g.changed) // if not chenged before, load image data
-                            freeMedia.exportData = helpers.getExportFragment(exportCtx, g.x, g.y);
-
-                        helpers.drawExportFragment(exportCtx, g.x, g.y, g.image.exportData);
-                        g.changed = true;
+                        g.image = freeImage;
+                        g.image.diff = diff;
+                        freeImage = tmp;
                     }
                     else {
-                        g.image = freeMedia;
-                        g.diff = diff;
-
-                        helpers.drawExportFragment(exportCtx, g.x, g.y, g.image.exportData);
-                        g.changed = true;
+                        g.image = freeImage;
+                        g.image.diff = diff;
                         break;
                     }
                 }
             }
 
-            this.globalDiff = this.groups.reduce(function (a, b) {return a + b.diff; }, 0) / this.groups.length;
+            this.calcDiff();
+        }
+
+        this.calcDiff = function() {
+            this.globalDiff = this.groups.reduce(
+                function (a, b) {
+                    return a + (b.image ? b.image.diff : 255);
+                },
+                0
+            ) / this.groups.length;
         }
     }
 })
