@@ -1,7 +1,6 @@
 from PIL import Image
 import StringIO
 from flask import current_app
-import base64
 
 class ImageHelper:
     @staticmethod
@@ -22,13 +21,9 @@ class ImageHelper:
 
     @staticmethod
     def save_export_image(path, data, width, height):
-        with open(path, "wb") as image_file:
-            image_file.write(data[22:].decode('base64'))
-        #return
-        export = Image.fromstring('RGBA',
-            (width * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE'],
-             height * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE']),
-            data[22:].decode('base64'))
+        st = StringIO.StringIO(data[22:].decode('base64'))
+        export = Image.open(st)
+        #Check image size 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         export.save(path)
 
     @staticmethod

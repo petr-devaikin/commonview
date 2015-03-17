@@ -1,7 +1,8 @@
-define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, helpers, proxy) {
+define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
+    function(PixelGroup, helpers, proxy, d3, settings) {
     var MAX_LOADS = 20;
 
-    return function(picture_id, picture, groupSize) {
+    return function(picture_id, picture) {
         this.picture_id = picture_id;
         this.groups = [];
         var groupIndex = {};
@@ -17,20 +18,20 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
             var x = picture.pixels[i].x,
                 y = picture.pixels[i].y,
                 color = picture.pixels[i].color,
-                gX = Math.floor(x/groupSize),
-                gY = Math.floor(y/groupSize);
+                gX = Math.floor(x/settings.groupSize),
+                gY = Math.floor(y/settings.groupSize);
 
             if (groupIndex[gX] === undefined)
                 groupIndex[gX] = {};
             var pixelGroup = groupIndex[gX][gY];
 
             if (pixelGroup === undefined) {
-                pixelGroup = new PixelGroup(groupSize, gX, gY);
+                pixelGroup = new PixelGroup(gX, gY);
                 this.groups.push(pixelGroup);
                 groupIndex[gX][gY] = pixelGroup;
             }
 
-            pixelGroup.addPixel(x % groupSize, y % groupSize, color);
+            pixelGroup.addPixel(x % settings.groupSize, y % settings.groupSize, color);
         }
 
         d3.shuffle(this.groups);
@@ -85,14 +86,12 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                         url: group.image.imageUrl,
                         useProxy: false,
                         success: function(img) {
-                            //console.log('Old photo loaded');
                             group.loading = false;
                             processNext();
                         },
                         error: function() {
                             console.log('Old photo not found');
                             group.loading = false;
-                            //group.diff = 255;
                             group.image = undefined;
                             processNext();
                         }
@@ -104,6 +103,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
             var exportImage = new Image();
             exportImage.src = params.exportImgUrl;
             exportImage.onload = function() {
+                console.log('Export image loaded');
                 exportCtx.drawImage(exportImage, 0, 0);
 
                 for (var x in data.groups)
@@ -113,12 +113,19 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3'], function(PixelGroup, help
                         g.fromHash(data.groups[x][y]);
 
                         if (params.checkDeleted) {
-                            g.color = helpers.getImgDataColorsFromCanvas(exportCtx, x, y);
-                            maxCounter++;
+                            g.image.color = helpers.getImgDataColorsFromCanvas(exportCtx, x, y);
+                            if (g.image.color === undefined) {
+                                console.log('Cannot get photo info from canvas');
+                                g.loading = false;
+                                g.image = undefined;
+                            }
+                            else {
+                                maxCounter++;
 
-                            queue.push(g);
-                            if (maxCounter <= MAX_LOADS)
-                                processNext();
+                                queue.push(g);
+                                if (maxCounter <= MAX_LOADS)
+                                    processNext();
+                            }
                         }
                     }
 

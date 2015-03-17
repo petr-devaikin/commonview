@@ -1,8 +1,7 @@
 define(['libs/instafeed', 'colorimage', 'helpers', 'settings'],
     function(instafeed, ColorImage, helpers, settings) {
     return function(params) {
-        // params: groupSize, accessToken,
-        // onListReceived, onPhotoLoaded, onComplete, onEmpty
+        // params: accessToken, onListReceived, onPhotoLoaded, onComplete, onEmpty
 
         var stopped = true;
 
@@ -20,7 +19,7 @@ define(['libs/instafeed', 'colorimage', 'helpers', 'settings'],
 
                     var imageProcessed = function(picgrabber, colorImage) {
                         return function(img) {                         
-                            colorImage.color = helpers.getImgDataColorsFromImage(img, params.groupSize);
+                            colorImage.color = helpers.getImgDataColorsFromImage(img);
                             colorImage.exportData = helpers.getExportFragmentFromImage(img);
 
                             if (params.onPhotoLoaded !== undefined) 
@@ -29,9 +28,8 @@ define(['libs/instafeed', 'colorimage', 'helpers', 'settings'],
                             if (--uncomplete == 0) {
                                 if (params.onComplete !== undefined)
                                     params.onComplete(stopped);
-                                if (!stopped)
-                                    if (!feed.next() && params.onEmpty !== undefined)
-                                        params.onEmpty();
+                                if (!stopped && !feed.next() && params.onEmpty !== undefined)
+                                    params.onEmpty();
                             }
                         }
                     } (

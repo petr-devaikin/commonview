@@ -1,9 +1,8 @@
-define([], function() {
-    return function(size, x, y) {
-        this.size = size;
+define(['settings'], function(settings) {
+    return function(x, y) {
         this.x = x;
         this.y = y;
-        this.pixels = new Array(3 * this.size * this.size);
+        this.pixels = new Array(3 * settings.groupSize * settings.groupSize);
         this.image = undefined;
         this.diff = 255;
         this.loading = false;
@@ -20,9 +19,9 @@ define([], function() {
         }
 
         this.addPixel = function(dX, dY, color) {
-            this.pixels[3 * (dY * this.size + dX)] = color[0];
-            this.pixels[3 * (dY * this.size + dX) + 1] = color[1];
-            this.pixels[3 * (dY * this.size + dX) + 2] = color[2];
+            this.pixels[3 * (dY * settings.groupSize + dX)] = color[0];
+            this.pixels[3 * (dY * settings.groupSize + dX) + 1] = color[1];
+            this.pixels[3 * (dY * settings.groupSize + dX) + 2] = color[2];
         }
 
         this.toHash = function() {

@@ -38,11 +38,11 @@ define(['proxy', 'settings'], function(proxy, settings) {
 
             image.src = _useProxy ? proxy.getImageUrl(params.url) : params.url;
         },
-        
-        getImgDataColorsFromImage: function(img, groupSize) {
+
+        getImgDataColorsFromImage: function(img) {
             ctx.drawImage(img, 0, 0, img.width, img.height,
-                               0, 0, groupSize, groupSize);
-            var imgData = ctx.getImageData(0, 0, groupSize, groupSize); 
+                               0, 0, settings.groupSize, settings.groupSize);
+            var imgData = ctx.getImageData(0, 0, settings.groupSize, settings.groupSize); 
             return RGBfromRGBA(imgData);
         },
         getImgDataColorsFromCanvas: function(exportCtx, x, y) {

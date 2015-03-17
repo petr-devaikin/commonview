@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+
+{% block style %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+
+{% block script %}
+    <script>
+        require(['index', 'upload'], function(index, upload) {
+            index();
+            {% if can_upload %}
+                upload({{ max_size }});
+            {% endif %}
+        })
+    </script>
+{% endblock %}
+
+
+{% block body %}
+    <div id="leftColumn">&nbsp;</div>
+    <div id="rightColumn">
+        <p>You can upload up to {{ max_count }} pictures</p>
+        <div id="pictures">
+            {% if can_upload %}
+                <div class="picture" id="new">
+                    <input type="file" style="display:none;" id="inputfile"/>
+                    <div class="original">
+                        Choose photo or drug it here to upload
+                    </div>
+                    <p>JPEG or PNG</p>
+                    <p>Up to {{ (max_size / 1024 / 1024) | int }}Mb</p>
+                    <p id="uploadError"></p>
+                </div>
+            {% endif %}
+            {% for p in g.user.pictures | reverse %}
+                <div class="picture">
+                    <div class="original" style="background-image: url({{ url_for('preview', id=p.id) }});">
+                        <a class="pictureLink" href="{{ url_for('render', id=p.id) }}">
+                        </a>
+                        <a class="delete" href="{{ url_for('palette', id=p.id) }}">Delete</a>
+                    </div>
+                    {% if p.tag %}
+                        <p class="tag">#{{ p.tag }}</p>
+                        <p class="accuracy" style="color: hsl({{ 120 * p.diff_percentage() / 100 }}, 35%, 75%)">
+                            Accuracy: {{ p.diff_percentage() }}%
+                        </p>
+                    {% else %}
+                        <p class="tag notSpecified">Tag is not specified</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+
+        <div id="uploader">
+            <div id="uploaderHelp">Drop picture to upload</div>
+        </div>
+    </div>
+{% endblock %}

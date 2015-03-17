@@ -1,6 +1,6 @@
 define(['palette', 'drawing'], function(Palette, drawing) {
-    return function(pic_id, picture, paletteData, exportImgUrl, groupSize) {
-        var palette = new Palette(pic_id, picture, groupSize);
+    return function(pic_id, picture, paletteData, exportImgUrl) {
+        var palette = new Palette(pic_id, picture);
 
         palette.load({
             data: paletteData,

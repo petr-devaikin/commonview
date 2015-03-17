@@ -69,9 +69,9 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             });
         }
 
-        function clearPalette(pic_id, picture, groupSize) {
+        function clearPalette(pic_id, picture) {
             console.log('Start');
-            palette = new Palette(pic_id, picture, groupSize);
+            palette = new Palette(pic_id, picture);
             console.log('Generated');
             return palette;
         }
@@ -82,16 +82,15 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             });
         }
 
-        return function(accessToken, pic_id, picture, paletteData, exportImgUrl, groupSize) {
+        return function(accessToken, pic_id, picture, paletteData, exportImgUrl) {
             var lastSave = undefined;
 
-            clearPalette(pic_id, picture, groupSize);
+            clearPalette(pic_id, picture);
 
             loadPalette(paletteData, exportImgUrl);
 
             var picGrabber = new PicGrabber({
                 accessToken: accessToken,
-                groupSize: groupSize,
                 onListReceived: function(nextTag) {
                     palette.next_max_tag_id = nextTag;
                 },
@@ -150,7 +149,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             })
 
             clearButton.on('click', function() {
-                clearPalette(pic_id, picture, groupSize);
+                clearPalette(pic_id, picture);
                 drawing.drawPalette(palette);
                 savePalette();
 

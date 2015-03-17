@@ -79,11 +79,14 @@ def insta_code():
 
 @app.route('/')
 def index():
-    can_upload = g.authorized and g.user.pictures.count() < current_app.config['MAX_UPLOADS'] 
-    return render_template('index.html',
-        can_upload=can_upload,
-        max_count=current_app.config['MAX_UPLOADS'],
-        max_size=current_app.config['MAX_CONTENT_LENGTH'])
+    if g.authorized:
+        can_upload = g.user.pictures.count() < current_app.config['MAX_UPLOADS'] 
+        return render_template('pictures.html',
+            can_upload=can_upload,
+            max_count=current_app.config['MAX_UPLOADS'],
+            max_size=current_app.config['MAX_CONTENT_LENGTH'])
+    else:
+        return render_template('index.html')
 
 
 @app.route('/pic/<id>')
