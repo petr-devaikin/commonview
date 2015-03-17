@@ -38,6 +38,7 @@ define(['proxy', 'settings'], function(proxy, settings) {
 
             image.src = _useProxy ? proxy.getImageUrl(params.url) : params.url;
         },
+        RGBfromRGBA: RGBfromRGBA,
 
         getImgDataColorsFromImage: function(img) {
             ctx.drawImage(img, 0, 0, img.width, img.height,

@@ -20,11 +20,20 @@ class ImageHelper:
              height * current_app.config['EXPORT_GROUP_SIZE'] / current_app.config['GROUP_SIZE']))
 
     @staticmethod
-    def save_export_image(path, data, width, height):
-        st = StringIO.StringIO(data[22:].decode('base64'))
-        export = Image.open(st)
-        #Check image size 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        export.save(path)
+    def draw_fragment(original, x, y, data):
+        width = current_app.config['EXPORT_GROUP_SIZE']
+        img = Image.new('RGB', (width, width))
+        pixels = [tuple(data[i:i+3]) for i in xrange(0, 3 * width * width, 3)]
+        img.putdata(pixels)
+        original.paste(img, (int(x) * current_app.config['EXPORT_GROUP_SIZE'],
+                             int(y) * current_app.config['EXPORT_GROUP_SIZE']))
+ 
+    #@staticmethod
+    #def save_export_image(path, data, width, height):
+    #    st = StringIO.StringIO(data[22:].decode('base64'))
+    #    export = Image.open(st)
+    #    #Check image size 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #    export.save(path)
 
     @staticmethod
     def load_image(path):

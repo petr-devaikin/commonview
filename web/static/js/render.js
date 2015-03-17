@@ -1,6 +1,6 @@
 define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
     function(d3, Palette, proxy, PicGrabber, drawing) {
-        var SAVE_PERIOD = 1000 * 60;
+        var SAVE_PERIOD = 1000 * 10;
 
         var palette;
 
@@ -21,6 +21,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
 
 
         function loadPalette(paletteData, exportImgUrl) {
+            console.log(paletteData);
             palette.load({
                 data: paletteData,
                 exportImgUrl: exportImgUrl,
@@ -149,13 +150,14 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             })
 
             clearButton.on('click', function() {
-                clearPalette(pic_id, picture);
-                drawing.drawPalette(palette);
-                savePalette();
+                proxy.clearPalette(pic_id, function() {
+                    clearPalette(pic_id, picture);
+                    drawing.drawPalette(palette);
+                    d3.select('#tagName').attr('disabled', null);
+                    startPanel.style('display', 'block');
+                });
 
-                d3.select('#tagName').attr('disabled', null);
                 allPanels.style('display', 'none');
-                startPanel.style('display', 'block');
             });
 
             deleteButton.on('click', deletePalette);

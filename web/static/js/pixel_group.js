@@ -1,4 +1,4 @@
-define(['settings'], function(settings) {
+define(['settings', 'helpers', 'colorimage'], function(settings, helpers, ColorImage) {
     return function(x, y) {
         this.x = x;
         this.y = y;
@@ -6,6 +6,7 @@ define(['settings'], function(settings) {
         this.image = undefined;
         this.diff = 255;
         this.loading = false;
+        this.changed = false;
 
         this.calcDiff = function(colors) {
             var summa = 0;
@@ -25,20 +26,24 @@ define(['settings'], function(settings) {
         }
 
         this.toHash = function() {
-            if (this.image === undefined)
+            if (!this.changed)
                 return undefined;
-            else
+            else {
                 return {
                     x: this.x,
                     y: this.y,
                     diff: this.diff,
-                    image: this.image,
+                    image: this.image.toHash(),
                 }
+            }
         }
 
         this.fromHash = function(data) {
             this.diff = data.diff;
-            this.image = data.image;
+            this.image = new ColorImage(data.image.id,
+                                        data.image.imageUrl,
+                                        data.image.link,
+                                        data.image.userName);
         }
     }
 })

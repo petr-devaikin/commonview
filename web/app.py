@@ -89,36 +89,44 @@ def index():
         return render_template('index.html')
 
 
-@app.route('/pic/<id>')
+@app.route('/pic/<id>', methods=['GET', 'DELETE'])
 def render(id):
     picture = Picture.get(Picture.id == id)
-    pixels = Pixels()
-    pixels.get_pixels_from_img(picture)
 
-    if not g.authorized or picture.user.id != g.user.id:
-        return render_template('render.html',
-                picture=picture,
-                pixels=json.dumps(pixels.to_hash()),
-                group_size=current_app.config['GROUP_SIZE'],
-                export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
-                palette=json.dumps(Palette.load_from_db(picture)),
-            )
+    if request.method == 'GET':
+        pixels = Pixels()
+        pixels.get_pixels_from_img(picture)
+
+        if not g.authorized or picture.user.id != g.user.id:
+            return render_template('showpicture.html',
+                    picture=picture,
+                    pixels=json.dumps(pixels.to_hash()),
+                    group_size=current_app.config['GROUP_SIZE'],
+                    export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
+                    palette=json.dumps(Palette.load_from_db(picture)),
+                )
+        else:
+            return render_template('render.html',
+                    picture=picture,
+                    pixels=json.dumps(pixels.to_hash()),
+                    access_token=g.user.access_token,
+                    group_size=current_app.config['GROUP_SIZE'],
+                    export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
+                    palette=json.dumps(Palette.load_from_db(picture)),
+                )
     else:
-        return render_template('render.html',
-                picture=picture,
-                pixels=json.dumps(pixels.to_hash()),
-                access_token=g.user.access_token,
-                group_size=current_app.config['GROUP_SIZE'],
-                export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
-                palette=json.dumps(Palette.load_from_db(picture)),
-            )
+        os.remove(picture.get_full_path())
+        os.remove(picture.get_export_path())
+        Palette.remove_from_db(picture)
+        return jsonify(result='ok')
+
 
 
 @app.route('/pic/<id>/preview')
 def preview(id):
     try:
         picture = Picture.get(Picture.id==id)
-    except Picture.NotFound:
+    except Picture.DoesNotExist:
         return 'Not found', 404
 
     return send_file('../' + picture.get_full_path())
@@ -128,7 +136,7 @@ def preview(id):
 def export(id):
     try:
         picture = Picture.get(Picture.id==id)
-    except Picture.NotFound:
+    except Picture.DoesNotExist:
         return 'Not found', 404
 
     return send_file('../' + picture.get_export_path())
@@ -138,7 +146,7 @@ def export(id):
 def palette(id):
     try:
         picture = Picture.get(Picture.id==id)
-    except Picture.NotFound:
+    except Picture.DoesNotExist:
         return 'Not found', 404
 
     if not g.authorized or picture.user.id != g.user.id:
@@ -150,9 +158,7 @@ def palette(id):
         else:
             return jsonify(error='wrong data'), 500
     else: #request.method == 'DELETE':
-        os.remove(picture.get_full_path())
-        os.remove(picture.get_export_path())
-        Palette.remove_from_db(picture)
+        Palette.clear(picture)
         return jsonify(result='ok')
 
 

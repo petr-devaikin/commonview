@@ -45,6 +45,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                     if (trueGroups[groupHash.x] === undefined)
                         trueGroups[groupHash.x] = {};
                     trueGroups[groupHash.x][groupHash.y] = groupHash;
+                    groupHash.changed = false;
                 }
             }
             return {
@@ -52,7 +53,6 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                 globalDiff: this.globalDiff,
                 tagName: this.tagName,
                 next_max_tag_id: this.next_max_tag_id,
-                export: exportCanvas.toDataURL(),
             }
         }
 
@@ -166,17 +166,18 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                         g.image = freeMedia;
                         g.diff = diff;
                         freeMedia = tmp;
-                        freeMedia.exportData = helpers.getExportFragment(exportCtx, g.x, g.y);
+                        if (!g.changed) // if not chenged before, load image data
+                            freeMedia.exportData = helpers.getExportFragment(exportCtx, g.x, g.y);
 
                         helpers.drawExportFragment(exportCtx, g.x, g.y, g.image.exportData);
-                        g.image.exportData = undefined;
+                        g.changed = true;
                     }
                     else {
                         g.image = freeMedia;
                         g.diff = diff;
 
                         helpers.drawExportFragment(exportCtx, g.x, g.y, g.image.exportData);
-                        g.image.exportData = undefined;
+                        g.changed = true;
                         break;
                     }
                 }

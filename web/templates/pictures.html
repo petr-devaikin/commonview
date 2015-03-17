@@ -39,7 +39,7 @@
                     <div class="original" style="background-image: url({{ url_for('preview', id=p.id) }});">
                         <a class="pictureLink" href="{{ url_for('render', id=p.id) }}">
                         </a>
-                        <a class="delete" href="{{ url_for('palette', id=p.id) }}">Delete</a>
+                        <a class="delete" href="{{ url_for('render', id=p.id) }}">Delete</a>
                     </div>
                     {% if p.tag %}
                         <p class="tag">#{{ p.tag }}</p>

@@ -40,8 +40,8 @@ class Picture(Model):
 
 class Fragment(Model):
     picture = ForeignKeyField(Picture, related_name='fragments')
-    row = IntegerField()
-    column = IntegerField()
+    x = IntegerField()
+    y = IntegerField()
     diff = IntegerField()
     insta_id = CharField()
     insta_img = CharField()
@@ -50,8 +50,8 @@ class Fragment(Model):
 
     def to_hash(self):
         return {
-            'x': self.column,
-            'y': self.row,
+            'x': self.x,
+            'y': self.y,
             'diff': self.diff,
             'image': {
                 'id': self.insta_id,
@@ -62,8 +62,8 @@ class Fragment(Model):
         }
 
     def from_hash(self, data):
-        self.column = data['x']
-        self.row = data['y']
+        self.x = data['x']
+        self.y = data['y']
         self.diff = data['diff']
 
         self.insta_id = data['image']['id']
@@ -80,3 +80,6 @@ class Fragment(Model):
 
     class Meta:
         database = get_db()
+        indexes = (
+            (('picture', 'x', 'y'), True),
+        )
