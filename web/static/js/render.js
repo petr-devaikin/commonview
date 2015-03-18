@@ -1,7 +1,5 @@
 define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
     function(d3, Palette, proxy, PicGrabber, drawing) {
-        var SAVE_PERIOD = 1000 * 10;
-
         var palette;
 
         var startButton = d3.select('#startButton');
@@ -66,8 +64,8 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                     console.log('Palette saved');
                     if (success !== undefined) success();
                 },
-                onError: function() {
-                    console.log('Palette saving error');
+                onError: function(ex) {
+                    console.log('Palette saving error: ' + ex);
                     if (error !== undefined) error();
                 }
             });
@@ -117,9 +115,16 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                             completePanel.style('display', 'block');
                     }
                     else {
-                        savePalette(function() {
-                            picGrabber.start(palette.tagName, palette.next_max_tag_id);
-                        });
+                        console.log('Start saving');
+                        savePalette(
+                            function() {
+                                picGrabber.start(palette.tagName, palette.next_max_tag_id);
+                            },
+                            function() {
+                                allPanels.style('display', 'none');
+                                resumePanel.style('display', 'block');
+                            }
+                        );
                     }
                 },
                 onEmpty: function(error) {

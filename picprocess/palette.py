@@ -10,7 +10,9 @@ class WrongDataException(Exception):
 class Palette:
     @staticmethod
     def save_to_db(picture, json_data):
+        print 'START SAVING'
         data = json.loads(json_data)
+        print 'CONVERTED'
 
         try:
             with get_db().atomic() as txn:
@@ -19,24 +21,21 @@ class Palette:
                 picture.next_tag_id = data['next_max_tag_id'] if 'next_max_tag_id' in data else None
 
                 picture.save()
+                print 'PICTURE SAVED'
 
                 to_remove = [f.id for f in picture.fragments]
+                print 'ALL FRAGMENTS SELECTED'
 
                 for g in data['groups']:
-                    try:
-                        fragment = Fragment.get(id=g['id'])
-                    except Fragment.DoesNotExist:
-                        raise WrongDataException('Wrong data')
-
-                    fragment.x = g['x']
-                    fragment.y = g['y']
-                    fragment.diff = g['diff']
-                    fragment.save()
-
                     if g['id'] in to_remove:
+                        Fragment.update(x=g['x'], y=g['y'], diff=g['diff']).where(Fragment.id == g['id']).execute()
                         to_remove.remove(g['id'])
+                    else:
+                        raise WrongDataException('Wrong data')
+                print 'ALL FRAGMENTS UPDATED'
 
                 Fragment.delete().where(Fragment.id << to_remove).execute()
+                print 'EXTRA FRAGMENTS REMOVED'
             return True
         except WrongDataException:
             return False

@@ -1,6 +1,7 @@
 from PIL import Image
-import StringIO
+import cStringIO
 from flask import current_app
+import urllib2
 
 class ImageHelper:
     @staticmethod
@@ -12,4 +13,38 @@ class ImageHelper:
         elif h >= w and h > max_size:
             img.thumbnail((w * max_size / h, max_size))
         return img
+
+    @staticmethod
+    def get_new_image(url):
+        try:
+            f = cStringIO.StringIO(urllib2.urlopen(url).read())
+            img = Image.open(f)
+
+            img.thumbnail((current_app.config['EXPORT_GROUP_SIZE'], current_app.config['EXPORT_GROUP_SIZE']))
+            high_pic = img.tostring('raw', 'RGB')
+
+            img.thumbnail((current_app.config['GROUP_SIZE'], current_app.config['GROUP_SIZE']))
+            low_pic = img.tostring('raw', 'RGB')
+
+            return high_pic, low_pic
+        except urllib2.HTTPError:
+            return None
+
+    @staticmethod
+    def compile_image(picture):
+        export_size = current_app.config['EXPORT_GROUP_SIZE']
+        group_size = current_app.config['GROUP_SIZE']
+        width = picture.width * export_size / group_size
+        height = picture.height * export_size / group_size
+
+        img = Image.new('RGBA', (width, height))
+        for f in picture.fragments:
+            fimg = Image.fromstring('RGB', (export_size, export_size), f.high_pic, 'raw')
+            img.paste(fimg, (f.x * export_size, f.y * export_size))
+
+        img_io = cStringIO.StringIO()
+        img.save(img_io, 'JPEG', quality=70)
+        img_io.seek(0)
+
+        return img_io
         

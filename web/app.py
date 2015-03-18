@@ -11,9 +11,6 @@ from picprocess.pixels import Pixels
 from picprocess.palette import Palette
 import os
 import urllib2
-import io
-import cStringIO
-from PIL import Image
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -34,6 +31,9 @@ def get_unauthenticated_api(**kwargs):
 
 @app.before_request
 def before_request():
+    db = get_db()
+    db.connect()
+
     if 'user_id' in session:
         g.authorized = True
         # load from db if not /img or /resize
@@ -41,6 +41,12 @@ def before_request():
     else:
         g.authorized = False
         g.user = None
+
+
+@app.after_request
+def after_request(response):
+    get_db().close()
+    return response
 
 
 @app.route('/login')
@@ -140,19 +146,8 @@ def export(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    export_size = current_app.config['EXPORT_GROUP_SIZE']
-    width = picture.width * export_size / current_app.config['GROUP_SIZE']
-    height = picture.height * export_size / current_app.config['GROUP_SIZE']
-
-    img = Image.new('RGBA', (width, height))
-    for f in picture.fragments:
-        fimg = Image.fromstring('RGB', (export_size, export_size), f.high_pic, 'raw')
-        img.paste(fimg, (f.x * export_size, f.y * export_size))
-
-    img_io = cStringIO.StringIO()
-    img.save(img_io, 'JPEG', quality=70)
-    img_io.seek(0)
-    return send_file(img_io, mimetype='image/jpeg')
+    result = ImageHelper.compile_image(picture)
+    return send_file(result, mimetype='image/jpeg')
 
 
 @app.route('/palette/<id>', methods=['POST'])
@@ -166,7 +161,6 @@ def palette(id):
         return 'error', 500
 
     if (Palette.save_to_db(picture, request.form['palette'])):
-        print picture.fragments.where(Fragment.x == None).count()
         return jsonify(result='ok')
     else:
         return jsonify(error='wrong data'), 500
@@ -204,37 +198,32 @@ def img(id):
 
     if not g.authorized or picture.user.id != g.user.id: return 'error', 500
     
-    insta_img = request.args.get('insta_img')
+    insta_img = request.args.get('insta_img') # check root!
     insta_id = request.args.get('insta_id')
     insta_url = request.args.get('insta_url').split('/')[-2] # remain just id
     insta_user = request.args.get('insta_user')
 
-    try:
-        f = cStringIO.StringIO(urllib2.urlopen(insta_img).read())
-        img = Image.open(f)
+    free_fragments = picture.fragments.where(Fragment.x == None)
+    overcome = free_fragments.count() - current_app.config['MAX_CACHED_PHOTOS']
 
-        img.thumbnail((current_app.config['EXPORT_GROUP_SIZE'], current_app.config['EXPORT_GROUP_SIZE']))
-        high_pic = img.tostring('raw', 'RGB')
+    if overcome >= 0:
+        to_remove = [f.id for f in free_fragments.limit(overcome + 1)]
+        Fragment.delete().where(Fragment.id << to_remove).execute()
 
-        img.thumbnail((current_app.config['GROUP_SIZE'], current_app.config['GROUP_SIZE']))
-        low_pic = img.tostring('raw', 'RGB')
+    result = ImageHelper.get_new_image(insta_img)
 
-        while picture.fragments.where(Fragment.x == None).count() > current_app.config['MAX_CACHED_PHOTOS']:
-            picture.fragments.where(Fragment.x == None).first().delete_instance()
-
+    if result != None:
         fragment = Fragment.create(picture=picture,
                                    insta_img=insta_img,
                                    insta_id=insta_id,
                                    insta_url=insta_url,
                                    insta_user=insta_user,
-                                   high_pic=high_pic,
-                                   low_pic=low_pic)
-
-         #''.join(chr(x) for x in olololo)
+                                   high_pic=result[0],
+                                   low_pic=result[1])
 
         return jsonify(fragment.to_hash())
-    except urllib2.HTTPError:
-        return 'Not found', 404
+    else:
+        return 'Cannot download image', 500
 
 
 
