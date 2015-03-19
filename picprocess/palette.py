@@ -38,14 +38,16 @@ class Palette:
                 rc = rc.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
                 rc = rc.count()
 
-                dlt = Fragment.delete()
-                dlt = dlt.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
-                dlt.execute()
+                if rc:
+                    dlt = Fragment.delete()
+                    dlt = dlt.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
+                    dlt.execute()
 
                 print 'REMOVED: %d' % rc
 
                 to_remove = [f.id for f in picture.fragments.where(Fragment.x == None)]
-                Fragment.delete().where(Fragment.id << to_remove).execute()
+                if len(to_remove) > 0:
+                    Fragment.delete().where(Fragment.id << to_remove).execute()
                 print 'EXTRA FRAGMENTS REMOVED: %d' % len(to_remove)
             return True
         except WrongDataException:
