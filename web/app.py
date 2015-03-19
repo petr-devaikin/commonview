@@ -80,7 +80,7 @@ def insta_code():
 
         session['user_id'] = user.id
 
-        return redirect(url_for('index'))
+        return redirect(url_for('pictures'))
     except Exception as e:
         print e
         return 'error'
