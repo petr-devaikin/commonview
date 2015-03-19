@@ -1,4 +1,4 @@
-DEBUG = False
+DEBUG = True
 
 PREFERRED_URL_SCHEME = 'http'
 
