@@ -1,21 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
-from flask import make_response, g, Response, send_file
+from flask import g, send_file
 from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
 import json
-import peewee
 from instagram import client
 from .db.models import *
 from picprocess.image_helper import ImageHelper
 from picprocess.pixels import Pixels
 from picprocess.palette import Palette
 import os
-import urllib2
+from .env_settings import load_env
 
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('web.default_settings')
-#load_env(app)
+load_env(app)
 app.config.from_pyfile('application.cfg', silent=True)
 
 Scss(app)
