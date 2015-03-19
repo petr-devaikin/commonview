@@ -5,3 +5,5 @@ def load_env(app):
 
     if 'INSTA_ID' in environ: app.config['INSTA_ID'] = environ.get('INSTA_ID')
     if 'INSTA_SECRET' in environ: app.config['INSTA_SECRET'] = environ.get('INSTA_SECRET')
+    
+    if 'SECRET_KEY' in environ: app.config['SECRET_KEY'] = environ.get('SECRET_KEY')
