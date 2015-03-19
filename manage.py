@@ -4,7 +4,6 @@ from web.logger import get_logger
 from web.db import scripts
 
 from web.db.models import *
-from picprocessor import *
 
 from picprocess.pixels import Pixels
 from picprocess.palette import Palette
