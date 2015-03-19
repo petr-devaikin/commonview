@@ -5,3 +5,5 @@ def load_env(app):
 
     if 'INSTA_ID' in environ: app.config['INSTA_ID'] = environ.get('INSTA_ID')
     if 'INSTA_SECRET' in environ: app.config['INSTA_SECRET'] = environ.get('INSTA_SECRET')
+    
+    if 'PREFERRED_URL_SCHEME' in environ: app.config['PREFERRED_URL_SCHEME'] = environ.get('PREFERRED_URL_SCHEME')

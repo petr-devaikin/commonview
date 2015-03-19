@@ -1,5 +1,7 @@
 DEBUG = False
 
+PREFERRED_URL_SCHEME = 'http'
+
 SEND_FILE_MAX_AGE_DEFAULT = 0
 
 import os
