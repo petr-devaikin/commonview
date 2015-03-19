@@ -24,7 +24,10 @@ init_db(app)
 def get_unauthenticated_api(**kwargs):
     return client.InstagramAPI(client_id=current_app.config['INSTA_ID'],
                                client_secret=current_app.config['INSTA_SECRET'],
-                               redirect_uri=url_for('insta_code', _external=True, **kwargs))
+                               redirect_uri=url_for('insta_code',
+                                                    _external=True,
+                                                    _scheme=current_app.config['PREFERRED_URL_SCHEME'],
+                                                    **kwargs))
 
 
 @app.before_request
