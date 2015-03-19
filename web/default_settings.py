@@ -2,8 +2,7 @@ DEBUG = True
 
 SEND_FILE_MAX_AGE_DEFAULT = 0
 
-import os
-SECRET_KEY = os.urandom(24)
+SECRET_KEY = '!\x11\xebG\x12\xe8\xb4\xedF.\x06:g6\x8e\x9e\xcd\xc4k\x94L\xb4)\xa3'
 
 import re
 ALLOWED_INSTA_URL = re.compile('^[a-zA-Z0-9_-]+$')
