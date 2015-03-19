@@ -1,15 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify
-from flask import g, send_file
-from flask.ext.scss import Scss
-from .db.engine import init_db, get_db
+from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify, g, send_file
 import json
 from instagram import client
-from .db.models import *
 from picprocess.image_helper import ImageHelper
 from picprocess.pixels import Pixels
 from picprocess.palette import Palette
 import os
 from .env_settings import load_env
+from flask.ext.scss import Scss
+from .db.engine import init_db, get_db
+from .db.models import *
 
 
 app = Flask(__name__, instance_relative_config=True)
