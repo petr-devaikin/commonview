@@ -1,0 +1,1 @@
+web: gunicorn web.app:app --workers $WEB_CONCURRENCY
