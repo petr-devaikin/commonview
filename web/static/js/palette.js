@@ -1,11 +1,10 @@
 define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
     function(PixelGroup, helpers, proxy, d3, settings) {
-    var MAX_LOADS = 20;
 
     return function(picture_id, picture) {
         this.picture_id = picture_id;
         this.groups = [];
-        var groupIndex = {};
+        this.groupIndex = {};
         this.next_max_tag_id = undefined;
         this.globalDiff = 255;
         this.tagName = undefined;
@@ -18,14 +17,14 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                 gX = Math.floor(x/settings.groupSize),
                 gY = Math.floor(y/settings.groupSize);
 
-            if (groupIndex[gX] === undefined)
-                groupIndex[gX] = {};
-            var pixelGroup = groupIndex[gX][gY];
+            if (this.groupIndex[gX] === undefined)
+                this.groupIndex[gX] = {};
+            var pixelGroup = this.groupIndex[gX][gY];
 
             if (pixelGroup === undefined) {
                 pixelGroup = new PixelGroup(gX, gY);
                 this.groups.push(pixelGroup);
-                groupIndex[gX][gY] = pixelGroup;
+                this.groupIndex[gX][gY] = pixelGroup;
             }
 
             pixelGroup.addPixel(x % settings.groupSize, y % settings.groupSize, color);
@@ -97,7 +96,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
 
             for (var x in data.groups)
                 for (var y in data.groups[x]) {
-                    var g = groupIndex[x][y];
+                    var g = this.groupIndex[x][y];
                     g.loading = true;
                     g.fromHash(data.groups[x][y]);
 
@@ -105,7 +104,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                         maxCounter++;
 
                         queue.push(g);
-                        if (maxCounter <= MAX_LOADS)
+                        if (maxCounter <= settings.maxLoads)
                             processNext();
                     }
                 }
@@ -140,6 +139,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                 var diff = g.calcDiff(freeImage.lowPic);
 
                 if (g.image === undefined || g.image.diff > diff) {
+                    g.changed = true;
                     if (g.image !== undefined) {
                         var tmp = g.image;
                         g.image = freeImage;

@@ -147,7 +147,7 @@ def export(id):
         return 'Not found', 404
 
     result = ImageHelper.compile_image(picture)
-    return send_file(result, mimetype='image/jpeg')
+    return send_file(result, mimetype='image/png')
 
 
 @app.route('/palette/<id>', methods=['POST'])
@@ -160,7 +160,7 @@ def palette(id):
     if not g.authorized or picture.user.id != g.user.id:
         return 'error', 500
 
-    if (Palette.save_to_db(picture, request.form['palette'])):
+    if Palette.save_to_db(picture, request.form['palette']):
         return jsonify(result='ok')
     else:
         return jsonify(error='wrong data'), 500

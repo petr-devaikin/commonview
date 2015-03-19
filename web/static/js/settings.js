@@ -4,5 +4,6 @@ define([], function() {
         miniPhotoSize: 13,
         exportPhotoSize: 20,
         uploadStep: 33,
+        maxLoads: 20,
     } 
 });

@@ -1,5 +1,5 @@
 define(['libs/d3', 'settings'], function(d3, settings) {
-    function setZoomer() {
+    function setZoomer(getPalette) {
         var zoom = d3.select('#zoom');
 
         window.addEventListener('mousemove', function(e) {
@@ -10,15 +10,18 @@ define(['libs/d3', 'settings'], function(d3, settings) {
                 var photoX = Math.floor((e.x - photoBounds.left) / settings.miniPhotoSize),
                     photoY = Math.floor((e.y - photoBounds.top) / settings.miniPhotoSize);
 
-                var photo = d3.select('.miniPhoto[column=\'' + photoX + '\'][row=\'' + photoY + '\']');
-                if (!photo.empty() && photo.datum().image !== undefined) {
+                var groupIndex = getPalette();
+
+                if (groupIndex[photoX] && groupIndex[photoX][photoY] &&
+                    groupIndex[photoX][photoY].image !== undefined) {
+                    var datum = groupIndex[photoX][photoY];
                     zoom
                         .style('display', 'block')
-                        .style('background', setBackground(photo.datum()))
+                        .style('background', setZoomerBackground(datum))
                         .style('left', e.pageX + 'px')
                         .style('top', e.pageY + 'px');
 
-                    zoom.select('#username').text('@' + photo.datum().image.instaUser);
+                    zoom.select('#username').text('@' + datum.image.instaUser);
                 }
                 else {
                     zoom.style('display', null);
@@ -29,8 +32,12 @@ define(['libs/d3', 'settings'], function(d3, settings) {
         })
     }
 
+    function setZoomerBackground(d) {
+        return 'url(' + d.image.instaImg + ')';
+    }
+
     function setBackground(d) {
-        return d.image ? 'url(' + d.image.instaImg + ')' : 'none';
+        return d.image && d.changed ? 'url(' + d.image.instaImg + ')' : 'none';
     }
 
     function setHref(d) {
@@ -39,6 +46,11 @@ define(['libs/d3', 'settings'], function(d3, settings) {
 
     function setDisplay(d) {
         return d.image ? null : 'none';
+    }
+
+    function drawBackground() {
+        var src = d3.select('#mainBackground').attr('url');
+        d3.select('#mainBackground').style('background-image', 'url(' + src + '?d=' + (new Date()).getTime() + ')');
     }
 
     function drawPalette(palette) {
@@ -73,12 +85,13 @@ define(['libs/d3', 'settings'], function(d3, settings) {
     }
 
     function showLoading(percentage) {
-        d3.select('#loadingPercentage').text(percentage.toFixed(1) + '%');
+        d3.select('#loadingPercentage').text(percentage.toFixed(0) + '%');
     }
 
     return {
         drawPalette: drawPalette,
         showLoading: showLoading,
         setZoomer: setZoomer,
+        drawBackground: drawBackground,
     }
 });

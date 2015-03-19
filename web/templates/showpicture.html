@@ -26,7 +26,9 @@
         {% endif %}
     </div>
     <div id="rightColumn">
-        <div id="mainPhoto" class="width{{ (picture.width / group_size) | round(0, 'ceil') | int }} height{{ (picture.height / group_size) | round(0, 'ceil') | int }}"></div>
+        <div id="mainPhoto" class="width{{ (picture.width / group_size) | round(0, 'ceil') | int }} height{{ (picture.height / group_size) | round(0, 'ceil') | int }}">
+            <div id="mainBackground" url="{{ url_for('export', id=picture.id) }}"></div>
+        </div>
     </div>
 
     <div id="zoom">

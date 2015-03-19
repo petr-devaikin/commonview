@@ -39,11 +39,12 @@ class ImageHelper:
 
         img = Image.new('RGBA', (width, height))
         for f in picture.fragments:
-            fimg = Image.fromstring('RGB', (export_size, export_size), f.high_pic, 'raw')
-            img.paste(fimg, (f.x * export_size, f.y * export_size))
+            if f.x != None and f.y != None:
+                fimg = Image.fromstring('RGB', (export_size, export_size), f.high_pic, 'raw')
+                img.paste(fimg, (f.x * export_size, f.y * export_size))
 
         img_io = cStringIO.StringIO()
-        img.save(img_io, 'JPEG', quality=70)
+        img.save(img_io, 'PNG', quality=70)
         img_io.seek(0)
 
         return img_io

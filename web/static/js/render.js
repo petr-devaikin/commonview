@@ -21,7 +21,6 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
 
 
         function loadPalette(paletteData) {
-            console.log(paletteData);
             palette.load({
                 data: paletteData,
                 checkDeleted: true,
@@ -34,6 +33,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                     console.log('Progress ' + percentage);
                 },
                 onComplete: function() {
+                    drawing.drawBackground();
                     drawing.drawPalette(palette);
 
                     allPanels.style('display', 'none');
@@ -160,12 +160,9 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
 
             clearButton.on('click', function() {
                 clearPalette(pic_id, picture);
-                savePalette();
-                drawing.drawPalette(palette);
-
-                d3.select('#tagName').attr('disabled', null);
-                allPanels.style('display', 'none');
-                startPanel.style('display', 'block');
+                savePalette(function() {
+                    window.location.reload();
+                });
             });
 
             deleteButton.on('click', deletePalette);
@@ -186,7 +183,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                     startButton.attr('disabled', null);
             });
 
-            drawing.setZoomer();
+            drawing.setZoomer(function() { return palette.groupIndex; });
 
             /*
             proxy.getImageColor(
