@@ -3,6 +3,7 @@ from web.db.engine import get_db
 from web.db.models import Fragment
 from picprocess.image_helper import ImageHelper
 from PIL import Image
+import datetime
 
 class WrongDataException(Exception):
     pass
@@ -19,23 +20,33 @@ class Palette:
                 picture.global_diff = data['globalDiff']
                 picture.tag = data['tagName'] if 'tagName' in data else None
                 picture.next_tag_id = data['next_max_tag_id'] if 'next_max_tag_id' in data else None
+                picture.updated = datetime.datetime.now()
 
                 picture.save()
                 print 'PICTURE SAVED'
 
-                to_remove = [f.id for f in picture.fragments]
                 print 'ALL FRAGMENTS SELECTED'
 
-                for g in data['groups']:
-                    if g['id'] in to_remove:
-                        Fragment.update(x=g['x'], y=g['y'], diff=g['diff']).where(Fragment.id == g['id']).execute()
-                        to_remove.remove(g['id'])
-                    else:
-                        raise WrongDataException('Wrong data')
-                print 'ALL FRAGMENTS UPDATED'
+                for g in data['updatedGroups']:
+                    upd = Fragment.update(x=g['x'], y=g['y'], diff=g['diff'])
+                    upd = upd.where(Fragment.id == g['id'], Fragment.picture == picture)
+                    upd.execute()
 
+                print 'UPDATED: %d' % len(data['updatedGroups'])
+
+                rc = Fragment.select()
+                rc = rc.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
+                rc = rc.count()
+
+                dlt = Fragment.delete()
+                dlt = dlt.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
+                dlt.execute()
+
+                print 'REMOVED: %d' % rc
+
+                to_remove = [f.id for f in picture.fragments.where(Fragment.x == None)]
                 Fragment.delete().where(Fragment.id << to_remove).execute()
-                print 'EXTRA FRAGMENTS REMOVED'
+                print 'EXTRA FRAGMENTS REMOVED: %d' % len(to_remove)
             return True
         except WrongDataException:
             return False

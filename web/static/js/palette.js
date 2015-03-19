@@ -9,6 +9,9 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
         this.globalDiff = 255;
         this.tagName = undefined;
 
+        var updatedGroups = [];
+        var removedPictures = [];
+
 
         for (var i = 0; i < picture.pixels.length; i++) {
             var x = picture.pixels[i].x,
@@ -31,25 +34,6 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
         }
 
         d3.shuffle(this.groups);
-
-
-        this._toHash = function() {
-            var trueGroups = [];
-            for (var i = 0; i < this.groups.length; i++)
-                if (this.groups[i].image)
-                    trueGroups.push({
-                        x: this.groups[i].x,
-                        y: this.groups[i].y,
-                        id: this.groups[i].image.id,
-                        diff: this.groups[i].image.diff
-                    });
-            return {
-                groups: trueGroups,
-                globalDiff: this.globalDiff,
-                tagName: this.tagName,
-                next_max_tag_id: this.next_max_tag_id,
-            }
-        }
 
 
         this.load = function(params) {
@@ -116,13 +100,38 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
         }
 
 
+        this._toHash = function() {
+            var trueGroups = [];
+            for (var i = 0; i < updatedGroups.length; i++) {
+                trueGroups.push({
+                    x: updatedGroups[i].x,
+                    y: updatedGroups[i].y,
+                    id: updatedGroups[i].image.id,
+                    diff: updatedGroups[i].image.diff
+                });
+            }
+
+            return {
+                updatedGroups: trueGroups,
+                removedPicrures: removedPictures,
+                globalDiff: this.globalDiff,
+                tagName: this.tagName,
+                next_max_tag_id: this.next_max_tag_id,
+            }
+        }
+
+
         this.save = function(params) {
             // params: onSuccess, onError
             var hash = JSON.stringify(this._toHash());
             proxy.savePalette(
                 this.picture_id,
                 hash,
-                params.onSuccess,
+                function(args) {
+                    updatedGroups = [];
+                    removedPictures = [];
+                    params.onSuccess(args);
+                },
                 params.onError
             );
         }
@@ -140,6 +149,9 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
 
                 if (g.image === undefined || g.image.diff > diff) {
                     g.changed = true;
+                    if (updatedGroups.indexOf(g) == -1)
+                        updatedGroups.push(g);
+
                     if (g.image !== undefined) {
                         var tmp = g.image;
                         g.image = freeImage;
@@ -149,10 +161,14 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                     else {
                         g.image = freeImage;
                         g.image.diff = diff;
+                        freeImage = undefined;
                         break;
                     }
                 }
             }
+
+            if (freeImage !== undefined)
+                removedPictures.push(freeImage.id);
 
             this.calcDiff();
         }

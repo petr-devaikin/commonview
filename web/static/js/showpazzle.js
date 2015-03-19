@@ -15,6 +15,7 @@ define(['palette', 'drawing'], function(Palette, drawing) {
             },
         });
         
+        drawing.drawBackground();
         drawing.setZoomer(function() { return palette.groupIndex; });
     }
 });

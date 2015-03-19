@@ -208,7 +208,7 @@ def img(id):
 
     if overcome >= 0:
         to_remove = [f.id for f in free_fragments.limit(overcome + 1)]
-        Fragment.delete().where(Fragment.id << to_remove).execute()
+        Fragment.delete().where(Fragment.id << to_remove, Fragment.x == None).execute()
 
     result = ImageHelper.get_new_image(insta_img)
 
