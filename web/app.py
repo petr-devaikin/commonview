@@ -9,6 +9,7 @@ from .env_settings import load_env
 from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
 from .db.models import *
+import cStringIO
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -24,10 +25,7 @@ init_db(app)
 def get_unauthenticated_api(**kwargs):
     return client.InstagramAPI(client_id=current_app.config['INSTA_ID'],
                                client_secret=current_app.config['INSTA_SECRET'],
-                               redirect_uri=url_for('insta_code',
-                                                    _external=True,
-                                                    _scheme=current_app.config['PREFERRED_URL_SCHEME'],
-                                                    **kwargs))
+                               redirect_uri=url_for('insta_code', _external=True, **kwargs))
 
 
 @app.before_request
@@ -131,7 +129,6 @@ def render(id):
                     palette=json.dumps(Palette.load_from_db(picture)),
                 )
     else:
-        os.remove(picture.get_full_path())
         Palette.remove_from_db(picture)
         return jsonify(result='ok')
 
@@ -144,7 +141,7 @@ def preview(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    return send_file('../' + picture.get_full_path())
+    return send_file(cStringIO.StringIO(picture.image), mimetype='image/jpeg')
 
 
 @app.route('/pic/<id>/export')
@@ -186,12 +183,12 @@ def upload():
     f = request.files['pic']
     if f and allowed_file(f.filename):
         with get_db().atomic() as txn:
-            pic = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
+            pic, size = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
             picture = Picture.create(
                 user=g.user,
-                width=pic.size[0],
-                height=pic.size[1])
-            pic.save(picture.get_full_path())
+                width=size[0],
+                height=size[1],
+                image=pic.getvalue())
         return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:
         return jsonify(result='error'), 500

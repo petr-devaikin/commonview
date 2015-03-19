@@ -12,7 +12,10 @@ class ImageHelper:
             img.thumbnail((max_size, h * max_size / w))
         elif h >= w and h > max_size:
             img.thumbnail((w * max_size / h, max_size))
-        return img
+        result = cStringIO.StringIO()
+        img.save(result, 'JPEG', quality=70)
+        result.seek(0)
+        return result, img.size
 
     @staticmethod
     def get_new_image(url):

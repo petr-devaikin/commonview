@@ -1,9 +1,10 @@
 from PIL import Image
 from web.db.models import *
+import cStringIO
 
 class Pixels:
     def get_pixels_from_img(self, picture):
-        image = Image.open(picture.get_full_path())
+        image = Image.open(cStringIO.StringIO(picture.image))
         self.width, self.height = image.size
 
         self.pixels = []

@@ -21,12 +21,7 @@ class Picture(Model):
     next_tag_id = CharField(null=True)
     global_diff = DoubleField(null=True)
     updated = DateTimeField(null=True)
-
-    def get_path(self):
-        return '%d_%d.png' % (self.user.id, self.id)
-
-    def get_full_path(self):
-        return os.path.join(current_app.config['UPLOAD_FOLDER'], self.get_path())
+    image = BlobField()
 
     def diff_percentage(self):
         return round(100 * (255 - self.global_diff) / 255, 1) if self.global_diff != None else 0
