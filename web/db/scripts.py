@@ -20,14 +20,14 @@ def drop_tables():
 def create_tables():
     print 'Start create tables'
 
+    User.create_table()
+    get_logger().info('User table created')
+
     Picture.create_table()
     get_logger().info('Picture table created')
 
     Fragment.create_table()
     get_logger().info('Fragment table created')
-
-    User.create_table()
-    get_logger().info('User table created')
 
 
 def init_data():
