@@ -2,6 +2,8 @@ from ..logger import get_logger
 from .models import *
 
 def drop_tables():
+    print 'Start drop tables'
+
     if Fragment.table_exists():
         Fragment.drop_table()
         get_logger().info('Fragment table dropped')
@@ -16,6 +18,8 @@ def drop_tables():
 
 
 def create_tables():
+    print 'Start create tables'
+
     Picture.create_table()
     get_logger().info('Picture table created')
 
@@ -31,6 +35,7 @@ def init_data():
 
 
 def init_database():
+    print 'Start init db'
     drop_tables()
     create_tables()
     init_data()
