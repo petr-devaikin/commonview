@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block meta %}
+    <meta property="og:title" content="Pazzle{{ ' #' + picture.tag if picture.tag else ' ' }} by @{{ picture.user.insta_name }}" />
+{% endblock %}
+
 {% block style %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/render.css') }}">
 {% endblock %}

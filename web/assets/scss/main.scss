@@ -120,3 +120,14 @@ footer {
     margin-top: -$footerHeight;
     clear: both;
 }
+
+#share-container {
+    display: inline-block;
+    margin-left: 100px;
+    opacity: 0.3;
+    transition: opacity 0.1s ease-out 0s;
+
+    &:hover {
+        opacity: 1;
+    }
+}

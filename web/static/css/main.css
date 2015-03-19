@@ -78,3 +78,11 @@ p {
     position: relative;
     margin-top: -47px;
     clear: both; }
+
+    #share-container {
+      display: inline-block;
+      margin-left: 100px;
+      opacity: 0.3;
+      transition: opacity 0.1s ease-out 0s; }
+      #share-container:hover {
+        opacity: 1; }
