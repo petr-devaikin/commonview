@@ -159,7 +159,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             })
 
             clearButton.on('click', function() {
-                clearPalette(pic_id, picture);
+                palette.clear();
                 savePalette(function() {
                     window.location.reload();
                 });

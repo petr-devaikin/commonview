@@ -56,12 +56,11 @@ class Palette:
 
     @staticmethod
     def remove_from_db(picture):
-        with get_db().atomic() as txn:
-            fragments_to_delete = [f for f in picture.fragments]
-            for f in fragments_to_delete:
-                f.delete_instance()
+        fragments_to_delete = [f for f in picture.fragments]
+        for f in fragments_to_delete:
+            f.delete_instance()
 
-            picture.delete_instance()
+        picture.delete_instance()
 
 
     @staticmethod

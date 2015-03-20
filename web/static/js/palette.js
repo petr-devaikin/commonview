@@ -137,6 +137,17 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
         }
 
 
+        this.clear = function() {
+            for (var i = 0; i < this.groups.length; i++)
+                if (this.groups[i].image)
+                    removedPictures.push(this.groups[i].image.id);
+
+            this.next_max_tag_id = undefined;
+            this.globalDiff = 255;
+            this.tagName = undefined;
+        }
+
+
         this.addPhoto = function(newImage) {
             var freeImage = newImage;
             
