@@ -100,7 +100,10 @@ def index():
 
 @app.route('/pic/<id>', methods=['GET', 'DELETE'])
 def render(id):
-    picture = Picture.get(Picture.id == id)
+    try:
+        picture = Picture.get(Picture.id==id)
+    except Picture.DoesNotExist:
+        return 'Not found', 404
 
     if request.method == 'GET':
         pixels = Pixels()
