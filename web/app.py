@@ -10,6 +10,7 @@ from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
 from .db.models import *
 import cStringIO
+import re
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -78,7 +79,7 @@ def insta_code():
 
         session['user_id'] = user.id
 
-        return redirect(url_for('pictures'))
+        return redirect(url_for('index'))
     except Exception as e:
         print e
         return 'error'
@@ -87,20 +88,13 @@ def insta_code():
 @app.route('/')
 def index():
     if g.authorized:
-        return redirect(url_for('pictures'))
-    else:
-        return render_template('index.html')
-
-@app.route('/pictures/')
-def pictures():
-    if g.authorized:
         can_upload = g.user.pictures.count() < current_app.config['MAX_UPLOADS'] 
         return render_template('pictures.html',
             can_upload=can_upload,
             max_count=current_app.config['MAX_UPLOADS'],
             max_size=current_app.config['MAX_CONTENT_LENGTH'])
     else:
-        return redirect(url_for('index'))
+        return render_template('index.html')
 
 
 @app.route('/pic/<id>', methods=['GET', 'DELETE'])
@@ -207,6 +201,10 @@ def img(id):
     insta_id = request.args.get('insta_id')
     insta_url = request.args.get('insta_url').split('/')[-2] # remain just id
     insta_user = request.args.get('insta_user')
+
+    insta_url_re = re.compile(current_app.config['ALLOWED_INSTA_URL'])
+    if not insta_url_re.match(insta_url):
+        return 'Wrong url', 500
 
     free_fragments = picture.fragments.where(Fragment.x == None)
     overcome = free_fragments.count() - current_app.config['MAX_CACHED_PHOTOS']
