@@ -18,8 +18,6 @@ define(['libs/d3', 'settings'], function(d3, settings) {
 
                 var groupIndex = getPalette();
 
-                console.log(document.body.scrollTop);
-
                 if (groupIndex[photoX] && groupIndex[photoX][photoY] &&
                     groupIndex[photoX][photoY].image !== undefined) {
                     var datum = groupIndex[photoX][photoY];
