@@ -7,6 +7,7 @@ INSTA_ID = ''
 INSTA_SECRET = ''
 
 MAX_UPLOADS = 4
+MY_ID = 1
 
 ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png']
 MAX_CONTENT_LENGTH = 5 * 1024 * 1024

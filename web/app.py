@@ -88,7 +88,8 @@ def insta_code():
 @app.route('/')
 def index():
     if g.authorized:
-        can_upload = g.user.pictures.count() < current_app.config['MAX_UPLOADS'] 
+        can_upload = g.user.id == current_app.config['MY_ID'] or \
+                     g.user.pictures.count() < current_app.config['MAX_UPLOADS'] 
         return render_template('pictures.html',
             can_upload=can_upload,
             max_count=current_app.config['MAX_UPLOADS'],
@@ -171,7 +172,8 @@ def allowed_file(filename):
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    if not g.authorized or g.user.pictures.count() >= current_app.config['MAX_UPLOADS']:
+    if not g.authorized or \
+          (g.user.pictures.count() >= current_app.config['MAX_UPLOADS'] and g.user.id != current_app.config['MY_ID']):
         return 'error', 500
 
     f = request.files['pic']
