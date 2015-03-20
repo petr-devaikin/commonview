@@ -56,10 +56,7 @@ class Palette:
 
     @staticmethod
     def remove_from_db(picture):
-        fragments_to_delete = [f for f in picture.fragments]
-        for f in fragments_to_delete:
-            f.delete_instance()
-
+        Fragment.delete().where(Fragment.picture == picture).execute()
         picture.delete_instance()
 
 
