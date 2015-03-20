@@ -2,7 +2,7 @@
 
 {% block meta %}
     <meta property="og:title" content="Pazzle{{ ' #' + picture.tag if picture.tag else ' ' }} by @{{ picture.user.insta_name }}" />
-    <meta property="og:image" content="{{ url_for('export', id=picture.id) }}" />
+    <meta property="og:image" content="{{ url_for('export', id=picture.id, _external=True) }}" />
 {% endblock %}
 
 {% block style %}
