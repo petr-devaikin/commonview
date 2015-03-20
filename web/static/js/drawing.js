@@ -4,13 +4,21 @@ define(['libs/d3', 'settings'], function(d3, settings) {
 
         window.addEventListener('mousemove', function(e) {
             var photoBounds = document.getElementById('mainPhoto').getBoundingClientRect();
-            if (e.x >= photoBounds.left && e.x  <= photoBounds.right &&
-                e.y >= photoBounds.top && e.y  <= photoBounds.bottom) {
 
-                var photoX = Math.floor((e.x - photoBounds.left) / settings.miniPhotoSize),
-                    photoY = Math.floor((e.y - photoBounds.top) / settings.miniPhotoSize);
+            var x = e.clientX,
+                y = e.clientY,
+                zoomX = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft),
+                zoomY = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop);
+
+            if (x >= photoBounds.left && x  <= photoBounds.right &&
+                y >= photoBounds.top && y  <= photoBounds.bottom) {
+
+                var photoX = Math.floor((x - photoBounds.left) / settings.miniPhotoSize),
+                    photoY = Math.floor((y - photoBounds.top) / settings.miniPhotoSize);
 
                 var groupIndex = getPalette();
+
+                console.log(document.body.scrollTop);
 
                 if (groupIndex[photoX] && groupIndex[photoX][photoY] &&
                     groupIndex[photoX][photoY].image !== undefined) {
@@ -18,8 +26,8 @@ define(['libs/d3', 'settings'], function(d3, settings) {
                     zoom
                         .style('display', 'block')
                         .style('background', setZoomerBackground(datum))
-                        .style('left', e.pageX + 'px')
-                        .style('top', e.pageY + 'px');
+                        .style('left', zoomX + 'px')
+                        .style('top', zoomY + 'px');
 
                     zoom.select('#username').text('@' + datum.image.instaUser);
                 }
