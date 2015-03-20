@@ -122,8 +122,9 @@ footer {
 }
 
 #share-container {
-    display: inline-block;
-    margin-left: 100px;
+    position: absolute;
+    margin-left: 660px;
+    top: 86px;
     opacity: 0.3;
     transition: opacity 0.1s ease-out 0s;
 
