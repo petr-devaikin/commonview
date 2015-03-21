@@ -10,6 +10,7 @@ from .db.engine import init_db, get_db
 from .db.models import *
 import cStringIO
 import re
+from .logger import get_logger, set_logger_params
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -18,6 +19,7 @@ app.config.from_pyfile('application.cfg', silent=True)
 
 Scss(app)
 
+set_logger_params(app)
 init_db(app)
 
 
@@ -56,6 +58,7 @@ def login():
 def logout():
     if g.authorized:
         del session['user_id']
+        get_logger().debug('User %d %s logged out', g.user.id, g.user.insta_name)
     return redirect(url_for('index'))
 
 
@@ -70,10 +73,12 @@ def insta_code():
             if user.insta_name != user_info[u'username']: user.insta_name = user_info[u'username']
             if user.access_token != access_token: user.access_token = access_token
             user.save()
+            get_logger().debug('User %d %s logged in', user.id, user.insta_name)
         except User.DoesNotExist:
             user = User.create(insta_id=user_info[u'id'],
                                insta_name=user_info[u'username'],
                                access_token=access_token)
+            get_logger().info('User %d %s registered', user.id, user.insta_name)
 
         session['user_id'] = user.id
 
@@ -125,6 +130,8 @@ def render(id):
                     palette=json.dumps(Palette.load_from_db(picture)),
                 )
     else:
+        get_logger().info('User %d removed picture %d', g.user.id, picture.id)
+
         Palette.remove_from_db(picture)
         return jsonify(result='ok')
 
@@ -161,6 +168,8 @@ def palette(id):
     if not g.authorized or picture.user.id != g.user.id:
         return 'error', 500
 
+    get_logger().debug('Save palette %d', picture.id)
+
     if Palette.save_to_db(picture, request.form['palette']):
         return jsonify(result='ok')
     else:
@@ -186,6 +195,8 @@ def upload():
                 width=size[0],
                 height=size[1],
                 image=pic.getvalue())
+
+        get_logger().info('User %d uploaded picture %d', g.user.id, picture.id)
         return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:
         return jsonify(result='error'), 500
@@ -199,7 +210,6 @@ def img(id):
         return 'Not found', 404
 
     if not g.authorized or picture.user.id != g.user.id: return 'error', 500
-
     
     insta_img = request.args.get('insta_img') # check root!
     insta_id = request.args.get('insta_id')
@@ -210,13 +220,17 @@ def img(id):
     if not insta_url_re.match(insta_url):
         return 'Wrong url', 500
 
-    free_fragments = picture.fragments.where(Fragment.x == None)
-    overcome = free_fragments.count() - current_app.config['MAX_CACHED_PHOTOS']
+    get_logger().debug('User %d gets new image for %d, %s', g.user.id, picture.id, insta_img)
+
+    with get_db().atomic() as txn:
+        free_fragments = picture.fragments.where(Fragment.x == None)
+        overcome = free_fragments.count() - current_app.config['MAX_CACHED_PHOTOS'] + 1
+        if overcome > 0:
+            remove_ids = [f.id for f in free_fragments.limit(overcome)]
+            Fragment.delete().where(Fragment.id << remove_ids).execute()
 
     if overcome >= 0:
-        print '%d: Remove overcome' % picture.id
-        to_remove = [f.id for f in free_fragments.limit(overcome + 1)]
-        Fragment.delete().where(Fragment.id << to_remove, Fragment.x == None).execute()
+        get_logger().warning('Remove %d extra fragments for %d', overcome + 1, picture.id)
 
     result = ImageHelper.get_new_image(insta_img)
 
@@ -230,6 +244,7 @@ def img(id):
                                    low_pic=result[1])
         return jsonify(fragment.to_hash())
     else:
+        get_logger().debug('Image %s for %d not found', insta_img, picture.id)
         return 'Cannot download image', 500
 
 

@@ -20,3 +20,10 @@ EXPORT_GROUP_SIZE = 20
 SEND_FILE_MAX_AGE_DEFAULT = 0
 ALLOWED_INSTA_URL = '^[a-zA-Z0-9_-]+$'
 MAX_CACHED_PHOTOS = 40
+
+
+LOGGER = {
+    'FORMAT': '[%(asctime)s] %(filename)s[%(lineno)d] #%(levelname)-8s  %(message)s',
+    'PATH': 'pazzla.log',
+    'DEBUG_PATH': 'pazzla-debug.log'
+}

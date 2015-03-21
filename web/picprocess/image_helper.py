@@ -4,6 +4,7 @@ from flask import current_app
 import urllib2
 import datetime
 import os
+from web.logger import get_logger
 
 class ImageHelper:
     @staticmethod
@@ -40,6 +41,8 @@ class ImageHelper:
         file_name = picture.export_full_path()
 
         if picture.export_generated == None or picture.export_generated < picture.updated:
+            get_logger().info('Generate new export for %d', picture.id)
+
             export_size = current_app.config['EXPORT_GROUP_SIZE']
             group_size = current_app.config['GROUP_SIZE']
             width = picture.width * export_size / group_size
