@@ -199,6 +199,7 @@ def img(id):
         return 'Not found', 404
 
     if not g.authorized or picture.user.id != g.user.id: return 'error', 500
+
     
     insta_img = request.args.get('insta_img') # check root!
     insta_id = request.args.get('insta_id')
@@ -227,7 +228,6 @@ def img(id):
                                    insta_user=insta_user,
                                    high_pic=result[0],
                                    low_pic=result[1])
-
         return jsonify(fragment.to_hash())
     else:
         return 'Cannot download image', 500
