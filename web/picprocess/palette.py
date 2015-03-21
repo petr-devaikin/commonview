@@ -26,6 +26,12 @@ class Palette:
                 print '%d: ALL FRAGMENTS SELECTED' % picture.id
 
                 for g in data['updatedGroups']:
+                    if g['x'] == None:
+                        print '%d x - None!' % picture.id
+
+                    if g['id'] in data['removedPicrures']:
+                        print '%d id in remove!' % picture.id
+
                     upd = Fragment.update(x=g['x'], y=g['y'], diff=g['diff'])
                     upd = upd.where(Fragment.id == g['id'], Fragment.picture == picture)
                     upd.execute()
