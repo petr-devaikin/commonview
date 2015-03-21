@@ -35,7 +35,7 @@ class Palette:
             
             if data['removedPicrures'] == 'all':
                 delete_counter = Fragment.delete().where(Fragment.picture == picture).execute()
-                get_logger().warning('Palette %d saving: fragments cleared (%d)', picture.id, delete_counter)
+                get_logger().info('Palette %d saving: fragments cleared (%d)', picture.id, delete_counter)
             else:
                 dlt = Fragment.delete()
                 dlt = dlt.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
