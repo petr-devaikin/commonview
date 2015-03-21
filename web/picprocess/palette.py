@@ -33,15 +33,19 @@ class Palette:
                 get_logger().debug('Palette %d saving: all %d fragments updated', picture.id, update_counter)
 
             
-            dlt = Fragment.delete()
-            dlt = dlt.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
-            delete_counter = dlt.execute()
-
-            if delete_counter != len(data['removedPicrures']):
-                get_logger().warning('Palette %d saving: %d fragments of %d removed', picture.id, \
-                    delete_counter, len(data['removedPicrures']))
+            if data['removedPicrures'] == 'all':
+                delete_counter = Fragment.delete().where(Fragment.picture == picture).execute()
+                get_logger().warning('Palette %d saving: fragments cleared (%d)', picture.id, delete_counter)
             else:
-                get_logger().debug('Palette %d saving: all %d fragments removed', picture.id, delete_counter)
+                dlt = Fragment.delete()
+                dlt = dlt.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
+                delete_counter = dlt.execute()
+
+                if delete_counter != len(data['removedPicrures']):
+                    get_logger().warning('Palette %d saving: %d fragments of %d removed', picture.id, \
+                        delete_counter, len(data['removedPicrures']))
+                else:
+                    get_logger().debug('Palette %d saving: all %d fragments removed', picture.id, delete_counter)
 
             to_remove_count = picture.fragments.where(Fragment.x == None).count()
             if to_remove_count > 0:
