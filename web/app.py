@@ -213,6 +213,7 @@ def img(id):
     overcome = free_fragments.count() - current_app.config['MAX_CACHED_PHOTOS']
 
     if overcome >= 0:
+        print '%d: Remove overcome' % picture.id
         to_remove = [f.id for f in free_fragments.limit(overcome + 1)]
         Fragment.delete().where(Fragment.id << to_remove, Fragment.x == None).execute()
 

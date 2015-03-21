@@ -11,9 +11,7 @@ class WrongDataException(Exception):
 class Palette:
     @staticmethod
     def save_to_db(picture, json_data):
-        print 'START SAVING'
         data = json.loads(json_data)
-        print 'CONVERTED'
 
         try:
             with get_db().atomic() as txn:
