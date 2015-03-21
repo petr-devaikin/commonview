@@ -2,6 +2,8 @@ from PIL import Image
 import cStringIO
 from flask import current_app
 import urllib2
+import datetime
+import os
 
 class ImageHelper:
     @staticmethod
@@ -35,20 +37,24 @@ class ImageHelper:
 
     @staticmethod
     def compile_image(picture):
-        export_size = current_app.config['EXPORT_GROUP_SIZE']
-        group_size = current_app.config['GROUP_SIZE']
-        width = picture.width * export_size / group_size
-        height = picture.height * export_size / group_size
+        file_name = picture.export_full_path()
 
-        img = Image.new('RGBA', (width, height))
-        for f in picture.fragments:
-            if f.x != None and f.y != None:
-                fimg = Image.fromstring('RGB', (export_size, export_size), f.high_pic, 'raw')
-                img.paste(fimg, (f.x * export_size, f.y * export_size))
+        if picture.export_generated == None or picture.export_generated < picture.updated:
+            export_size = current_app.config['EXPORT_GROUP_SIZE']
+            group_size = current_app.config['GROUP_SIZE']
+            width = picture.width * export_size / group_size
+            height = picture.height * export_size / group_size
 
-        img_io = cStringIO.StringIO()
-        img.save(img_io, 'PNG', quality=70)
-        img_io.seek(0)
+            img = Image.new('RGBA', (width, height))
+            for f in picture.fragments:
+                if f.x != None and f.y != None:
+                    fimg = Image.fromstring('RGB', (export_size, export_size), f.high_pic, 'raw')
+                    img.paste(fimg, (f.x * export_size, f.y * export_size))
 
-        return img_io
+            print file_name
+            img.save(os.path.join('web', file_name), 'PNG')
+            picture.export_generated = datetime.datetime.now()
+            picture.save()
+
+        return file_name
         

@@ -21,10 +21,17 @@ class Picture(Model):
     next_tag_id = CharField(null=True)
     global_diff = DoubleField(null=True)
     updated = DateTimeField(null=True)
+    export_generated = DateTimeField(null=True)
     image = BlobField()
 
     def diff_percentage(self):
         return round(100 * (255 - self.global_diff) / 255, 1) if self.global_diff != None else 0
+
+    def export_path(self):
+        return '%d_%d.png' % (self.user.id, self.id)
+
+    def export_full_path(self):
+        return 'export/%d_%d.png' % (self.user.id, self.id)
 
     class Meta:
         database = get_db()

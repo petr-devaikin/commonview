@@ -3,11 +3,6 @@ from web.app import app
 from web.logger import get_logger
 from web.db import scripts
 
-from web.db.models import *
-
-from picprocess.pixels import Pixels
-from picprocess.palette import Palette
-
 manager = Manager(app)
 
 @manager.command
@@ -36,6 +31,14 @@ def clear():
     """
     Clear images
     """
+
+
+@manager.command
+def migrate():
+    """
+    Migrate
+    """
+    scripts.migrate_1()
 
 
 if __name__ == "__main__":

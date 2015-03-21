@@ -26,6 +26,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 checkDeleted: true,
                 onInit: function() {
                     //drawing.drawPalette(palette);
+                    drawing.drawBackground();
                     console.log('Initialized');
                 },
                 onProgress: function(percentage) {
@@ -33,7 +34,6 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                     console.log('Progress ' + percentage);
                 },
                 onComplete: function() {
-                    drawing.drawBackground();
                     drawing.drawPalette(palette);
 
                     allPanels.style('display', 'none');

@@ -1,7 +1,7 @@
 import json
 from web.db.engine import get_db
 from web.db.models import Fragment
-from picprocess.image_helper import ImageHelper
+from .image_helper import ImageHelper
 from PIL import Image
 import datetime
 
