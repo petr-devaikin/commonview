@@ -105,12 +105,19 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 },
                 onComplete: function() {
                     drawing.drawPalette(palette);
+                    if (palette.next_max_tag_id === undefined)
+                        isStopped = true;
+
                     if (isStopped) {
                         savePalette();
 
                         allPanels.style('display', 'none');
-                        if (palette.globalDiff > 0)
-                            resumePanel.style('display', 'block');
+                        if (palette.globalDiff > 0) {
+                            if (palette.next_max_tag_id === undefined)
+                                interruptionPanel.style('display', 'block');
+                            else
+                                resumePanel.style('display', 'block');
+                        }
                         else
                             completePanel.style('display', 'block');
                     }
