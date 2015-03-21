@@ -23,16 +23,16 @@ class Palette:
                 picture.updated = datetime.datetime.now()
 
                 picture.save()
-                print 'PICTURE SAVED'
+                print '%d: PICTURE SAVED' % picture.id
 
-                print 'ALL FRAGMENTS SELECTED'
+                print '%d: ALL FRAGMENTS SELECTED' % picture.id
 
                 for g in data['updatedGroups']:
                     upd = Fragment.update(x=g['x'], y=g['y'], diff=g['diff'])
                     upd = upd.where(Fragment.id == g['id'], Fragment.picture == picture)
                     upd.execute()
 
-                print 'UPDATED: %d' % len(data['updatedGroups'])
+                print '%d: UPDATED: %d' % (picture.id, len(data['updatedGroups']))
 
                 rc = Fragment.select()
                 rc = rc.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
@@ -43,12 +43,13 @@ class Palette:
                     dlt = dlt.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
                     dlt.execute()
 
-                print 'REMOVED: %d' % rc
+                print '%d: REMOVED: %d' % (picture.id, rc)
 
-                to_remove = [f.id for f in picture.fragments.where(Fragment.x == None)]
-                if len(to_remove) > 0:
-                    Fragment.delete().where(Fragment.id << to_remove).execute()
-                print 'EXTRA FRAGMENTS REMOVED: %d' % len(to_remove)
+                to_remove_count = picture.fragments.where(Fragment.x == None).count()
+                if to_remove_count > 0:
+                    Fragment.delete().where(Fragment.x == None, Fragment.picture == picture).execute()
+
+                print '%d: EXTRA FRAGMENTS REMOVED: %d' % (picture.id, to_remove_count)
             return True
         except WrongDataException:
             return False
