@@ -51,7 +51,6 @@ class ImageHelper:
                     fimg = Image.fromstring('RGB', (export_size, export_size), f.high_pic, 'raw')
                     img.paste(fimg, (f.x * export_size, f.y * export_size))
 
-            print file_name
             img.save(os.path.join('web', file_name), 'PNG')
             picture.export_generated = datetime.datetime.now()
             picture.save()
