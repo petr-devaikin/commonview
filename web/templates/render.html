@@ -45,12 +45,14 @@
 
         <div id="resumePanel" class="panel">
             <p class="status">Paused</p>
-            <p class="accuracy">Accuracy:</p>
+            <p class="accuracy">Accuracy*:</p>
             <p class="accuracyPercentage">0.0%</p>
             <button id="resumeButton" class="button">Resume</button>
             <p class="hint">
                 or <button class="clearButton button">clear</button> the picture to start
                 with another tag
+                <br/><br/>
+                <i>* Accuracy can never reach 100%. Stop compiling when the picture looks good</i>
             </p>
         </div>
 
@@ -59,9 +61,12 @@
                 Compiling
                 <img src="{{ url_for('static', filename='img/ajax-loader.gif') }}" />
             </p>
-            <p class="accuracy">Accuracy:</p>
+            <p class="accuracy">Accuracy*:</p>
             <p class="accuracyPercentage">0.0%</p>
             <button id="pauseButton" class="button">Pause</button>
+            <p class="hint">
+                <i>* Accuracy can never reach 100%. Stop compiling when the picture looks good</i>
+            </p>
         </div>
 
         <div id="completePanel" class="panel">
