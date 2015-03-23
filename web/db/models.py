@@ -25,7 +25,8 @@ class Picture(Model):
     image = BlobField()
 
     def diff_percentage(self):
-        return round(100 * (255 - self.global_diff) / 255, 1) if self.global_diff != None else 0
+        r = (255 - self.global_diff) / 255 if self.global_diff != None else 0
+        return round(100 * r * r, 1)
 
     def export_path(self):
         return '%d_%d.png' % (self.user.id, self.id)

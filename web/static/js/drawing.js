@@ -105,7 +105,7 @@ define(['libs/d3', 'settings'], function(d3, settings) {
     }
 
     function updateAccuracy(palette) {
-        var v = palette.globalDiff ? (100 * (255 - palette.globalDiff) / 255) : 0;
+        var v = palette.globalDiff ? (100 * Math.pow((255 - palette.globalDiff) / 255, 2)) : 0;
         console.log('Accurancy: ' + v);
         d3.selectAll('.accuracyPercentage')
             .text(v.toFixed(1) + '%')
