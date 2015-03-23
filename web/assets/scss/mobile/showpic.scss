@@ -1,0 +1,70 @@
+$miniPhotoSize: 13px;
+
+#pictureName {
+    position: absolute;
+    left: 90px;
+    right: 0px;
+    top: 17px;
+}
+
+#mainPhoto {
+    position: relative;
+    background: url('/static/img/tbg.png');
+    background-size: $miniPhotoSize;
+
+    @for $i from 1 through 100 {
+        &.width#{$i} { width: $miniPhotoSize * $i; }
+        &.height#{$i} { height: $miniPhotoSize * $i; }
+    }
+
+    #mainBackground {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        background-size: contain;
+    }
+
+    .miniPhoto {
+        position: absolute;
+        width: $miniPhotoSize;
+        height: $miniPhotoSize;
+        background-size: $miniPhotoSize $miniPhotoSize;
+        background-repeat: no-repeat;
+
+        @for $i from 1 through 100 {
+            &[column="#{$i}"] { left: $miniPhotoSize * $i; }
+        }
+
+        @for $i from 1 through 100 {
+            &[row="#{$i}"] { top: $miniPhotoSize * $i; }
+        }
+
+        a {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    }
+}
+
+#zoom {
+    position: absolute;
+    display: none;
+    width: 150px;
+    height: 150px;
+    margin-left: 10px;
+    margin-top: -155px;
+    background: red;
+
+    #username {
+        position: absolute;
+        left: 0px;
+        bottom: 0px;
+        padding: 2px 5px;
+        background: rgba(255, 255, 255, 0.8);
+        font-size: 12px;
+        width: 140px;
+    }
+}

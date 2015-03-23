@@ -1,18 +1,30 @@
 define(['libs/d3', 'settings'], function(d3, settings) {
-    function setZoomer(getPalette) {
+    function setZoomer(getPalette, mobile) {
         var zoom = d3.select('#zoom');
 
-        window.addEventListener('mousemove', function(e) {
+        function moveHandler(e) {
             var photoBounds = document.getElementById('mainPhoto').getBoundingClientRect();
 
             var x = e.clientX,
-                y = e.clientY,
-                zoomX = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft),
-                zoomY = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop);
+                y = e.clientY;
+
+
+            if (mobile && e.touches.length == 1){ // Only deal with one finger
+                var touch = e.touches[0]; // Get the information for finger #1
+                x = touch.clientX;
+                y = touch.clientY;
+            }
+
+            var zoomX = x + (document.documentElement.scrollLeft || document.body.scrollLeft),
+                zoomY = y + (document.documentElement.scrollTop || document.body.scrollTop);
+
+            if (mobile && e.touches.length == 1){ // Only deal with one finger
+                zoomX += 10;
+                zoomY -= 10;
+            }
 
             if (x >= photoBounds.left && x  <= photoBounds.right &&
                 y >= photoBounds.top && y  <= photoBounds.bottom) {
-
                 var photoX = Math.floor((x - photoBounds.left) / settings.miniPhotoSize),
                     photoY = Math.floor((y - photoBounds.top) / settings.miniPhotoSize);
 
@@ -35,7 +47,17 @@ define(['libs/d3', 'settings'], function(d3, settings) {
             }
             else
                 zoom.style('display', null);
-        })
+        }
+
+        if (!mobile)
+            window.addEventListener('mousemove', moveHandler);
+        else {
+            window.addEventListener('touchmove', moveHandler);
+            window.addEventListener('touchstart', moveHandler);
+            window.addEventListener('touchend', function() {
+                zoom.style('display', null);
+            });
+        }
     }
 
     function setZoomerBackground(d) {

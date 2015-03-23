@@ -1,0 +1,39 @@
+
+$fontColor: #1C212D;
+
+$headerHeight: 40px;
+
+
+html, body {
+    margin: 0;
+    padding: 0;
+    color: $fontColor;
+    background: #fff;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    overflow: auto;
+}
+
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: $headerHeight;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 1;
+
+    h1 {
+        position: relative;
+        float: left;
+        font-family: 'Roboto Slab', serif;
+        font-size: 24px;
+        margin: 5px;
+        padding: 0;
+    }
+}
+
+#content {
+    padding-top: $headerHeight;
+    z-index: 0;
+}

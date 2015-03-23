@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, current_app, session, jsonify, g, send_file
+from flask.ext.mobility import Mobility
 import json
 from instagram import client
 from .picprocess.image_helper import ImageHelper
@@ -18,6 +19,7 @@ app.config.from_object('web.default_settings')
 app.config.from_pyfile('application.cfg', silent=True)
 
 Scss(app)
+Mobility(app)
 
 set_logger_params(app)
 init_db(app)
@@ -108,11 +110,20 @@ def render(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
+    
     if request.method == 'GET':
         pixels = Pixels()
         pixels.get_pixels_from_img(picture)
-
-        if not g.authorized or picture.user.id != g.user.id:
+    
+        if request.MOBILE:
+            return render_template('mobile/showpicture.html',
+                    picture=picture,
+                    pixels=json.dumps(pixels.to_hash()),
+                    group_size=current_app.config['GROUP_SIZE'],
+                    export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
+                    palette=json.dumps(Palette.load_from_db(picture))
+                )
+        elif not g.authorized or picture.user.id != g.user.id:
             return render_template('showpicture.html',
                     picture=picture,
                     pixels=json.dumps(pixels.to_hash()),
@@ -130,11 +141,13 @@ def render(id):
                     palette=json.dumps(Palette.load_from_db(picture)),
                 )
     else:
+        if not g.authorized or picture.user.id != g.user.id:
+            return 'error', 500
+
         get_logger().info('User %d removed picture %d', g.user.id, picture.id)
 
         Palette.remove_from_db(picture)
         return jsonify(result='ok')
-
 
 
 @app.route('/pic/<id>/preview')
