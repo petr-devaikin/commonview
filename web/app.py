@@ -156,6 +156,9 @@ def preview(id):
         picture = Picture.get(Picture.id==id)
     except Picture.DoesNotExist:
         return 'Not found', 404
+    
+    if not g.authorized or picture.user.id != g.user.id:
+        return 'error', 500
 
     return send_file(cStringIO.StringIO(picture.image), mimetype='image/jpeg')
 
