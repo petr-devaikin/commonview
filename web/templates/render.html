@@ -14,7 +14,7 @@
     <script>
         var paletteData = {{ palette | safe }};
         var exportImgUrl = '{{ url_for('export', id=picture.id) }}';
-        require(['render'], function(render) {
+        require(['pages/render/render'], function(render) {
             render('{{ access_token }}', {{ picture.id }}, {{ pixels | safe }}, paletteData, exportImgUrl);
         })
     </script>

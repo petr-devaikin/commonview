@@ -12,7 +12,7 @@
 
 {% block script %}
     <script>
-        require(['index', 'upload'], function(index, upload) {
+        require(['index', 'pages/upload'], function(index, upload) {
             index();
             {% if can_upload %}
                 upload({{ max_size }});

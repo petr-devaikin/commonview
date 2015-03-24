@@ -13,9 +13,14 @@
 
         <script src="{{ url_for('static', filename='js/libs/require.js') }}"></script>
         <script>
+            {% if config['DEBUG'] %}
+                var version = (new Date()).getTime();
+            {% else %}
+                var version = '{{ config['VERSION'] }}';
+            {% endif %}
             requirejs.config({
                 baseUrl: "{{ url_for('static', filename='js') }}",
-                urlArgs: "bust=" + (new Date()).getTime(),
+                urlArgs: "v=" + version,
                 paths: {
                     'libs/d3': "libs/d3.min",
                     'libs/instafeed': "libs/instafeed.min",

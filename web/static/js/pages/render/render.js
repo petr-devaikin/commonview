@@ -1,5 +1,5 @@
-define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
-    function(d3, Palette, proxy, PicGrabber, drawing) {
+define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
+    function(d3, Palette, proxy, PicGrabber, drawing, panels) {
         var palette;
 
         var startButton = d3.select('#startButton');
@@ -7,15 +7,6 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
         var stopButton = d3.select('#pauseButton');
         var clearButton = d3.selectAll('.clearButton');
         var deleteButton = d3.select('#deleteButton');
-
-        var allPanels = d3.selectAll('.panel'),
-            startPanel = d3.select('#startPanel'),
-            loadingPanel = d3.select('#loadingPanel'),
-            resumePanel = d3.select('#resumePanel'),
-            processingPanel = d3.select('#processingPanel'),
-            completePanel = d3.select('#completePanel'),
-            interruptionPanel = d3.select('#interruptionPanel'),
-            savingPanel = d3.select('#savingPanel');
 
         var isStopped = true;
 
@@ -36,18 +27,17 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 onComplete: function() {
                     drawing.drawPalette(palette);
 
-                    allPanels.style('display', 'none');
                     if (palette.tagName == null) {
-                        startPanel.style('display', 'block');
+                        panels.showStart();
                     }
                     else if (palette.globalDiff > 0) {
                         if (palette.next_max_tag_id !== null)
-                            resumePanel.style('display', 'block');
+                            panels.showResume();
                         else
-                            interruptionPanel.style('display', 'block');
+                            panels.showInterruption();
                     }
                     else {
-                        completePanel.style('display', 'block');
+                        panels.showComplete();
                     }
 
                     console.log('Palette loaded');
@@ -111,15 +101,14 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                     if (isStopped) {
                         savePalette();
 
-                        allPanels.style('display', 'none');
                         if (palette.globalDiff > 0) {
                             if (palette.next_max_tag_id === undefined)
-                                interruptionPanel.style('display', 'block');
+                                panels.showInterruption();
                             else
-                                resumePanel.style('display', 'block');
+                                panels.showResume();
                         }
                         else
-                            completePanel.style('display', 'block');
+                            panels.showComplete();
                     }
                     else {
                         console.log('Start saving');
@@ -128,8 +117,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                                 picGrabber.start(palette.tagName, palette.next_max_tag_id);
                             },
                             function() {
-                                allPanels.style('display', 'none');
-                                resumePanel.style('display', 'block');
+                                panels.showResume();
                             }
                         );
                     }
@@ -137,8 +125,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 onEmpty: function(error) {
                     drawing.drawPalette(palette);
                     savePalette();
-                    allPanels.style('display', 'none');
-                    interruptionPanel.style('display', 'block');
+                    panels.showInterruption();
                     console.log('Empty feed');
                 }
             });
@@ -151,8 +138,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                 picGrabber.start(palette.tagName, palette.next_max_tag_id);
 
                 d3.select('#tagName').attr('disabled', 'disabled');
-                allPanels.style('display', 'none');
-                processingPanel.style('display', 'block');
+                panels.showProcessing();
             }
 
             startButton.on('click', startProcess);
@@ -160,9 +146,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
 
             stopButton.on('click', function() {
                 isStopped = true;
-
-                allPanels.style('display', 'none');
-                savingPanel.style('display', 'block');
+                panels.showSaving();
             })
 
             clearButton.on('click', function() {
@@ -191,20 +175,5 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
             });
 
             drawing.setZoomer(function() { return palette.groupIndex; });
-
-            /*
-            proxy.getImageColor(
-                pic_id,
-                {
-                    insta_id: '123',
-                    insta_img: 'https://scontent-ams.cdninstagram.com/hphotos-xaf1/t51.2885-15/e15/11024323_354048768115499_2017163424_n.jpg',
-                    insta_url: 'qweqweqwe',
-                    insta_user: 'user',
-                },
-                function(result) {
-                    console.log(result);
-                }
-            );
-            */
         }
     });

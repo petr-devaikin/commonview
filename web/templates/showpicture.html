@@ -13,7 +13,7 @@
     <script>
         var paletteData = {{ palette | safe }};
         var exportImgUrl = '{{ url_for('export', id=picture.id) }}';
-        require(['showpicture'], function(showpazzle) {
+        require(['pages/showpicture'], function(showpazzle) {
             showpazzle({{ picture.id }}, {{ pixels | safe }}, paletteData, exportImgUrl);
         })
     </script>
