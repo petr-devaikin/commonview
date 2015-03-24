@@ -1,7 +1,7 @@
 define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
     function(PixelGroup, helpers, proxy, d3, settings) {
 
-    return function(picture_id, picture) {
+    return function(picture_id, pixelGroups) {
         this.picture_id = picture_id;
         this.groups = [];
         this.groupIndex = {};
@@ -13,24 +13,16 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
         var removedPictures = [];
 
 
-        for (var i = 0; i < picture.pixels.length; i++) {
-            var x = picture.pixels[i].x,
-                y = picture.pixels[i].y,
-                color = picture.pixels[i].color,
-                gX = Math.floor(x/settings.groupSize),
-                gY = Math.floor(y/settings.groupSize);
+        for (var i = 0; i < pixelGroups.length; i++) {
+            var pixelGroup = new PixelGroup(pixelGroups[i]);
+
+            var gX = pixelGroups[i].x,
+                gY = pixelGroups[i].y;
 
             if (this.groupIndex[gX] === undefined)
                 this.groupIndex[gX] = {};
-            var pixelGroup = this.groupIndex[gX][gY];
-
-            if (pixelGroup === undefined) {
-                pixelGroup = new PixelGroup(gX, gY);
-                this.groups.push(pixelGroup);
-                this.groupIndex[gX][gY] = pixelGroup;
-            }
-
-            pixelGroup.addPixel(x % settings.groupSize, y % settings.groupSize, color);
+            this.groupIndex[gX][gY] = pixelGroup;
+            this.groups.push(pixelGroup);
         }
 
         d3.shuffle(this.groups);
@@ -82,7 +74,7 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                 for (var y in data.groups[x]) {
                     var g = this.groupIndex[x][y];
                     g.loading = true;
-                    g.fromHash(data.groups[x][y]);
+                    g.setImage(data.groups[x][y]);
 
                     if (params.checkDeleted) {
                         maxCounter++;

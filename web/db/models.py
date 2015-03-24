@@ -2,6 +2,7 @@ from peewee import *
 from .engine import get_db
 from flask import current_app
 import os
+import math
 
 
 class User(Model):
@@ -23,6 +24,12 @@ class Picture(Model):
     updated = DateTimeField(null=True)
     export_generated = DateTimeField(null=True)
     image = BlobField()
+
+    def fragment_width(self):
+        return int(math.ceil(float(self.width) / current_app.config['GROUP_SIZE']))
+
+    def fragment_height(self):
+        return int(math.ceil(float(self.height) / current_app.config['GROUP_SIZE']))
 
     def diff_percentage(self):
         r = (255 - self.global_diff) / 255 if self.global_diff != None else 0

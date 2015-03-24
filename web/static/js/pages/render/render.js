@@ -61,9 +61,9 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
             });
         }
 
-        function clearPalette(pic_id, picture) {
+        function clearPalette(pic_id, pixelGroups) {
             console.log('Start');
-            palette = new Palette(pic_id, picture);
+            palette = new Palette(pic_id, pixelGroups);
             console.log('Generated');
             return palette;
         }
@@ -74,10 +74,10 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
             });
         }
 
-        return function(accessToken, pic_id, picture, paletteData) {
+        return function(accessToken, pic_id, pixelGroups, paletteData) {
             var lastSave = undefined;
 
-            clearPalette(pic_id, picture);
+            clearPalette(pic_id, pixelGroups);
 
             loadPalette(paletteData);
 

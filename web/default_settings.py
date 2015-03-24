@@ -1,5 +1,5 @@
 DEBUG = False
-VERSION = '1.0.0.0'
+VERSION = '1.0.0.1'
 
 SECRET_KEY = '!\x11\xebG\x12\xe8\xb4\xedF.\x06:g6\x8e\x9e\xcd\xc4k\x94L\xb4)\xa3'
 DATABASE_URI = 'sqlite:////tmp/commonview.db'

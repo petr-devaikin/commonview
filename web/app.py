@@ -113,31 +113,30 @@ def render(id):
     
     if request.method == 'GET':
         pixels = Pixels()
-        pixels.get_pixels_from_img(picture)
     
         if request.MOBILE:
+            pixels.get_empty_pixels(picture)
+
             return render_template('mobile/showpicture.html',
                     picture=picture,
                     pixels=json.dumps(pixels.to_hash()),
-                    group_size=current_app.config['GROUP_SIZE'],
-                    export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
                     palette=json.dumps(Palette.load_from_db(picture))
                 )
         elif not g.authorized or picture.user.id != g.user.id:
+            pixels.get_empty_pixels(picture)
+            
             return render_template('showpicture.html',
                     picture=picture,
                     pixels=json.dumps(pixels.to_hash()),
-                    group_size=current_app.config['GROUP_SIZE'],
-                    export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
                     palette=json.dumps(Palette.load_from_db(picture)),
                 )
         else:
+            pixels.get_pixels_from_img(picture)
+
             return render_template('render.html',
                     picture=picture,
                     pixels=json.dumps(pixels.to_hash()),
                     access_token=g.user.access_token,
-                    group_size=current_app.config['GROUP_SIZE'],
-                    export_pic_size=current_app.config['EXPORT_GROUP_SIZE'],
                     palette=json.dumps(Palette.load_from_db(picture)),
                 )
     else:
@@ -156,7 +155,7 @@ def preview(id):
         picture = Picture.get(Picture.id==id)
     except Picture.DoesNotExist:
         return 'Not found', 404
-    
+
     if not g.authorized or picture.user.id != g.user.id:
         return 'error', 500
 
