@@ -44,9 +44,8 @@ class ImageHelper:
             get_logger().info('Generate new export for %d', picture.id)
 
             export_size = current_app.config['EXPORT_GROUP_SIZE']
-            group_size = current_app.config['GROUP_SIZE']
-            width = picture.width * export_size / group_size
-            height = picture.height * export_size / group_size
+            width = picture.fragment_width() * export_size
+            height = picture.fragment_height() * export_size
 
             img = Image.new('RGBA', (width, height))
             for f in picture.fragments:
