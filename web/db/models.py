@@ -60,8 +60,8 @@ class Fragment(Model):
     def to_hash(self):
         return {
             'id': self.id,
-            #'x': self.x,
-            #'y': self.y,
+            'x': self.x,
+            'y': self.y,
             'diff': self.diff,
             'instaId': self.insta_id,
             'instaImg': self.insta_img,

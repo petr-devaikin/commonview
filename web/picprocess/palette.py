@@ -64,14 +64,7 @@ class Palette:
 
     @staticmethod
     def load_from_db(picture):
-        groups = {}
-        for f in picture.fragments:
-            if f.x != None and f.y != None:
-                y = str(f.y)
-                x = str(f.x)
-                if not x in groups:
-                    groups[x] = {}
-                groups[x][y] = f.to_hash()
+        groups = [f.to_hash() for f in picture.fragments if f.x != None and f.y != None]
 
         return {
             'globalDiff': picture.global_diff,

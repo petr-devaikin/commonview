@@ -36,5 +36,26 @@ define(['libs/qwest', 'settings'], function(qwest, settings) {
                     if (error !== undefined) error();
                 });
         },
+        loadRemoteImage: function(params) {
+            // params: url, success, error
+
+            var image = new Image();
+
+            image.onload = function() {
+                if ('naturalHeight' in this && this.naturalHeight + this.naturalWidth !== 0)
+                    params.success(this);
+                else {
+                    console.log('Error: empty image');
+                    params.error();
+                }
+            }
+
+            image.onerror = function(e) {
+                console.log('Error: ' + e);
+                if (params.error !== undefined) params.error();
+            }
+
+            image.src = params.url;
+        },
     }
 });

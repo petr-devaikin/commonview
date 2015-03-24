@@ -1,5 +1,5 @@
-define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
-    function(PixelGroup, helpers, proxy, d3, settings) {
+define(['pixel_group', 'proxy', 'libs/d3', 'settings'],
+    function(PixelGroup, proxy, d3, settings) {
 
     return function(picture_id, pixelGroups) {
         this.picture_id = picture_id;
@@ -53,9 +53,8 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
 
                 if (picsLeft > 0) {
                     var group = queue.pop();
-                    helpers.loadImgByUrl({
+                    proxy.loadRemoteImage({
                         url: group.image.instaImg,
-                        useProxy: false,
                         success: function(img) {
                             group.loading = false;
                             processNext();
@@ -70,20 +69,21 @@ define(['pixel_group', 'helpers', 'proxy', 'libs/d3', 'settings'],
                 }
             }
 
-            for (var x in data.groups)
-                for (var y in data.groups[x]) {
-                    var g = this.groupIndex[x][y];
-                    g.loading = true;
-                    g.setImage(data.groups[x][y]);
+            for (var i = 0; i < data.groups.length; i++) {
+                var group = data.groups[i];
+                var g = this.groupIndex[group.x][group.y];
 
-                    if (params.checkDeleted) {
-                        maxCounter++;
+                g.loading = true;
+                g.setImage(group);
 
-                        queue.push(g);
-                        if (maxCounter <= settings.maxLoads)
-                            processNext();
-                    }
+                if (params.checkDeleted) {
+                    maxCounter++;
+
+                    queue.push(g);
+                    if (maxCounter <= settings.maxLoads)
+                        processNext();
                 }
+            }
 
             if (maxCounter == 0 && params.onComplete !== undefined)
                 params.onComplete();

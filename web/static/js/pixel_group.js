@@ -1,4 +1,4 @@
-define(['settings', 'helpers'], function(settings, helpers) {
+define(['settings'], function(settings) {
     return function(data) {
         this.x = data.x;
         this.y = data.y;
