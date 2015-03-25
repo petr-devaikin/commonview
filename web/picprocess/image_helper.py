@@ -58,4 +58,16 @@ class ImageHelper:
             picture.save()
 
         return file_name
+
+    @staticmethod
+    def mini_image(picture):
+        file_name = ImageHelper.compile_image(picture)
+
+        img = Image.open('web/' + file_name)
+        img = img.resize((picture.width * 2, picture.height * 2))
+        data = cStringIO.StringIO()
+        img.save(data, 'PNG')
+        data.seek(0)
+
+        return data
         

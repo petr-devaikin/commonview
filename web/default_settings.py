@@ -23,6 +23,9 @@ ALLOWED_INSTA_URL = '^[a-zA-Z0-9_-]+$'
 MAX_CACHED_PHOTOS = 40
 
 
+GALLERY_MAX_DIFF = 80
+
+
 LOGGER = {
     'FORMAT': '[%(asctime)s] %(filename)s[%(lineno)d] #%(levelname)-8s  %(message)s',
     'PATH': 'pazzla.log',

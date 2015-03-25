@@ -12,6 +12,7 @@ from .db.models import *
 import cStringIO
 import re
 from .logger import get_logger, set_logger_params
+import random
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -100,7 +101,11 @@ def index():
             max_count=current_app.config['MAX_UPLOADS'],
             max_size=current_app.config['MAX_CONTENT_LENGTH'])
     else:
-        return render_template('index.html')
+        pics = Picture.select().where(Picture.global_diff < current_app.config['GALLERY_MAX_DIFF'])
+        numbers = range(pics.count())
+        random.shuffle(numbers)
+        gallery = [pics[i] for i in numbers[:3]]
+        return render_template('index.html', gallery=gallery)
 
 
 @app.route('/pic/<id>', methods=['GET', 'DELETE'])
@@ -124,7 +129,7 @@ def render(id):
                 )
         elif not g.authorized or picture.user.id != g.user.id:
             pixels.get_empty_pixels(picture)
-            
+
             return render_template('showpicture.html',
                     picture=picture,
                     pixels=json.dumps(pixels.to_hash()),
@@ -170,6 +175,17 @@ def export(id):
         return 'Not found', 404
 
     result = ImageHelper.compile_image(picture)
+    return send_file(result, mimetype='image/png')
+
+
+@app.route('/pic/<id>/mini')
+def mini(id):
+    try:
+        picture = Picture.get(Picture.id==id)
+    except Picture.DoesNotExist:
+        return 'Not found', 404
+
+    result = ImageHelper.mini_image(picture)
     return send_file(result, mimetype='image/png')
 
 

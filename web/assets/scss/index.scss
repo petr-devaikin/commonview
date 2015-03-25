@@ -13,3 +13,48 @@ ol {
         margin-bottom: 0.5em;
     }
 }
+
+#gallery {
+    margin-top: 70px;
+    margin-bottom: 20px;
+    overflow: hidden;
+
+    .photo {
+        position: relative;
+        float: left;
+        width: 200px;
+        height: 160px;
+        background-repeat: no-repeat;
+
+        background-size: cover;
+        background-position: center center;
+        margin-right: 20px;
+
+        overflow: hidden;
+
+        .label {
+            transition: bottom 0.1s ease-out 0s;
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            position: absolute;
+            bottom: -18px;
+            left: 0px;
+            right: 0px;
+            padding: 0 5px;
+            height: 18px;
+        }
+
+        &:hover {
+            .label {
+                bottom: 0px;
+            }
+        }
+
+        a {
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%; 
+        }
+    }
+}

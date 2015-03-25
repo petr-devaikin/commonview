@@ -21,9 +21,18 @@
         <ol>
             <li>Log in via Instagram</li>
             <li>Upload an image (jpeg or png)</li>
-            <li>Choose a hashtag to find pazzle elements</li>
+            <li>Choose a hashtag to find puzzle elements</li>
             <li>Start compiling and enjoy the process</li>
-            <li>Share your pazzle</li>
+            <li>Share your puzzle</li>
         </ol>
+
+        <div id="gallery">
+            {% for p in gallery %}
+                <div class="photo" style="background-image: url({{ url_for('mini', id=p.id) }})">
+                    <div class="label">#{{ p.tag }} by @{{ p.user.insta_name }}</div>
+                    <a href="{{ url_for('render', id=p.id) }}"></a>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
