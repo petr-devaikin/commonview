@@ -1,5 +1,5 @@
-define(['libs/instafeed', 'proxy', 'settings'],
-    function(instafeed, proxy, settings) {
+define(['libs/instafeed', 'proxy', 'settings', 'json!data/test.json'],
+    function(instafeed, proxy, settings, lobster_data) {
     return function(params) {
         // params: accessToken, picId, onListReceived, onPhotoLoaded, onComplete, onEmpty
         var feed = undefined;
@@ -15,14 +15,14 @@ define(['libs/instafeed', 'proxy', 'settings'],
                     var instaImage = photos.data[i];
 
                     function imageProcessed(newImage) {
-                        if (params.onPhotoLoaded !== undefined) 
+                        if (params.onPhotoLoaded !== undefined)
                             params.onPhotoLoaded(newImage);
 
                         if (--uncomplete == 0) {
                             if (params.onComplete !== undefined)
                                 params.onComplete();
                         }
-                    } 
+                    }
 
                     function imageFailed() {
                         console.log('Cannot load new image');
@@ -49,6 +49,36 @@ define(['libs/instafeed', 'proxy', 'settings'],
         } (this);
 
         this.start = function(tagName, nextTag) {
+            var i = 0;
+            var current_images = {
+                data: [],
+                pagination: {
+                    next_max_tag_id: 'sorry_nope'
+                },
+            };
+
+            while (lobster_data.length > 0 && i++ < settings.uploadStep) {
+                var img = lobster_data.pop();
+                current_images.data.push({
+                    id: img.url,
+                    images: {
+                        thumbnail: {
+                            url: img.thumb,
+                        },
+                    },
+                    link: 'https://lobster.media' + img.url,
+                    user: {
+                        username: 'lobster',
+                    }
+                });
+            }
+
+            if (current_images.data.length == 0)
+                params.onEmpty();
+            else
+                this._onSuccess(current_images);
+
+            /*
             feed = new Instafeed({
                 accessToken: params.accessToken,
                 get: 'tagged',
@@ -69,6 +99,7 @@ define(['libs/instafeed', 'proxy', 'settings'],
             });
 
             feed.run();
+            */
         }
     }
 })

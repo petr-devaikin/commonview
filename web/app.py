@@ -88,7 +88,7 @@ def insta_code():
 @app.route('/')
 def index():
     if g.authorized:
-        can_upload = g.user.pictures.count() < current_app.config['MAX_UPLOADS'] 
+        can_upload = g.user.pictures.count() < current_app.config['MAX_UPLOADS']
         return render_template('pictures.html',
             can_upload=can_upload,
             max_count=current_app.config['MAX_UPLOADS'],
@@ -196,15 +196,15 @@ def img(id):
         return 'Not found', 404
 
     if not g.authorized or picture.user.id != g.user.id: return 'error', 500
-    
+
     insta_img = request.args.get('insta_img') # check root!
     insta_id = request.args.get('insta_id')
     insta_url = request.args.get('insta_url').split('/')[-2] # remain just id
     insta_user = request.args.get('insta_user')
 
-    insta_url_re = re.compile(current_app.config['ALLOWED_INSTA_URL'])
-    if not insta_url_re.match(insta_url):
-        return 'Wrong url', 500
+    #insta_url_re = re.compile(current_app.config['ALLOWED_INSTA_URL'])
+    #if not insta_url_re.match(insta_url):
+    #    return 'Wrong url', 500
 
     free_fragments = picture.fragments.where(Fragment.x == None)
     overcome = free_fragments.count() - current_app.config['MAX_CACHED_PHOTOS']

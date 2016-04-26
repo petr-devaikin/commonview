@@ -118,6 +118,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                         console.log('Start saving');
                         savePalette(
                             function() {
+                                console.log('grab againt');
                                 picGrabber.start(palette.tagName, palette.next_max_tag_id);
                             },
                             function() {

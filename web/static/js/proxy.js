@@ -2,7 +2,7 @@ define(['libs/qwest'], function(qwest) {
     return {
         getImageColor: function(id, params, success, error) {
             //params: insta_id, insta_img, insta_url, insta_user
-            qwest.get('/img/' + id, params)
+            qwest.get('/img/' + id, params, {timeout: 100000})
                 .then(function(response) {
                     if (success !== undefined) success(response);
                 })

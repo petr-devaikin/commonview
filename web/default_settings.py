@@ -2,7 +2,7 @@ DEBUG = True
 
 SECRET_KEY = '!\x11\xebG\x12\xe8\xb4\xedF.\x06:g6\x8e\x9e\xcd\xc4k\x94L\xb4)\xa3'
 DATABASE_URI = 'sqlite:////tmp/commonview.db'
-  
+
 INSTA_ID = ''
 INSTA_SECRET = ''
 
@@ -13,7 +13,7 @@ MAX_CONTENT_LENGTH = 5 * 1024 * 1024
 
 IMAGE_WIDTH = 300
 GROUP_SIZE = 5
-EXPORT_GROUP_SIZE = 20
+EXPORT_GROUP_SIZE = 40
 
 
 SEND_FILE_MAX_AGE_DEFAULT = 0
