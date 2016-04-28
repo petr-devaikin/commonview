@@ -11,7 +11,7 @@ p {
     background: url('/static/img/tbg.png');
     background-size: $miniPhotoSize;
 
-    @for $i from 1 through 100 {
+    @for $i from 1 through 200 {
         &.width#{$i} { width: $miniPhotoSize * $i; }
         &.height#{$i} { height: $miniPhotoSize * $i; }
     }
@@ -32,11 +32,11 @@ p {
         background-size: $miniPhotoSize $miniPhotoSize;
         background-repeat: no-repeat;
 
-        @for $i from 1 through 100 {
+        @for $i from 1 through 200 {
             &[column="#{$i}"] { left: $miniPhotoSize * $i; }
         }
 
-        @for $i from 1 through 100 {
+        @for $i from 1 through 200 {
             &[row="#{$i}"] { top: $miniPhotoSize * $i; }
         }
 
@@ -55,7 +55,9 @@ p {
     height: 150px;
     margin-left: 10px;
     margin-top: -155px;
-    background: red;
+    background: black;
+    background-size: contain;
+    background-repeat: no-repeat;
 
     #username {
         position: absolute;

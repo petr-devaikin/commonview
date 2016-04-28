@@ -1,4 +1,4 @@
-define(['settings', 'helpers'], function(settings, helpers) {
+define(['settings', 'helpers', 'libs/d3'], function(settings, helpers, d3) {
     return function(x, y) {
         this.x = x;
         this.y = y;
@@ -6,15 +6,23 @@ define(['settings', 'helpers'], function(settings, helpers) {
         this.image = undefined;
         this.loading = false;
 
+        this.lab = d3.lab('rgb('+this.pixels[0]+','+this.pixels[1]+','+this.pixels[2]+')');
+
+        console.log("====");
+        console.log(this.pixels);
+        console.log(this.lab);
+
         this.calcDiff = function(colors) {
             var summa = 0;
             var count = 0;
-            for (var i = 0; i < colors.length; i++)
-                if (this.pixels[i] !== undefined) {
-                    count++;
-                    summa += Math.abs(this.pixels[i] - colors[i]);
-                }
-            return summa / count;
+
+            var c2 = d3.lab('rgb('+colors[0]+','+colors[1]+','+colors[2]+')');
+
+            summa += (this.lab.l - c2.l) * (this.lab.l - c2.l);
+            summa += (this.lab.a - c2.a) * (this.lab.a - c2.a);
+            summa += (this.lab.b - c2.b) * (this.lab.b - c2.b);
+
+            return Math.sqrt(summa);
         }
 
         this.addPixel = function(dX, dY, color) {

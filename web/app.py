@@ -148,6 +148,15 @@ def export(id):
     result = ImageHelper.compile_image(picture)
     return send_file(result, mimetype='image/png')
 
+@app.route('/pic/<id>/export_json')
+def export_json(id):
+    try:
+        picture = Picture.get(Picture.id==id)
+    except Picture.DoesNotExist:
+        return 'Not found', 404
+
+    return jsonify(result=Palette.export(picture))
+
 
 @app.route('/palette/<id>', methods=['POST'])
 def palette(id):
@@ -199,7 +208,7 @@ def img(id):
 
     insta_img = request.args.get('insta_img') # check root!
     insta_id = request.args.get('insta_id')
-    insta_url = request.args.get('insta_url').split('/')[-2] # remain just id
+    insta_url = request.args.get('insta_url').split('/')[-1] # remain just id
     insta_user = request.args.get('insta_user')
 
     #insta_url_re = re.compile(current_app.config['ALLOWED_INSTA_URL'])

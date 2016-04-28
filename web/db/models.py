@@ -55,6 +55,12 @@ class Fragment(Model):
             'lowPic': [ord(c) for c in self.low_pic]
         }
 
+    def export(self):
+        return {
+            'id': self.insta_id,
+            'img': self.insta_img
+        }
+
 
     class Meta:
         database = get_db()

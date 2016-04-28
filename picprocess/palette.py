@@ -82,3 +82,16 @@ class Palette:
             'groups': groups,
         }
 
+    @staticmethod
+    def export(picture):
+        groups = {}
+        for f in picture.fragments:
+            if f.x != None and f.y != None:
+                y = str(f.y)
+                x = str(f.x)
+                if not x in groups:
+                    groups[x] = {}
+                groups[x][y] = f.export()
+
+        return groups
+

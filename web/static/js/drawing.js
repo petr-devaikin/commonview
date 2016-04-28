@@ -23,7 +23,7 @@ define(['libs/d3', 'settings'], function(d3, settings) {
                     var datum = groupIndex[photoX][photoY];
                     zoom
                         .style('display', 'block')
-                        .style('background', setZoomerBackground(datum))
+                        .style('background-image', setZoomerBackground(datum))
                         .style('left', zoomX + 'px')
                         .style('top', zoomY + 'px');
 
@@ -47,7 +47,7 @@ define(['libs/d3', 'settings'], function(d3, settings) {
     }
 
     function setHref(d) {
-        return d.image ? 'https://instagram.com/p/' + d.image.instaUrl + '/' : '#';
+        return d.image ? 'https://lobster.media/content/' + d.image.instaUrl + '/' : '#';
     }
 
     function setDisplay(d) {

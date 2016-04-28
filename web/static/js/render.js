@@ -40,15 +40,15 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing'],
                     if (palette.tagName == null) {
                         startPanel.style('display', 'block');
                     }
-                    else if (palette.globalDiff > 0) {
+                    else /*if (palette.globalDiff > 0)*/ {
                         if (palette.next_max_tag_id !== null)
                             resumePanel.style('display', 'block');
                         else
                             interruptionPanel.style('display', 'block');
-                    }
+                    }/*
                     else {
                         completePanel.style('display', 'block');
-                    }
+                    }*/
 
                     console.log('Palette loaded');
                 },

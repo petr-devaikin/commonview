@@ -1,4 +1,4 @@
-define(['libs/instafeed', 'proxy', 'settings', 'json!data/test.json'],
+define(['libs/instafeed', 'proxy', 'settings', 'json!data/collection_thumbs.json'],
     function(instafeed, proxy, settings, lobster_data) {
     return function(params) {
         // params: accessToken, picId, onListReceived, onPhotoLoaded, onComplete, onEmpty
@@ -58,7 +58,7 @@ define(['libs/instafeed', 'proxy', 'settings', 'json!data/test.json'],
             };
 
             while (lobster_data.length > 0 && i++ < settings.uploadStep) {
-                var img = lobster_data.pop();
+                var img = lobster_data.shift();
                 current_images.data.push({
                     id: img.url,
                     images: {
