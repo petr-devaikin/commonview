@@ -1,4 +1,4 @@
-$miniPhotoSize: 13px;
+$miniPhotoSize: 52px;
 
 p {
     margin: 0;
@@ -29,7 +29,8 @@ p {
         position: absolute;
         width: $miniPhotoSize;
         height: $miniPhotoSize;
-        background-size: $miniPhotoSize $miniPhotoSize;
+        background-size: cover;
+        background-position: center center;
         background-repeat: no-repeat;
 
         @for $i from 1 through 200 {

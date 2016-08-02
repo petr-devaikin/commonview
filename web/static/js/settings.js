@@ -1,8 +1,8 @@
 define([], function() {
     return {
-        groupSize: 10,
-        miniPhotoSize: 13,
-        exportPhotoSize: 40,
+        groupSize: 40,
+        miniPhotoSize: 52,
+        exportPhotoSize: 80,
         uploadStep: 10,
         maxLoads: 20,
     }

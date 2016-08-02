@@ -1,34 +1,36 @@
-define(['settings', 'helpers', 'libs/d3'], function(settings, helpers, d3) {
+define(['settings', 'helpers', 'libs/deltae', 'libs/d3'], function(settings, helpers, deltae, d3) {
     return function(x, y) {
         this.x = x;
         this.y = y;
         this.pixels = new Array(3 * settings.groupSize * settings.groupSize);
         this.image = undefined;
         this.loading = false;
-
-        this.lab = d3.lab('rgb('+this.pixels[0]+','+this.pixels[1]+','+this.pixels[2]+')');
-
-        console.log("====");
-        console.log(this.pixels);
-        console.log(this.lab);
+        this.lab = [];
 
         this.calcDiff = function(colors) {
             var summa = 0;
             var count = 0;
-
-            var c2 = d3.lab('rgb('+colors[0]+','+colors[1]+','+colors[2]+')');
-
-            summa += (this.lab.l - c2.l) * (this.lab.l - c2.l);
-            summa += (this.lab.a - c2.a) * (this.lab.a - c2.a);
-            summa += (this.lab.b - c2.b) * (this.lab.b - c2.b);
-
-            return Math.sqrt(summa);
+            for (var i = 0; i < colors.length / 3; i++)
+                if (this.pixels[i] !== undefined) {
+                    var color1 = d3.lab('rgb('+colors[3 * i]+','+colors[3 * i + 1]+','+colors[3 * i + 2]+')');
+                    var color2 = this.lab[i];
+                    color1 = {
+                        L: color1.l,
+                        A: color1.a,
+                        B: color1.b,
+                    }
+                    count++;
+                    summa += deltae.getDeltaE00(color1, color2);
+                }
+            return summa / count;
         }
 
         this.addPixel = function(dX, dY, color) {
             this.pixels[3 * (dY * settings.groupSize + dX)] = color[0];
             this.pixels[3 * (dY * settings.groupSize + dX) + 1] = color[1];
             this.pixels[3 * (dY * settings.groupSize + dX) + 2] = color[2];
+            var c = d3.lab('rgb('+color[0]+','+color[1]+','+color[2]+')');
+            this.lab[dY * settings.groupSize + dX] = { L: c.l, A: c.a, B: c.b };
         }
 
         this.toHash = function() {
