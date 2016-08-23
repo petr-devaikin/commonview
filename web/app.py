@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, current_ap
 from flask.ext.mobility import Mobility
 import json
 from instagram import client
+from httplib2 import Http
 from .picprocess.image_helper import ImageHelper
 from .picprocess.pixels import Pixels
 from .picprocess.palette import Palette
@@ -13,6 +14,7 @@ import cStringIO
 import re
 from .logger import get_logger, set_logger_params
 import random
+import requests
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -26,10 +28,27 @@ set_logger_params(app)
 init_db(app)
 
 
+def exchange_code_for_access_token(code, **kwargs):
+    url = u'https://api.instagram.com/oauth/access_token'
+    data = {
+        u'client_id': current_app.config['INSTA_ID'],
+        u'client_secret': current_app.config['INSTA_SECRET'],
+        u'code': code,
+        u'grant_type': u'authorization_code',
+        u'redirect_uri': url_for('insta_code', _external=True, **kwargs)
+    }
+
+    response = requests.post(url, data=data)
+
+    account_data = json.loads(response.content)
+
+    return account_data
+
+
 def get_unauthenticated_api(**kwargs):
     return client.InstagramAPI(client_id=current_app.config['INSTA_ID'],
-                               client_secret=current_app.config['INSTA_SECRET'],
-                               redirect_uri=url_for('insta_code', _external=True, **kwargs))
+                              client_secret=current_app.config['INSTA_SECRET'],
+                              redirect_uri=url_for('insta_code', _external=True, **kwargs))
 
 
 @app.before_request
@@ -64,38 +83,35 @@ def logout():
         get_logger().debug('User %d %s logged out', g.user.id, g.user.insta_name)
     return redirect(url_for('index'))
 
-
 @app.route('/insta_code')
 def insta_code():
     code = request.args.get('code')
+    account_data = exchange_code_for_access_token(code)
+    access_token = account_data['access_token']
+    user_info = account_data['user']
+    #get_unauthenticated_api().exchange_code_for_access_token(code)
     try:
-        access_token, user_info = get_unauthenticated_api().exchange_code_for_access_token(code)
+        user = User.get(User.insta_id == user_info[u'id'])
+        if user.insta_name != user_info[u'username']: user.insta_name = user_info[u'username']
+        if user.access_token != access_token: user.access_token = access_token
+        user.save()
+        get_logger().debug('User %d %s logged in', user.id, user.insta_name)
+    except User.DoesNotExist:
+        user = User.create(insta_id=user_info[u'id'],
+                           insta_name=user_info[u'username'],
+                           access_token=access_token)
+        get_logger().info('User %d %s registered', user.id, user.insta_name)
 
-        try:
-            user = User.get(User.insta_id == user_info[u'id'])
-            if user.insta_name != user_info[u'username']: user.insta_name = user_info[u'username']
-            if user.access_token != access_token: user.access_token = access_token
-            user.save()
-            get_logger().debug('User %d %s logged in', user.id, user.insta_name)
-        except User.DoesNotExist:
-            user = User.create(insta_id=user_info[u'id'],
-                               insta_name=user_info[u'username'],
-                               access_token=access_token)
-            get_logger().info('User %d %s registered', user.id, user.insta_name)
+    session['user_id'] = user.id
 
-        session['user_id'] = user.id
-
-        return redirect(url_for('index'))
-    except Exception as e:
-        print e
-        return 'error'
+    return redirect(url_for('index'))
 
 
 @app.route('/')
 def index():
     if g.authorized:
         can_upload = g.user.id == current_app.config['MY_ID'] or \
-                     g.user.pictures.count() < current_app.config['MAX_UPLOADS'] 
+                     g.user.pictures.count() < current_app.config['MAX_UPLOADS']
         return render_template('pictures.html',
             can_upload=can_upload,
             max_count=current_app.config['MAX_UPLOADS'],
@@ -115,10 +131,10 @@ def render(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    
+
     if request.method == 'GET':
         pixels = Pixels()
-    
+
         if request.MOBILE:
             pixels.get_empty_pixels(picture)
 
@@ -241,7 +257,7 @@ def img(id):
         return 'Not found', 404
 
     if not g.authorized or picture.user.id != g.user.id: return 'error', 500
-    
+
     insta_img = request.args.get('insta_img') # check root!
     insta_id = request.args.get('insta_id')
     insta_url = request.args.get('insta_url').split('/')[-2] # remain just id

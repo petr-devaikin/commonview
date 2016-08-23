@@ -417,7 +417,8 @@ p {
                                                                                                                                                                                                                                                                                                                                                                                                                         position: absolute;
                                                                                                                                                                                                                                                                                                                                                                                                                         width: 13px;
                                                                                                                                                                                                                                                                                                                                                                                                                         height: 13px;
-                                                                                                                                                                                                                                                                                                                                                                                                                        background-size: 13px 13px;
+                                                                                                                                                                                                                                                                                                                                                                                                                        background-size: cover;
+                                                                                                                                                                                                                                                                                                                                                                                                                        background-position: center center;
                                                                                                                                                                                                                                                                                                                                                                                                                         background-repeat: no-repeat; }
                                                                                                                                                                                                                                                                                                                                                                                                                         #mainPhoto .miniPhoto[column="1"] {
                                                                                                                                                                                                                                                                                                                                                                                                                           left: 13px; }
@@ -831,7 +832,9 @@ p {
   height: 150px;
   margin-left: 10px;
   margin-top: -155px;
-  background: red; }
+  background: #000;
+  background-size: contain;
+  background-repeat: no-repeat; }
   #zoom #username {
     position: absolute;
     left: 0px;
