@@ -1,4 +1,4 @@
-define(['settings', 'helpers', 'libs/deltae', 'libs/d3'], function(settings, helpers, deltae, d3) {
+define(['settings', 'libs/deltae', 'libs/d3'], function(settings, deltae, d3) {
     return function(x, y) {
         this.x = x;
         this.y = y;

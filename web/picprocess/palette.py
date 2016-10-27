@@ -7,6 +7,7 @@ import datetime
 from web.logger import get_logger
 
 class Palette:
+    # Save current state of mosaic to db
     @staticmethod
     def save_to_db(picture, json_data):
         data = json.loads(json_data)
@@ -32,7 +33,7 @@ class Palette:
             else:
                 get_logger().debug('Palette %d saving: all %d fragments updated', picture.id, update_counter)
 
-            
+
             if data['removedPicrures'] == 'all':
                 delete_counter = Fragment.delete().where(Fragment.picture == picture).execute()
                 get_logger().info('Palette %d saving: fragments cleared (%d)', picture.id, delete_counter)
@@ -57,11 +58,28 @@ class Palette:
 
 
     @staticmethod
+    def find_place(picture, images):
+        buffer_images = []
+        for i in image:
+            # catch exception !!!!!!!!!!!!
+            high_res, low_res = ImageHelper.get_image(i['thumb'])
+            f = Fragment(
+                    picture=picture,
+                    lobster_id = i['_id'],
+                    lobster_url = current_app.config['LOBSTER_IMAGE_URL'] + i['_id'],
+                    lobster_img = i['thumb'],
+                    high_pic = high_pic,
+                    low_pic = low_pic
+                )
+
+    # Removes picture and its fragments from db
+    @staticmethod
     def remove_from_db(picture):
         Fragment.delete().where(Fragment.picture == picture).execute()
         picture.delete_instance()
 
 
+    # Reads picture's data from db and returns hash with its meta and fragments
     @staticmethod
     def load_from_db(picture):
         groups = [f.to_hash() for f in picture.fragments if f.x != None and f.y != None]

@@ -2,8 +2,10 @@ from PIL import Image
 import cStringIO
 from flask import current_app
 import urllib2
+import requests
 
 class ImageHelper:
+    # Resizes image if its width or height is bigger than max_size. Returns image (stream) and its size
     @staticmethod
     def resize(f, max_size):
         img = Image.open(f)
@@ -17,8 +19,10 @@ class ImageHelper:
         result.seek(0)
         return result, img.size
 
+
+    # Downloads a picture from url, resizes it to high- and low-res and returns 2 byte arrays (RGB)
     @staticmethod
-    def get_new_image(url):
+    def get_image(url):
         try:
             f = cStringIO.StringIO(urllib2.urlopen(url).read())
             img_o = Image.open(f)
@@ -45,6 +49,8 @@ class ImageHelper:
         except urllib2.HTTPError:
             return None
 
+
+    # Compiles export image file for picture. Returns image stream
     @staticmethod
     def compile_image(picture):
         export_size = current_app.config['EXPORT_GROUP_SIZE']

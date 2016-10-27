@@ -1,5 +1,4 @@
-define(['libs/instafeed', 'proxy', 'settings'],
-    function(instafeed, proxy, settings) {
+define(['libs/instafeed', 'proxy', 'settings'], function(instafeed, proxy, settings) {
     return function(params) {
         // params: accessToken, picId, onListReceived, onPhotoLoaded, onComplete, onEmpty
         var feed = undefined;
@@ -15,14 +14,14 @@ define(['libs/instafeed', 'proxy', 'settings'],
                     var instaImage = photos.data[i];
 
                     function imageProcessed(newImage) {
-                        if (params.onPhotoLoaded !== undefined) 
+                        if (params.onPhotoLoaded !== undefined)
                             params.onPhotoLoaded(newImage);
 
                         if (--uncomplete == 0) {
                             if (params.onComplete !== undefined)
                                 params.onComplete();
                         }
-                    } 
+                    }
 
                     function imageFailed() {
                         console.log('Cannot load new image');

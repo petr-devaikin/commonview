@@ -5,6 +5,7 @@ import os
 import math
 
 
+'''
 class User(Model):
     insta_id = CharField()
     insta_name = CharField()
@@ -12,14 +13,13 @@ class User(Model):
 
     class Meta:
         database = get_db()
-
+'''
 
 class Picture(Model):
-    user = ForeignKeyField(User, related_name='pictures')
+    #user = ForeignKeyField(User, related_name='pictures')
     width = IntegerField()
     height = IntegerField()
-    tag = CharField(null=True)
-    next_tag_id = CharField(null=True)
+    current_page = CharField(null=True, default=1)
     global_diff = DoubleField(null=True)
     updated = DateTimeField(null=True)
     export_generated = DateTimeField(null=True)
@@ -36,10 +36,13 @@ class Picture(Model):
         return round(100 * r * r, 1)
 
     def export_path(self):
-        return '%d_%d.png' % (self.user.id, self.id)
+        return '%d.png' % (self.id)
 
     def export_full_path(self):
-        return 'export/%d_%d.png' % (self.user.id, self.id)
+        return 'export/%d.png' % (self.id)
+
+    def belong_to_user(self, u):
+        return True # self.user.id != u.id
 
     class Meta:
         database = get_db()
@@ -50,10 +53,9 @@ class Fragment(Model):
     x = IntegerField(null=True)
     y = IntegerField(null=True)
     diff = IntegerField(null=True)
-    insta_id = CharField()
-    insta_img = CharField()
-    insta_url = CharField()
-    insta_user = CharField()
+    lobster_id = CharField()
+    lobster_img = CharField()
+    lobster_url = CharField()
     low_pic = BlobField()
     high_pic = BlobField()
 
@@ -63,10 +65,9 @@ class Fragment(Model):
             'x': self.x,
             'y': self.y,
             'diff': self.diff,
-            'instaId': self.insta_id,
-            'instaImg': self.insta_img,
-            'instaUrl': self.insta_url,
-            'instaUser': self.insta_user,
+            'lobsterId': self.lobster_id,
+            'lobsterImg': self.lobster_img,
+            'lobsterUrl': self.lobster_url,
             'lowPic': [ord(c) for c in self.low_pic]
         }
 

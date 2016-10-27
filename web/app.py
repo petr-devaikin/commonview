@@ -6,6 +6,7 @@ from httplib2 import Http
 from .picprocess.image_helper import ImageHelper
 from .picprocess.pixels import Pixels
 from .picprocess.palette import Palette
+from .picprocess.lobster_proxy import LobsterProxy
 import os
 from flask.ext.scss import Scss
 from .db.engine import init_db, get_db
@@ -28,34 +29,12 @@ set_logger_params(app)
 init_db(app)
 
 
-def exchange_code_for_access_token(code, **kwargs):
-    url = u'https://api.instagram.com/oauth/access_token'
-    data = {
-        u'client_id': current_app.config['INSTA_ID'],
-        u'client_secret': current_app.config['INSTA_SECRET'],
-        u'code': code,
-        u'grant_type': u'authorization_code',
-        u'redirect_uri': url_for('insta_code', _external=True, **kwargs)
-    }
-
-    response = requests.post(url, data=data)
-
-    account_data = json.loads(response.content)
-
-    return account_data
-
-
-def get_unauthenticated_api(**kwargs):
-    return client.InstagramAPI(client_id=current_app.config['INSTA_ID'],
-                              client_secret=current_app.config['INSTA_SECRET'],
-                              redirect_uri=url_for('insta_code', _external=True, **kwargs))
-
-
 @app.before_request
 def before_request():
     db = get_db()
     db.connect()
 
+    '''
     if 'user_id' in session:
         g.authorized = True
         # load from db if not /img or /resize
@@ -63,6 +42,7 @@ def before_request():
     else:
         g.authorized = False
         g.user = None
+    '''
 
 
 @app.after_request
@@ -71,59 +51,24 @@ def after_request(response):
     return response
 
 
-@app.route('/login')
-def login():
-    return redirect(get_unauthenticated_api().get_authorize_url())
-
-
-@app.route('/logout')
-def logout():
-    if g.authorized:
-        del session['user_id']
-        get_logger().debug('User %d %s logged out', g.user.id, g.user.insta_name)
-    return redirect(url_for('index'))
-
-@app.route('/insta_code')
-def insta_code():
-    code = request.args.get('code')
-    account_data = exchange_code_for_access_token(code)
-    access_token = account_data['access_token']
-    user_info = account_data['user']
-    #get_unauthenticated_api().exchange_code_for_access_token(code)
-    try:
-        user = User.get(User.insta_id == user_info[u'id'])
-        if user.insta_name != user_info[u'username']: user.insta_name = user_info[u'username']
-        if user.access_token != access_token: user.access_token = access_token
-        user.save()
-        get_logger().debug('User %d %s logged in', user.id, user.insta_name)
-    except User.DoesNotExist:
-        user = User.create(insta_id=user_info[u'id'],
-                           insta_name=user_info[u'username'],
-                           access_token=access_token)
-        get_logger().info('User %d %s registered', user.id, user.insta_name)
-
-    session['user_id'] = user.id
-
-    return redirect(url_for('index'))
-
-
 @app.route('/')
 def index():
-    if g.authorized:
-        can_upload = g.user.id == current_app.config['MY_ID'] or \
-                     g.user.pictures.count() < current_app.config['MAX_UPLOADS']
-        return render_template('pictures.html',
-            can_upload=can_upload,
-            max_count=current_app.config['MAX_UPLOADS'],
-            max_size=current_app.config['MAX_CONTENT_LENGTH'])
-    else:
+    #if g.authorized:
+    can_upload = g.user.id == current_app.config['MY_ID'] or \
+                 g.user.pictures.count() < current_app.config['MAX_UPLOADS']
+    return render_template('pictures.html',
+        can_upload=can_upload,
+        max_count=current_app.config['MAX_UPLOADS'],
+        max_size=current_app.config['MAX_CONTENT_LENGTH'])
+    '''else:
         pics = Picture.select().where(Picture.global_diff < current_app.config['GALLERY_MAX_DIFF'])
         numbers = range(pics.count())
         random.shuffle(numbers)
         gallery = [pics[i] for i in numbers[:3]]
-        return render_template('index.html', gallery=gallery)
+        return render_template('index.html', gallery=gallery)'''
 
 
+# get or remove palette
 @app.route('/pic/<id>', methods=['GET', 'DELETE'])
 def render(id):
     try:
@@ -170,6 +115,7 @@ def render(id):
         return jsonify(result='ok')
 
 
+# picture uploaded by user (jpeg)
 @app.route('/pic/<id>/preview')
 def preview(id):
     try:
@@ -177,12 +123,13 @@ def preview(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    if not g.authorized or picture.user.id != g.user.id:
+    if not g.authorized or picture.belong_to_user(g.user):
         return 'error', 500
 
     return send_file(cStringIO.StringIO(picture.image), mimetype='image/jpeg')
 
 
+# large compiled result
 @app.route('/pic/<id>/export')
 def export(id):
     try:
@@ -194,17 +141,7 @@ def export(id):
     return send_file(result, mimetype='image/png')
 
 
-@app.route('/pic/<id>/mini')
-def mini(id):
-    try:
-        picture = Picture.get(Picture.id==id)
-    except Picture.DoesNotExist:
-        return 'Not found', 404
-
-    result = ImageHelper.mini_image(picture)
-    return send_file(result, mimetype='image/png')
-
-
+# update palette
 @app.route('/palette/<id>', methods=['POST'])
 def palette(id):
     try:
@@ -212,7 +149,7 @@ def palette(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    if not g.authorized or picture.user.id != g.user.id:
+    if not g.authorized or !picture.belong_to_user(g.user):
         return 'error', 500
 
     get_logger().debug('Save palette %d', picture.id)
@@ -238,7 +175,7 @@ def upload():
         with get_db().atomic() as txn:
             pic, size = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
             picture = Picture.create(
-                user=g.user,
+                #user=g.user,
                 width=size[0],
                 height=size[1],
                 image=pic.getvalue())
@@ -249,50 +186,32 @@ def upload():
         return jsonify(result='error'), 500
 
 
-@app.route('/img/<id>')
-def img(id):
+@app.route('/palette/<id>/update')
+def update(id):
     try:
         picture = Picture.get(Picture.id==id)
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    if not g.authorized or picture.user.id != g.user.id: return 'error', 500
+    if not g.authorized or !picture.belong_to_user(g.user): return 'error', 500
 
-    insta_img = request.args.get('insta_img') # check root!
-    insta_id = request.args.get('insta_id')
-    insta_url = request.args.get('insta_url').split('/')[-2] # remain just id
-    insta_user = request.args.get('insta_user')
+    get_logger().debug('Getting new images for %d', picture.id)
 
-    insta_url_re = re.compile(current_app.config['ALLOWED_INSTA_URL'])
-    if not insta_url_re.match(insta_url):
-        return 'Wrong url', 500
+    images = LobsterProxy.get_images(picture.page)
 
-    get_logger().debug('User %d gets new image for %d, %s', g.user.id, picture.id, insta_img)
-
-    with get_db().atomic() as txn:
-        free_fragments = picture.fragments.where(Fragment.x == None)
-        overcome = free_fragments.count() - current_app.config['MAX_CACHED_PHOTOS'] + 1
-        if overcome > 0:
-            remove_ids = [f.id for f in free_fragments.limit(overcome)]
-            Fragment.delete().where(Fragment.id << remove_ids).execute()
-
-    if overcome >= 0:
-        get_logger().warning('Remove %d extra fragments for %d', overcome + 1, picture.id)
-
-    result = ImageHelper.get_new_image(insta_img)
-
-    if result != None:
-        fragment = Fragment.create(picture=picture,
-                                   insta_img=insta_img,
-                                   insta_id=insta_id,
-                                   insta_url=insta_url,
-                                   insta_user=insta_user,
-                                   high_pic=result[0],
-                                   low_pic=result[1])
-        return jsonify(fragment.to_hash())
+    if images == None:
+        return 'requesting content error', 500
+    else if len(images) == 0:
+        picture.page = None
+        picture.save()
+        return jsonify(result='done')
     else:
-        get_logger().debug('Image %s for %d not found', insta_img, picture.id)
-        return 'Cannot download image', 500
+        updated_fragments = Palette.find_place(picture, images)
+        if updated_fragments == None:
+            return 'requesting content error', 500
+        picture.page += 1
+        picture.save()
+        return jsonify(retult='processing', fragments=[u.to_hash for u in updated_fragments])
 
 
 
