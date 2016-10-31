@@ -20,7 +20,7 @@ class Picture(Model):
     #user = ForeignKeyField(User, related_name='pictures')
     width = IntegerField()
     height = IntegerField()
-    current_page = CharField(null=True, default=1)
+    page = IntegerField(default=1)
     global_diff = DoubleField(null=True)
     updated = DateTimeField(null=True)
     export_generated = DateTimeField(null=True)
@@ -66,7 +66,7 @@ class Fragment(Model):
             'id': self.id,
             'x': self.x,
             'y': self.y,
-            'diff': self.diff,
+            'isSet': self.is_set(),
             'lobsterId': self.lobster_id,
             'lobsterImg': self.lobster_img,
             'lobsterUrl': self.lobster_url,
@@ -76,12 +76,12 @@ class Fragment(Model):
 
     _lab = None
     def get_lab(self):
-        if _lab != None:
-            return _lab
+        if self._lab != None:
+            return self._lab
 
-        _lab = ImageHelper.calc_lab(low_pic)
+        self._lab = ImageHelper.calc_lab(self.source_pic)
 
-        return _lab
+        return self._lab
 
 
     def calc_diff(self, other_pic_lab):

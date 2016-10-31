@@ -82,7 +82,7 @@ def render(id):
         if request.MOBILE:
             return render_template('mobile/showpicture.html',
                     picture=picture,
-                    palette=json.dumps(Palette.load_from_db(picture))
+                    diff=picture.global_diff
                 )
             '''elif not g.authorized or picture.user.id != g.user.id:
                 pixels.get_empty_pixels(picture)
@@ -95,8 +95,8 @@ def render(id):
         else:
             return render_template('render.html',
                     picture=picture,
-                    #access_token=g.user.access_token,
-                    palette=json.dumps(Palette.load_from_db(picture)),
+                    fragments=json.dumps([f.to_hash() for f in picture.fragments]),
+                    diff=picture.global_diff
                 )
     else:
         #if not g.authorized or picture.user.id != g.user.id:
@@ -209,7 +209,6 @@ def update(id):
     get_logger().debug('Getting new images for %d', picture.id)
 
     images = LobsterProxy.get_images(picture.page)
-
     if images == None:
         return 'requesting content error', 500
     elif len(images) == 0:
@@ -222,7 +221,7 @@ def update(id):
             return 'requesting content error', 500
         picture.page += 1
         picture.save()
-        return jsonify(retult='processing', fragments=[u.to_hash for u in updated_fragments])
+        return jsonify(result='processing', fragments=[u.to_hash() for u in updated_fragments])
 
 
 

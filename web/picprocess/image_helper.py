@@ -3,6 +3,7 @@ import cStringIO
 from flask import current_app
 import urllib2
 import requests
+from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
@@ -86,9 +87,9 @@ class ImageHelper:
     def calc_lab(rgb_array):
         res = []
         for i in xrange(0, len(rgb_array), 3):
-            rgb = sRGBColor(rgb_array[i] / 255.0, rgb_array[i+1] / 255.0, rgb_array[i+2] / 255.0);
-            res.push(convert_color(rgb, LabColor))
-        return rgb
+            rgb = sRGBColor(ord(rgb_array[i]) / 255.0, ord(rgb_array[i+1]) / 255.0, ord(rgb_array[i+2]) / 255.0);
+            res.append(convert_color(rgb, LabColor))
+        return res
 
 
     # Calculates the difference between 2 lab colors

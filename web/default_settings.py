@@ -7,7 +7,7 @@ DATABASE_URI = 'sqlite:////tmp/commonview.db'
 LOBSTER_CONTENT_URL = 'https://lobster.media/dev/api/v1/contents'
 LOBSTER_IMAGE_URL = 'http://lobster.media/content/'
 LOBSTER_SECRET = ''
-LOAD_PAGE_SIZE = 10
+LOAD_PAGE_SIZE = 3
 
 MAX_UPLOADS = 4
 MY_ID = 1
