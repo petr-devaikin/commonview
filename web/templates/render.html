@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block meta %}
-    <meta property="og:title" content="Puzzle{{ ' #' + picture.tag if picture.tag else ' ' }} by @{{ picture.user.insta_name }}" />
+    <meta property="og:title" content="Mosaic" />
     <meta property="og:image" content="{{ url_for('export', id=picture.id, _external=True) }}" />
 {% endblock %}
 
@@ -26,14 +26,10 @@
             <img src="{{ url_for('preview', id=picture.id) }}" />
             <button id="deleteButton">Delete</button>
         </div>
-        <div id="tagForm">
-            <input type="text" value="{{ picture.tag if picture.tag else '' }}" id="tagName" {% if picture.tag != None %}disabled="disabled"{% endif %} placeholder="enter tag before start" />
-            <span>#</span>
-        </div>
 
 
         <div id="startPanel" class="panel">
-            <button id="startButton" class="button" {% if picture.tag == None %}disabled="disabled"{% endif %}>Start</button>
+            <button id="startButton" class="button">Start</button>
         </div>
 
         <div id="loadingPanel" class="panel" style="display: block;">

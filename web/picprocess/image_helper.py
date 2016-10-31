@@ -1,8 +1,11 @@
-from PIL import Image
+from PIL import Image, ImageCms
 import cStringIO
 from flask import current_app
 import urllib2
 import requests
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
+
 
 class ImageHelper:
     # Resizes image if its width or height is bigger than max_size. Returns image (stream) and its size
@@ -20,7 +23,14 @@ class ImageHelper:
         return result, img.size
 
 
-    # Downloads a picture from url, resizes it to high- and low-res and returns 2 byte arrays (RGB)
+    # Returns a fragment of picture (byte array)
+    @staticmethod
+    def getFragment(f, x, y, w, h):
+        img = Image.open(cStringIO.StringIO(f))
+        return img.crop((x, y, x+w, y+h)).tobytes('raw', 'RGB')
+
+
+    # Downloads a picture from url, resizes it to high- and low-res and returns 2 byte arrays (RGB) plus LAB of low_pic
     @staticmethod
     def get_image(url):
         try:
@@ -69,3 +79,19 @@ class ImageHelper:
         img_io.seek(0)
 
         return img_io
+
+
+    # Converts rgb bytearray to lab array
+    @staticmethod
+    def calc_lab(rgb_array):
+        res = []
+        for i in xrange(0, len(rgb_array), 3):
+            rgb = sRGBColor(rgb_array[i] / 255.0, rgb_array[i+1] / 255.0, rgb_array[i+2] / 255.0);
+            res.push(convert_color(rgb, LabColor))
+        return rgb
+
+
+    # Calculates the difference between 2 lab colors
+    @staticmethod
+    def calc_difference(a, b):
+        return delta_e_cie2000(a, b);

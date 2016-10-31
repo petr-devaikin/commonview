@@ -1,4 +1,4 @@
-define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
+define(['libs/d3', 'libs/qwest', 'settings'], function(d3, qwest, settings) {
     var uploader = d3.select('#uploader'),
         allowedFileTypes = ['image/png', 'image/jpeg'],
         UPLOAD_URL = '/upload';
@@ -46,7 +46,7 @@ define(['libs/d3', 'libs/qwest'], function(d3, qwest) {
                          console.log('Uploaded: ' + percent);
                      };
                  })
-                 .post(UPLOAD_URL, data, { dataType: 'formdata' })
+                 .post(UPLOAD_URL, data, { dataType: 'formdata', timeout: settings.uploadImageTimeout })
                  .then(function(res) {
                      window.location = res.url;
                  })

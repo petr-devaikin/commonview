@@ -6,5 +6,6 @@ define([], function() {
         uploadStep: 33,
         maxLoads: 20,
         getImageTimeout: 30000,
-    } 
+        uploadImageTimeout: 30000,
+    }
 });

@@ -48,24 +48,10 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
             });
         }
 
-        function savePalette(success, error) {
-            palette.save({
-                onSuccess: function() {
-                    console.log('Palette saved');
-                    if (success !== undefined) success();
-                },
-                onError: function(ex) {
-                    console.log('Palette saving error: ' + ex);
-                    if (error !== undefined) error();
-                }
-            });
-        }
-
         function clearPalette(pic_id, pixelGroups) {
-            console.log('Start');
-            palette = new Palette(pic_id, pixelGroups);
-            console.log('Generated');
-            return palette;
+            proxy.clearPalette(palette.picture_id, function() {
+                // !!!!!!!!!!!!!!!!!!!!!!
+            });
         }
 
         function deletePalette() {
@@ -75,60 +61,9 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
         }
 
         return function(accessToken, pic_id, pixelGroups, paletteData) {
-            var lastSave = undefined;
-
-            clearPalette(pic_id, pixelGroups);
+            // var lastSave = undefined;
 
             loadPalette(paletteData);
-
-            var picGrabber = new PicGrabber({
-                picId: pic_id,
-                accessToken: accessToken,
-                onListReceived: function(nextTag) {
-                    palette.next_max_tag_id = nextTag;
-                },
-                onPhotoLoaded: function(colorImage) {
-                    palette.addPhoto(colorImage);
-
-                    if (palette.globalDiff == 0)
-                        picGrabber.stop();
-                },
-                onComplete: function() {
-                    drawing.drawPalette(palette);
-                    if (palette.next_max_tag_id === undefined)
-                        isStopped = true;
-
-                    if (isStopped) {
-                        savePalette();
-
-                        if (palette.globalDiff > 0) {
-                            if (palette.next_max_tag_id === undefined)
-                                panels.showInterruption();
-                            else
-                                panels.showResume();
-                        }
-                        else
-                            panels.showComplete();
-                    }
-                    else {
-                        console.log('Start saving');
-                        savePalette(
-                            function() {
-                                picGrabber.start(palette.tagName, palette.next_max_tag_id);
-                            },
-                            function() {
-                                panels.showResume();
-                            }
-                        );
-                    }
-                },
-                onEmpty: function(error) {
-                    drawing.drawPalette(palette);
-                    savePalette();
-                    panels.showInterruption();
-                    console.log('Empty feed');
-                }
-            });
 
             function startProcess() {
                 if (!palette.tagName)

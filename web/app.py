@@ -54,9 +54,10 @@ def after_request(response):
 @app.route('/')
 def index():
     #if g.authorized:
-    can_upload = g.user.id == current_app.config['MY_ID'] or \
-                 g.user.pictures.count() < current_app.config['MAX_UPLOADS']
+    can_upload = True   #g.user.id == current_app.config['MY_ID'] or \
+                        #g.user.pictures.count() < current_app.config['MAX_UPLOADS']
     return render_template('pictures.html',
+        pictures=Picture.select(),
         can_upload=can_upload,
         max_count=current_app.config['MAX_UPLOADS'],
         max_size=current_app.config['MAX_CONTENT_LENGTH'])
@@ -78,38 +79,30 @@ def render(id):
 
 
     if request.method == 'GET':
-        pixels = Pixels()
-
         if request.MOBILE:
-            pixels.get_empty_pixels(picture)
-
             return render_template('mobile/showpicture.html',
                     picture=picture,
-                    pixels=json.dumps(pixels.to_hash()),
                     palette=json.dumps(Palette.load_from_db(picture))
                 )
-        elif not g.authorized or picture.user.id != g.user.id:
-            pixels.get_empty_pixels(picture)
+            '''elif not g.authorized or picture.user.id != g.user.id:
+                pixels.get_empty_pixels(picture)
 
-            return render_template('showpicture.html',
-                    picture=picture,
-                    pixels=json.dumps(pixels.to_hash()),
-                    palette=json.dumps(Palette.load_from_db(picture)),
-                )
+                return render_template('showpicture.html',
+                        picture=picture,
+                        pixels=json.dumps(pixels.to_hash()),
+                        palette=json.dumps(Palette.load_from_db(picture)),
+                    )'''
         else:
-            pixels.get_pixels_from_img(picture)
-
             return render_template('render.html',
                     picture=picture,
-                    pixels=json.dumps(pixels.to_hash()),
-                    access_token=g.user.access_token,
+                    #access_token=g.user.access_token,
                     palette=json.dumps(Palette.load_from_db(picture)),
                 )
     else:
-        if not g.authorized or picture.user.id != g.user.id:
-            return 'error', 500
+        #if not g.authorized or picture.user.id != g.user.id:
+        #    return 'error', 500
 
-        get_logger().info('User %d removed picture %d', g.user.id, picture.id)
+        get_logger().info('User removed picture %d', picture.id)
 
         Palette.remove_from_db(picture)
         return jsonify(result='ok')
@@ -123,8 +116,8 @@ def preview(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    if not g.authorized or picture.belong_to_user(g.user):
-        return 'error', 500
+    #if not g.authorized or picture.belong_to_user(g.user):
+    #    return 'error', 500
 
     return send_file(cStringIO.StringIO(picture.image), mimetype='image/jpeg')
 
@@ -149,8 +142,8 @@ def palette(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    if not g.authorized or !picture.belong_to_user(g.user):
-        return 'error', 500
+    #if not g.authorized or not picture.belong_to_user(g.user):
+    #    return 'error', 500
 
     get_logger().debug('Save palette %d', picture.id)
 
@@ -166,9 +159,9 @@ def allowed_file(filename):
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    if not g.authorized or \
-          (g.user.pictures.count() >= current_app.config['MAX_UPLOADS'] and g.user.id != current_app.config['MY_ID']):
-        return 'error', 500
+    #if not g.authorized or \
+    #      (g.user.pictures.count() >= current_app.config['MAX_UPLOADS'] and g.user.id != current_app.config['MY_ID']):
+    #    return 'error', 500
 
     f = request.files['pic']
     if f and allowed_file(f.filename):
@@ -178,9 +171,27 @@ def upload():
                 #user=g.user,
                 width=size[0],
                 height=size[1],
-                image=pic.getvalue())
+                image=pic.getvalue()
+            )
 
-        get_logger().info('User %d uploaded picture %d', g.user.id, picture.id)
+            for i in xrange(picture.fragment_width()):
+                for j in xrange(picture.fragment_height()):
+                    # MAKE IT MUCH FASTER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    source_pic = ImageHelper.getFragment(
+                        picture.image,
+                        i * current_app.config['GROUP_SIZE'],
+                        j * current_app.config['GROUP_SIZE'],
+                        current_app.config['GROUP_SIZE'],
+                        current_app.config['GROUP_SIZE']);
+
+                    f = Fragment.create(
+                        picture=picture,
+                        x=i,
+                        y=j,
+                        source_pic=source_pic
+                    )
+
+        get_logger().info('User uploaded picture %d', picture.id)
         return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:
         return jsonify(result='error'), 500
@@ -193,7 +204,7 @@ def update(id):
     except Picture.DoesNotExist:
         return 'Not found', 404
 
-    if not g.authorized or !picture.belong_to_user(g.user): return 'error', 500
+    #if not g.authorized or not picture.belong_to_user(g.user): return 'error', 500
 
     get_logger().debug('Getting new images for %d', picture.id)
 
@@ -201,7 +212,7 @@ def update(id):
 
     if images == None:
         return 'requesting content error', 500
-    else if len(images) == 0:
+    elif len(images) == 0:
         picture.page = None
         picture.save()
         return jsonify(result='done')

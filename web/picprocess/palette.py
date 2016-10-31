@@ -7,70 +7,54 @@ import datetime
 from web.logger import get_logger
 
 class Palette:
-    # Save current state of mosaic to db
-    @staticmethod
-    def save_to_db(picture, json_data):
-        data = json.loads(json_data)
-
-        with get_db().atomic() as txn:
-            picture.global_diff = data['globalDiff']
-            picture.tag = data['tagName'] if 'tagName' in data else None
-            picture.next_tag_id = data['next_max_tag_id'] if 'next_max_tag_id' in data else None
-            picture.updated = datetime.datetime.now()
-
-            picture.save()
-            get_logger().debug('Palette %d saving: picture data saved. Global diff: %f', \
-                picture.id, picture.global_diff)
-
-            update_counter = 0
-            for g in data['updatedGroups']:
-                upd = Fragment.update(x=g['x'], y=g['y'], diff=g['diff'])
-                update_counter += upd.where(Fragment.id == g['id'], Fragment.picture == picture).execute()
-
-            if update_counter != len(data['updatedGroups']):
-                get_logger().warning('Palette %d saving: %d fragments of %d updated', picture.id, \
-                    update_counter, len(data['updatedGroups']))
-            else:
-                get_logger().debug('Palette %d saving: all %d fragments updated', picture.id, update_counter)
-
-
-            if data['removedPicrures'] == 'all':
-                delete_counter = Fragment.delete().where(Fragment.picture == picture).execute()
-                get_logger().info('Palette %d saving: fragments cleared (%d)', picture.id, delete_counter)
-            else:
-                dlt = Fragment.delete()
-                dlt = dlt.where(Fragment.id << data['removedPicrures'], Fragment.picture == picture)
-                delete_counter = dlt.execute()
-
-                if delete_counter != len(data['removedPicrures']):
-                    get_logger().warning('Palette %d saving: %d fragments of %d removed', picture.id, \
-                        delete_counter, len(data['removedPicrures']))
-                else:
-                    get_logger().debug('Palette %d saving: all %d fragments removed', picture.id, delete_counter)
-
-            to_remove_count = picture.fragments.where(Fragment.x == None).count()
-            if to_remove_count > 0:
-                Fragment.delete().where(Fragment.x == None, Fragment.picture == picture).execute()
-                get_logger().warning('Palette %d saving: %d extra fragments removed', picture.id, to_remove_count)
-            else:
-                get_logger().debug('Palette %d saving: no extra fragments removed', picture.id)
-        return True
-
-
+    # find a place on the palette for given array on new images. returns array of changed fragments
     @staticmethod
     def find_place(picture, images):
+        changed_fragments = []
+
         buffer_images = []
         for i in image:
-            # catch exception !!!!!!!!!!!!
+            # catch exception !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             high_res, low_res = ImageHelper.get_image(i['thumb'])
-            f = Fragment(
-                    picture=picture,
-                    lobster_id = i['_id'],
-                    lobster_url = current_app.config['LOBSTER_IMAGE_URL'] + i['_id'],
-                    lobster_img = i['thumb'],
-                    high_pic = high_pic,
-                    low_pic = low_pic
-                )
+            buffer_images.push({
+                'lobster_id': i['_id'],
+                'lobster_url': current_app.config['LOBSTER_IMAGE_URL'] + i['_id'],
+                'lobster_img': i['thumb'],
+                'high_pic': high_pic,
+                'low_pic': low_pic,
+                'lab_pic': ImageHelper.calc_lab(low_pic)
+            })
+
+        fragments = [f for f in picture.fragments]
+        for f in fragments:
+            min_diff = None
+            min_image = None
+            for i in buffer_images:
+                diff = f.calc_diff(buffer_images[i]['lab_pic'])
+                if min_diff == None or diff < min_diff:
+                    min_diff = diff
+                    min_image = i
+
+            if not f.is_set():
+                f.set_image(min_image, min_diff)
+                buffer_images.remove(min_image)
+                changed_fragments.push(f)
+            elif f.diff > min_diff:
+                min_image_copy = min_image.copy()
+                min_image['lobster_id'] = f.lobster_id
+                min_image['lobster_url'] = f.lobster_url
+                min_image['lobster_img'] = f.lobster_img
+                min_image['high_pic'] = f.high_pic
+                min_image['low_pic'] = f.low_pic
+                min_image['lab_pic'] = f.get_lab()
+                f.set_image(min_image_copy, min_diff)
+                changed_fragments.push(f)
+
+            if len(buffer_images) == 0:
+                break
+
+        return changed_fragments
+
 
     # Removes picture and its fragments from db
     @staticmethod
@@ -82,12 +66,12 @@ class Palette:
     # Reads picture's data from db and returns hash with its meta and fragments
     @staticmethod
     def load_from_db(picture):
-        groups = [f.to_hash() for f in picture.fragments if f.x != None and f.y != None]
+        groups = [f.to_hash() for f in picture.fragments]
 
         return {
             'globalDiff': picture.global_diff,
-            'tagName': picture.tag,
-            'next_max_tag_id': picture.next_tag_id,
+            #'tagName': picture.tag,
+            #'next_max_tag_id': picture.next_tag_id,
             'groups': groups,
         }
 

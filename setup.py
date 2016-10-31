@@ -10,5 +10,5 @@ setup(
     zip_safe=False,
     setup_requires=['Flask'],
     install_requires=['Flask', 'Flask-Script', 'peewee', 'Flask-Scss', 'Pillow',
-        'Flask-Mobility', 'requests']
+        'Flask-Mobility', 'requests', 'colormath']
 )
