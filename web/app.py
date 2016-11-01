@@ -166,29 +166,30 @@ def upload():
     f = request.files['pic']
     if f and allowed_file(f.filename):
         with get_db().atomic() as txn:
-            pic, size = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
+            img, stream, size = ImageHelper.resize(f, current_app.config['IMAGE_WIDTH'])
             picture = Picture.create(
                 #user=g.user,
                 width=size[0],
                 height=size[1],
-                image=pic.getvalue()
+                image=stream.getvalue()
             )
 
             for i in xrange(picture.fragment_width()):
                 for j in xrange(picture.fragment_height()):
-                    # MAKE IT MUCH FASTER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     source_pic = ImageHelper.getFragment(
-                        picture.image,
+                        img,
                         i * current_app.config['GROUP_SIZE'],
                         j * current_app.config['GROUP_SIZE'],
                         current_app.config['GROUP_SIZE'],
                         current_app.config['GROUP_SIZE']);
 
+                    source_lab = ImageHelper.calc_lab(source_pic, True) # prepare to store immidiately
+
                     f = Fragment.create(
                         picture=picture,
                         x=i,
                         y=j,
-                        source_pic=source_pic
+                        source_pic=source_lab
                     )
 
         get_logger().info('User uploaded picture %d', picture.id)

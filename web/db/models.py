@@ -53,7 +53,7 @@ class Fragment(Model):
     picture = ForeignKeyField(Picture, related_name='fragments')
     x = IntegerField()
     y = IntegerField()
-    source_pic = BlobField()
+    source_pic = BlobField() # fragment of source pic in LAB space
     diff = FloatField(null=True)
     lobster_id = CharField(null=True)
     lobster_img = CharField(null=True)
@@ -79,7 +79,7 @@ class Fragment(Model):
         if self._lab != None:
             return self._lab
 
-        self._lab = ImageHelper.calc_lab(self.source_pic)
+        self._lab = ImageHelper.unpack_lab(self.source_pic)
 
         return self._lab
 

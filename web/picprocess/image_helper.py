@@ -9,7 +9,7 @@ from colormath.color_diff import delta_e_cie2000
 
 
 class ImageHelper:
-    # Resizes image if its width or height is bigger than max_size. Returns image (stream) and its size
+    # Resizes image if its width or height is bigger than max_size. Returns image, stream, and its size
     @staticmethod
     def resize(f, max_size):
         img = Image.open(f)
@@ -21,13 +21,12 @@ class ImageHelper:
         result = cStringIO.StringIO()
         img.save(result, 'JPEG', quality=70)
         result.seek(0)
-        return result, img.size
+        return img, result, img.size
 
 
     # Returns a fragment of picture (byte array)
     @staticmethod
-    def getFragment(f, x, y, w, h):
-        img = Image.open(cStringIO.StringIO(f))
+    def getFragment(img, x, y, w, h):
         return img.crop((x, y, x+w, y+h)).tobytes('raw', 'RGB')
 
 
@@ -84,11 +83,27 @@ class ImageHelper:
 
     # Converts rgb bytearray to lab array
     @staticmethod
-    def calc_lab(rgb_array):
+    def calc_lab(rgb_array, to_store=False):
         res = []
         for i in xrange(0, len(rgb_array), 3):
-            rgb = sRGBColor(ord(rgb_array[i]) / 255.0, ord(rgb_array[i+1]) / 255.0, ord(rgb_array[i+2]) / 255.0);
-            res.append(convert_color(rgb, LabColor))
+            rgb = sRGBColor(ord(rgb_array[i]) / 255.0, ord(rgb_array[i+1]) / 255.0, ord(rgb_array[i+2]) / 255.0)
+            lab = convert_color(rgb, LabColor)
+            if to_store:
+                res.append(int(round(lab.lab_l + 128)))
+                res.append(int(round(lab.lab_a + 128)))
+                res.append(int(round(lab.lab_b + 128)))
+            else:
+                res.append(lab)
+        return bytearray(res) if to_store else res
+
+
+    # Unpach lab bitearray to LabColors
+    @staticmethod
+    def unpack_lab(lab_array):
+        res = []
+        for i in xrange(0, len(rgb_array), 3):
+            lab = LabColor(ord(rgb_array[i]) - 128, ord(rgb_array[i+1]) - 128, ord(rgb_array[i+2]) - 128)
+            res.append(lab)
         return res
 
 
