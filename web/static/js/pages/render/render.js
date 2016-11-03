@@ -83,19 +83,15 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
 
             var picGrabber = new PicGrabber({
                 picId: pic_id,
-                onListReceived: function(nextTag) {
-                    palette.next_max_tag_id = nextTag;
-                },
-                onPhotoLoaded: function(colorImage) {
-                    palette.addPhoto(colorImage);
+                onPhotoLoaded: function(fragment) {
+                    palette.addPhoto(fragment);
 
-                    if (palette.globalDiff == 0)
-                        picGrabber.stop();
+                    // !!!!!!!!!!!!!!!!!!!!
+                    //if (palette.globalDiff == 0)
+                    //    picGrabber.stop();
                 },
                 onComplete: function() {
                     drawing.drawPalette(palette);
-                    if (palette.next_max_tag_id === undefined)
-                        isStopped = true;
 
                     if (isStopped) {
                         savePalette();
@@ -113,7 +109,7 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
                         console.log('Start saving');
                         savePalette(
                             function() {
-                                picGrabber.start(palette.tagName, palette.next_max_tag_id);
+                                picGrabber.start();
                             },
                             function() {
                                 panels.showResume();
@@ -130,13 +126,9 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
             });
 
             function startProcess() {
-                if (!palette.tagName)
-                    palette.tagName = d3.select('#tagName').property('value');
-
                 isStopped = false;
-                picGrabber.start(palette.tagName, palette.next_max_tag_id);
+                picGrabber.start();
 
-                d3.select('#tagName').attr('disabled', 'disabled');
                 panels.showProcessing();
             }
 
@@ -156,22 +148,6 @@ define(['libs/d3', 'palette', 'proxy', 'picgrabber', 'drawing', './panels'],
             });
 
             deleteButton.on('click', deletePalette);
-
-            d3.select('#tagName').on('focus', function() {
-                this.select();
-            });
-
-            d3.select('#tagName').on('input', function() {
-                var s = d3.select('#tagName').property('value');
-                var filter = /[\s`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
-                if (s.match(filter))
-                    d3.select('#tagName').property('value', s.replace(filter, ''));
-
-                if (d3.select('#tagName').property('value') == '')
-                    startButton.attr('disabled', 'disabled');
-                else
-                    startButton.attr('disabled', null);
-            });
 
             drawing.setZoomer(function() { return palette.groupIndex; });
         }

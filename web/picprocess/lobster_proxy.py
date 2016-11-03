@@ -6,11 +6,13 @@ class LobsterProxy:
     @staticmethod
     def get_images(page):
         try:
+            get_logger().debug('Calling lobster on page %d' % page)
             r = requests.get(
                 current_app.config['LOBSTER_CONTENT_URL'],
                 params={
                     'page': page,
                     'per_page': current_app.config['LOAD_PAGE_SIZE'],
+                    'media_type_id': 0,
                     #'secret': current_app.config['LOBSTER_SECRET']
                 },
                 headers={

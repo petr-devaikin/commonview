@@ -212,24 +212,25 @@ def update(id):
     else:
         fragments = []
         for i in images:
-            img_res = ImageHelper.get_image(i['thumb'])
-            if img_res != None:
-                f = Fragment.create(
-                    picture=picture,
-                    lobster_id=i['_id'],
-                    lobster_img=i['thumb'],
-                    lobster_url=current_app.config['LOBSTER_IMAGE_URL'] + i['_id'],
-                    low_res=img_res[0],
-                    high_res=img_res[1]
-                )
-                fragments.append(f)
+            if i['thumb'] != None: # wtf
+                img_res = ImageHelper.get_image(i['thumb'])
+                if img_res != None:
+                    f = Fragment.create(
+                        picture=picture,
+                        lobster_id=i['_id'],
+                        lobster_img=i['thumb'],
+                        lobster_url=current_app.config['LOBSTER_IMAGE_URL'] + i['_id'],
+                        low_pic=img_res[1],
+                        high_pic=img_res[0]
+                    )
+                    fragments.append(f)
         picture.page += 1
         picture.save()
 
-        return jsonify(result='processing', fragments=[f.to_hash() for f in updatefragmentsd_fragments])
+        return jsonify(result='processing', fragments=[f.to_hash() for f in fragments])
 
 
-@app.route('/palette/<id>/save')
+@app.route('/palette/<id>/save', methods=['POST'])
 def save(id):
     try:
         picture = Picture.get(Picture.id==id)
@@ -238,13 +239,15 @@ def save(id):
 
     #if not g.authorized or not picture.belong_to_user(g.user): return 'error', 500
 
-    fragments = json.loads(request.form['updatedGroups'])
-    for f in fragments:
+    form_data = json.loads(request.form['data'])
+
+    updated_fragments = form_data['updatedGroups']
+    for f in updated_fragments:
         upd = Fragment.update(x=f['x'], y=f['y'], diff=f['diff'])
         upd = upd.where(Fragment.id == f['id'], Fragment.picture == picture)
         upd.execute()
 
-    Fragment.delete().where(Fragment.picture == picture, Fragment.id << json.loads(request.form['removedPicrures'])).execute()
+    Fragment.delete().where(Fragment.picture == picture, Fragment.id << form_data['removedPicrures']).execute()
     Fragment.delete().where(Fragment.picture == picture, Fragment.x == None).execute()
 
     fragments_count_diff = picture.fragments.count() - picture.fragment_width() * picture.fragment_height()

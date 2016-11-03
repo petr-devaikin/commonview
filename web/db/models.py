@@ -54,11 +54,11 @@ class Fragment(Model):
     x = IntegerField(null=True)
     y = IntegerField(null=True)
     diff = FloatField(null=True)
-    lobster_id = CharField(null=True)
-    lobster_img = CharField(null=True)
-    lobster_url = CharField(null=True)
-    low_pic = BlobField(null=True)
-    high_pic = BlobField(null=True)
+    lobster_id = CharField()
+    lobster_img = CharField()
+    lobster_url = CharField()
+    low_pic = BlobField()
+    high_pic = BlobField()
 
 
     def to_hash(self):

@@ -48,7 +48,7 @@ class ImageHelper:
     def get_image(url):
         try:
             f = cStringIO.StringIO(urllib2.urlopen(url).read())
-            img_o = Image.open(f)
+            img_o = Image.open(f).convert('RGB')
 
             w, h = img_o.size
             if w == h:
@@ -63,10 +63,10 @@ class ImageHelper:
                 img = img_o.crop(box=(0, top, w, bottom))
 
             img.thumbnail((current_app.config['EXPORT_GROUP_SIZE'], current_app.config['EXPORT_GROUP_SIZE']))
-            high_pic = img.tobytes('raw', 'RGB')
+            high_pic = img.tobytes()
 
             img.thumbnail((current_app.config['GROUP_SIZE'], current_app.config['GROUP_SIZE']))
-            low_pic = img.tobytes('raw', 'RGB')
+            low_pic = img.tobytes()
 
             return high_pic, low_pic
         except urllib2.HTTPError:
