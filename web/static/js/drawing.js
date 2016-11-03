@@ -3,7 +3,6 @@ define(['libs/d3', 'settings'], function(d3, settings) {
         var zoom = d3.select('#zoom');
 
         function moveHandler(e) {
-            return;
             var photoBounds = document.getElementById('mainPhoto').getBoundingClientRect();
 
             var x = e.clientX,
@@ -66,15 +65,15 @@ define(['libs/d3', 'settings'], function(d3, settings) {
     }
 
     function setBackground(d) {
-        return d.isSet ? 'url(' + d.lobsterImg + ')' : 'none';
+        return d.image && d.changed ? 'url(' + d.image.instaImg + ')' : 'none';
     }
 
     function setHref(d) {
-        return d.isSet ? d.lobsterUrl : '#';
+        return d.image ? 'https://instagram.com/p/' + d.image.instaUrl + '/' : '#';
     }
 
     function setDisplay(d) {
-        return d.isSet ? null : 'none';
+        return d.image ? null : 'none';
     }
 
     function drawBackground() {
@@ -83,7 +82,7 @@ define(['libs/d3', 'settings'], function(d3, settings) {
     }
 
     function drawPalette(palette) {
-        var photos = d3.select('#mainPhoto').selectAll('.miniPhoto').data(palette.fragments, function(d) { return d.x + '-' + d.y; })
+        var photos = d3.select('#mainPhoto').selectAll('.miniPhoto').data(palette.groups)
                 .style('background-image', setBackground);
 
         photos.selectAll('a')
@@ -101,20 +100,26 @@ define(['libs/d3', 'settings'], function(d3, settings) {
                 .attr('target', '_blank');
 
         photos.exit().remove();
+
+        updateAccuracy(palette);
     }
 
-    function updateAccuracy(v) {
-        //var v = palette.globalDiff ? (100 * Math.pow((255 - palette.globalDiff) / 255, 2)) : 0;
+    function updateAccuracy(palette) {
+        var v = palette.globalDiff ? (100 * Math.pow((255 - palette.globalDiff) / 255, 2)) : 0;
         console.log('Accurancy: ' + v);
         d3.selectAll('.accuracyPercentage')
             .text(v.toFixed(1) + '%')
             .style('color', 'hsl(' + (120 * v / 100) + ', 50%, 60%)');
     }
 
+    function showLoading(percentage) {
+        d3.select('#loadingPercentage').text(percentage.toFixed(0) + '%');
+    }
+
     return {
         drawPalette: drawPalette,
+        showLoading: showLoading,
         setZoomer: setZoomer,
         drawBackground: drawBackground,
-        updateAccuracy: updateAccuracy
     }
 });

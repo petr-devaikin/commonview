@@ -79,6 +79,7 @@ def render(id):
 
 
     if request.method == 'GET':
+
         if request.MOBILE:
             return render_template('mobile/showpicture.html',
                     picture=picture,
@@ -93,9 +94,12 @@ def render(id):
                         palette=json.dumps(Palette.load_from_db(picture)),
                     )'''
         else:
+            pixels = Pixels()
+            pixels.get_pixels_from_img(picture)
             return render_template('render.html',
                     picture=picture,
-                    fragments=json.dumps([f.to_hash() for f in picture.fragments]),
+                    pixels=json.dumps(pixels.to_hash()),
+                    fragments=json.dumps([f.to_hash() for f in picture.fragments.where(Fragment.x != None)]),
                     diff=picture.global_diff
                 )
     else:
@@ -104,7 +108,10 @@ def render(id):
 
         get_logger().info('User removed picture %d', picture.id)
 
-        Palette.remove_from_db(picture)
+        with get_db().atomic() as txn:
+            Fragment.delete().where(Fragment.picture == picture).execute()
+            picture.delete_instance()
+
         return jsonify(result='ok')
 
 
@@ -174,24 +181,6 @@ def upload():
                 image=stream.getvalue()
             )
 
-            for i in xrange(picture.fragment_width()):
-                for j in xrange(picture.fragment_height()):
-                    source_pic = ImageHelper.getFragment(
-                        img,
-                        i * current_app.config['GROUP_SIZE'],
-                        j * current_app.config['GROUP_SIZE'],
-                        current_app.config['GROUP_SIZE'],
-                        current_app.config['GROUP_SIZE']);
-
-                    source_lab = ImageHelper.calc_lab(source_pic, True) # prepare to store immidiately
-
-                    f = Fragment.create(
-                        picture=picture,
-                        x=i,
-                        y=j,
-                        source_pic=source_lab
-                    )
-
         get_logger().info('User uploaded picture %d', picture.id)
         return jsonify(result='ok', url=url_for('render', _external=True, id=picture.id))
     else:
@@ -207,23 +196,66 @@ def update(id):
 
     #if not g.authorized or not picture.belong_to_user(g.user): return 'error', 500
 
+    # remove old unused fragments (just in case user interrupted saving)
+    Fragment.delete().where(Fragment.picture == picture, Fragment.x == None).execute()
+
     get_logger().debug('Getting new images for %d', picture.id)
 
     images = LobsterProxy.get_images(picture.page)
+
     if images == None:
-        return 'requesting content error', 500
+        return 'Requesting content error', 500
     elif len(images) == 0:
         picture.page = None
         picture.save()
         return jsonify(result='done')
     else:
-        updated_fragments = Palette.find_place(picture, images)
-        if updated_fragments == None:
-            return 'requesting content error', 500
+        fragments = []
+        for i in images:
+            img_res = ImageHelper.get_image(i['thumb'])
+            if img_res != None:
+                f = Fragment.create(
+                    picture=picture,
+                    lobster_id=i['_id'],
+                    lobster_img=i['thumb'],
+                    lobster_url=current_app.config['LOBSTER_IMAGE_URL'] + i['_id'],
+                    low_res=img_res[0],
+                    high_res=img_res[1]
+                )
+                fragments.append(f)
         picture.page += 1
         picture.save()
-        return jsonify(result='processing', fragments=[u.to_hash() for u in updated_fragments])
 
+        return jsonify(result='processing', fragments=[f.to_hash() for f in updatefragmentsd_fragments])
+
+
+@app.route('/palette/<id>/save')
+def save(id):
+    try:
+        picture = Picture.get(Picture.id==id)
+    except Picture.DoesNotExist:
+        return 'Not found', 404
+
+    #if not g.authorized or not picture.belong_to_user(g.user): return 'error', 500
+
+    fragments = json.loads(request.form['updatedGroups'])
+    for f in fragments:
+        upd = Fragment.update(x=f['x'], y=f['y'], diff=f['diff'])
+        upd = upd.where(Fragment.id == f['id'], Fragment.picture == picture)
+        upd.execute()
+
+    Fragment.delete().where(Fragment.picture == picture, Fragment.id << json.loads(request.form['removedPicrures'])).execute()
+    Fragment.delete().where(Fragment.picture == picture, Fragment.x == None).execute()
+
+    fragments_count_diff = picture.fragments.count() - picture.fragment_width() * picture.fragment_height()
+    if fragments_count_diff > 0:
+        get_logger().error('Wrong fragment combination for %d', picture.id)
+        to_delete = picture.fragments.limit(fragments_count_diff)
+        dlt = Fragment.delete().where(Fragment.id << [f.id for d in to_delete])
+        dlt.execute()
+        return jsonify(result='error'), 500
+    else:
+        return jsonify(result='done')
 
 
 if __name__ == '__main__':

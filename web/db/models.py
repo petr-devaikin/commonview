@@ -27,10 +27,10 @@ class Picture(Model):
     image = BlobField()
 
     def fragment_width(self):
-        return int(math.floor(float(self.width) / current_app.config['GROUP_SIZE']))
+        return self.width / current_app.config['GROUP_SIZE']
 
     def fragment_height(self):
-        return int(math.floor(float(self.height) / current_app.config['GROUP_SIZE']))
+        return self.height / current_app.config['GROUP_SIZE']
 
     def diff_percentage(self):
         r = (255 - self.global_diff) / 255 if self.global_diff != None else 0
@@ -51,9 +51,8 @@ class Picture(Model):
 
 class Fragment(Model):
     picture = ForeignKeyField(Picture, related_name='fragments')
-    x = IntegerField()
-    y = IntegerField()
-    source_pic = BlobField() # fragment of source pic in LAB space
+    x = IntegerField(null=True)
+    y = IntegerField(null=True)
     diff = FloatField(null=True)
     lobster_id = CharField(null=True)
     lobster_img = CharField(null=True)
@@ -61,52 +60,22 @@ class Fragment(Model):
     low_pic = BlobField(null=True)
     high_pic = BlobField(null=True)
 
+
     def to_hash(self):
         return {
             'id': self.id,
             'x': self.x,
             'y': self.y,
             'isSet': self.is_set(),
-            'lobsterId': self.lobster_id,
-            'lobsterImg': self.lobster_img,
-            'lobsterUrl': self.lobster_url,
+            'externalId': self.lobster_id,
+            'imageUrl': self.lobster_img,
+            'link': self.lobster_url,
             'lowPic': [ord(c) for c in self.low_pic] if self.low_pic != None else None
         }
 
 
-    _lab = None
-    def get_lab(self):
-        if self._lab != None:
-            return self._lab
-
-        self._lab = ImageHelper.unpack_lab(self.source_pic)
-
-        return self._lab
-
-
-    def calc_diff(self, other_pic_lab):
-        self_lab = self.get_lab()
-        if len(self_lab) != len(other_pic_lab):
-            return None
-
-        result = 0
-        for i in xrange(len(other_pic_lab)):
-            result += ImageHelper.calc_difference(self_lab[i], other_pic_lab[i])
-        return result
-
-
-    def set_image(self, image, diff):
-        self.lobster_id = image['lobster_id']
-        self.lobster_img = image['lobster_img']
-        self.lobster_url = image['lobster_url']
-        self.low_pic = image['low_pic']
-        self.high_pic = image['high_pic']
-        self._lab = image['lab_pic']
-        self.diff = diff
-
-
     def is_set(self):
-        return self.diff != None
+        return self.x != None
 
 
     class Meta:

@@ -3,9 +3,6 @@ import cStringIO
 from flask import current_app
 import urllib2
 import requests
-from colormath.color_objects import sRGBColor, LabColor
-from colormath.color_conversions import convert_color
-from colormath.color_diff import delta_e_cie2000
 
 
 class ImageHelper:
@@ -15,9 +12,25 @@ class ImageHelper:
         img = Image.open(f)
         w, h = img.size
         if w >= h and w > max_size:
-            img.thumbnail((max_size, h * max_size / w))
+            new_w = max_size
+            new_h = h * max_size / w
         elif h >= w and h > max_size:
-            img.thumbnail((w * max_size / h, max_size))
+            new_w = w * max_size / h
+            new_h = max_size
+
+
+        img.thumbnail((new_w, new_h))
+
+        crop_w = (new_w / current_app.config['GROUP_SIZE']) * current_app.config['GROUP_SIZE']
+        crop_h = (new_h / current_app.config['GROUP_SIZE']) * current_app.config['GROUP_SIZE']
+
+        img.crop((
+            (new_w - crop_w / 2),
+            (new_h - crop_h / 2),
+            (new_w - crop_w / 2) + crop_w,
+            (new_h - crop_h / 2) + crop_h
+        ))
+
         result = cStringIO.StringIO()
         img.save(result, 'JPEG', quality=70)
         result.seek(0)
@@ -30,7 +43,7 @@ class ImageHelper:
         return img.crop((x, y, x+w, y+h)).tobytes('raw', 'RGB')
 
 
-    # Downloads a picture from url, resizes it to high- and low-res and returns 2 byte arrays (RGB) plus LAB of low_pic
+    # Downloads a picture from url, resizes it to high- and low-res and returns 2 byte arrays (RGB)
     @staticmethod
     def get_image(url):
         try:
@@ -79,35 +92,3 @@ class ImageHelper:
         img_io.seek(0)
 
         return img_io
-
-
-    # Converts rgb bytearray to lab array
-    @staticmethod
-    def calc_lab(rgb_array, to_store=False):
-        res = []
-        for i in xrange(0, len(rgb_array), 3):
-            rgb = sRGBColor(ord(rgb_array[i]) / 255.0, ord(rgb_array[i+1]) / 255.0, ord(rgb_array[i+2]) / 255.0)
-            lab = convert_color(rgb, LabColor)
-            if to_store:
-                res.append(int(round(lab.lab_l + 128)))
-                res.append(int(round(lab.lab_a + 128)))
-                res.append(int(round(lab.lab_b + 128)))
-            else:
-                res.append(lab)
-        return bytearray(res) if to_store else res
-
-
-    # Unpach lab bitearray to LabColors
-    @staticmethod
-    def unpack_lab(lab_array):
-        res = []
-        for i in xrange(0, len(rgb_array), 3):
-            lab = LabColor(ord(rgb_array[i]) - 128, ord(rgb_array[i+1]) - 128, ord(rgb_array[i+2]) - 128)
-            res.append(lab)
-        return res
-
-
-    # Calculates the difference between 2 lab colors
-    @staticmethod
-    def calc_difference(a, b):
-        return delta_e_cie2000(a, b);
